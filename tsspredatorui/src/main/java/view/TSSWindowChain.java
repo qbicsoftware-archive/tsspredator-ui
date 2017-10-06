@@ -4,6 +4,10 @@ import view.tsswindows.TSSWindow;
 
 import java.util.LinkedList;
 
+/**
+ * A TSSWindowChain holds a list of windows that should be displayed as a sequence.
+ * The required logic is implemented in TSSWindowChainPresenter
+ */
 public class TSSWindowChain {
     private LinkedList<TSSWindow> windowList;
 

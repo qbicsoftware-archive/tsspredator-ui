@@ -4,7 +4,12 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.VerticalLayout;
 
-public class ParametersWindow2 extends TSSWindow{
+/**
+ * Second of four windows where the TSSPredator parameters are set.
+ * Here, it's the enrichment factor, the processing site factor,
+ * the step length and the base height
+ */
+public class ParametersWindow2 extends TSSWindow {
     @Override
     void designContentLayout() {
         Layout contentLayout = new VerticalLayout();
@@ -26,9 +31,8 @@ public class ParametersWindow2 extends TSSWindow{
         Slider baseHeight = new Slider("Base Height (disabled by default)");
         baseHeight.setEnabled(false);
 
-        contentLayout.addComponents(enrichmentFactor,processingSiteFactor,stepLength,baseHeight);
+        contentLayout.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
         setContentLayout(contentLayout);
-
 
 
     }

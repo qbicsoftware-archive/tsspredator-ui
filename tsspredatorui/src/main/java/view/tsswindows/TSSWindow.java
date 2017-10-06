@@ -3,10 +3,10 @@ package view.tsswindows;
 import com.vaadin.ui.*;
 
 /**
- * Template for the windows that lead through the TSSPredator workflow
+ * Template for the windows that lead through the TSSPredator workflow.
  * Consists of a variable upper Layout and a static lower HorizontalLayout.
- * The latter contains two buttons to jump to the next or to the previous step (might be disabled or invisible)
- * as well as an infobar on where we are in the process
+ * The latter contains two buttons to jump to the next or to the previous step
+ * as well as a bar with info about the current state of the process.
  */
 public abstract class TSSWindow extends Window {
     private VerticalLayout tssWindowLayout;
@@ -32,8 +32,14 @@ public abstract class TSSWindow extends Window {
         this.center();
     }
 
+    /**
+     * This is the method that has to be implemented by every inheriting class.
+     */
     abstract void designContentLayout();
 
+    /**
+     * Generic part of every TSSWindow, shouldn't be overridden
+     */
     private void designInfobar() {
         previousButton = new Button("Previous Step");
         nextButton = new Button("Next Step");

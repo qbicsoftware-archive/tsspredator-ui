@@ -5,6 +5,11 @@ import com.vaadin.ui.*;
 import java.util.Collection;
 import java.util.LinkedList;
 
+/**
+ * Fourth of four windows where the TSSPredator parameters are set.
+ * Here, it's the allowed shifts, minimal number of matching replicates and the UTR lengths.
+ * Additionally, the user decides if he wants to write the RNA-seq graphs.
+ */
 public class ParametersWindow4 extends TSSWindow {
     @Override
     void designContentLayout() {

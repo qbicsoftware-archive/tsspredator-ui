@@ -9,7 +9,7 @@ import java.util.LinkedList;
  * In this window, first, the number of replicates is chosen.
  * Then fasta and gff files are loaded (so far, as Uploads, but this is only provisional)
  * After this, the RNA-seq data is loaded
- * TODO: Optionally do this automatically (e.g. by pattern matching over filenames)
+ * TODO: Try doing this automatically (e.g. by pattern matching over filenames)
  */
 public class DataWindow extends TSSWindow {
     //TODO: isConditions must be stored globally - it depends on the user's choice in the GenConfigWindow

@@ -1,8 +1,11 @@
 package view.tsswindows;
 
 import com.vaadin.ui.*;
-import javafx.scene.shape.HLineTo;
 
+/**
+ * Third of four windows where the TSSPredator parameters are set.
+ * Here, it's the (enriched) normalization percentiles as well as clustering method and distance.
+ */
 public class ParametersWindow3 extends TSSWindow{
 
     @Override

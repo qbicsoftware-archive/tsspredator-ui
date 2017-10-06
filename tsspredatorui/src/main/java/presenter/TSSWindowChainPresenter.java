@@ -11,6 +11,10 @@ import java.util.LinkedList;
 public class TSSWindowChainPresenter {
     TSSWindowChain windowChain;
 
+    /**
+     * This method sets up the 'chain links' of the WindowChain,
+     * i.e. you can go through the sequence of windows via the "Next" and "Previous"-buttons
+     */
     public void setupWindowButtons() {
         LinkedList<TSSWindow> windowList = windowChain.getWindowList();
         for (int i = 0; i < windowList.size(); i++) {
@@ -21,15 +25,15 @@ public class TSSWindowChainPresenter {
                     currentWindow.getUI().addWindow(windowList.get(finalI - 1));
                     currentWindow.close();
                 });
-            }else{
+            } else {
                 currentWindow.getPreviousButton().setEnabled(false);
             }
             if (i != windowList.size() - 1) {
-                currentWindow.getNextButton().addClickListener(e ->{
+                currentWindow.getNextButton().addClickListener(e -> {
                     currentWindow.getUI().addWindow(windowList.get(finalI + 1));
                     currentWindow.close();
                 });
-            }else{
+            } else {
                 currentWindow.getNextButton().setEnabled(false);
             }
         }

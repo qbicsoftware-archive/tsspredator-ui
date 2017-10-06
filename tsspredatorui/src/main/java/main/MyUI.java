@@ -27,14 +27,19 @@ public class MyUI extends UI {
         Button showWindowButton = new Button("Start TSS-Prediction");
         TSSWindowChain windowChain = setupTSSWindowChain();
         layout.addComponent(showWindowButton);
-        showWindowButton.addClickListener(e->{
+        showWindowButton.addClickListener(e -> {
             addWindow(windowChain.getWindowList().peekFirst());
         });
-
 
         setContent(layout);
     }
 
+
+    /**
+     * Here the sequence of windows that lead through the TSSPredator process is generated as a TSSWindowChain
+     * All of these *Window-objects inherit the abstract class TSSWindow
+     * @return
+     */
     private TSSWindowChain setupTSSWindowChain() {
         TSSWindowChain windowChain = new TSSWindowChain();
 

@@ -5,6 +5,10 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Slider;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * First of four windows where the TSSPredator parameters are set.
+ * Here, it's the Step Height/Factor (Reduction) Parameters.
+ */
 public class ParametersWindow1 extends TSSWindow {
     @Override
     void designContentLayout() {

@@ -20,9 +20,8 @@ public class DataWindow extends TSSWindow {
 
 
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         contentLayout = new FormLayout();
-        contentLayout.setWidth("100%");
         isConditions = false;
         ComboBox<Integer> numOfGenomesOrConditionsBox = new ComboBox<>("Select number of " + (isConditions ? "Conditions" : "Genomes"));
         ComboBox<Integer> numOfReplicatesBox = new ComboBox<>("Select number of Replicates");
@@ -51,7 +50,7 @@ public class DataWindow extends TSSWindow {
         genomeOrConditionAccordion.setWidth("100%");
         genomeOrConditionAccordion.setVisible(false);
         contentLayout.addComponents(numOfGenomesOrConditionsBox, numOfReplicatesBox, setNumbers, genomeOrConditionAccordion);
-        setContentLayout(contentLayout);
+        return contentLayout;
     }
 
     /**

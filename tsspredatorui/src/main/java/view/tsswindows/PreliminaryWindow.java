@@ -12,12 +12,13 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class PreliminaryWindow extends TSSWindow {
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new VerticalLayout();
         RadioButtonGroup<String> allocatedSpaceButtons = new RadioButtonGroup<>("How much space do you want to use?");
         allocatedSpaceButtons.setItems("500MB", "1GB", "2GB", "4GB", "8GB");
         Button loadConfigButton = new Button("Load existing configuration");
         contentLayout.addComponents(allocatedSpaceButtons, loadConfigButton);
         setContentLayout(contentLayout);
+        return contentLayout;
     }
 }

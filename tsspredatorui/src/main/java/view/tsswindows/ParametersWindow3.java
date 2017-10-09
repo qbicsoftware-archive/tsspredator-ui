@@ -6,10 +6,10 @@ import com.vaadin.ui.*;
  * Third of four windows where the TSSPredator parameters are set.
  * Here, it's the (enriched) normalization percentiles as well as clustering method and distance.
  */
-public class ParametersWindow3 extends TSSWindow{
+public class ParametersWindow3 extends TSSWindow {
 
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new VerticalLayout();
 
         HorizontalLayout percentiles = new HorizontalLayout();
@@ -33,7 +33,7 @@ public class ParametersWindow3 extends TSSWindow{
         methodAndDistance.addComponents(clusterMethod,clusteringDistance);
 
         contentLayout.addComponents(percentiles,methodAndDistance);
-        setContentLayout(contentLayout);
 
+        return contentLayout;
     }
 }

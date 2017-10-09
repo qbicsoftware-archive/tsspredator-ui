@@ -12,7 +12,7 @@ import java.util.LinkedList;
  */
 public class ParametersWindow4 extends TSSWindow {
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new VerticalLayout();
 
         HorizontalLayout allowedShifts = new HorizontalLayout();
@@ -48,6 +48,6 @@ public class ParametersWindow4 extends TSSWindow {
 
 
         contentLayout.addComponents(allowedShifts, matchingReplicates,utrLengths, writeGraphs);
-        setContentLayout(contentLayout);
+        return contentLayout;
     }
 }

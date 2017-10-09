@@ -16,37 +16,41 @@ public abstract class TSSWindow extends Window {
     private Label infoLabel;
 
     public TSSWindow() {
-        this.tssWindowLayout = new VerticalLayout();
-        this.navigationLayout = new HorizontalLayout();
+        tssWindowLayout = new VerticalLayout();
 
         //The contentLayout gets initialized individually by the classes inheriting this one by implementing this method
-        designContentLayout();
+        contentLayout = designContentLayout();
 
-        designInfobar();
+        navigationLayout = designNavigationLayout();
 
         tssWindowLayout.addComponents(contentLayout, navigationLayout);
-        tssWindowLayout.setSizeUndefined();
-        this.setContent(tssWindowLayout);
-        this.setHeight("80%");
-        this.setWidth("80%");
-        this.center();
+        setContent(tssWindowLayout);
+        addStyleName("my-tsswindow");
+        center();
+
     }
 
     /**
      * This is the method that has to be implemented by every inheriting class.
      */
-    abstract void designContentLayout();
+    abstract Layout designContentLayout();
 
     /**
      * Generic part of every TSSWindow, shouldn't be overridden
      */
-    private void designInfobar() {
+    private HorizontalLayout designNavigationLayout() {
+        navigationLayout = new HorizontalLayout();
         previousButton = new Button("Previous Step");
         nextButton = new Button("Next Step");
+        previousButton.addStyleName("my-navigation-button");
+        nextButton.addStyleName("my-navigation-button");
+        nextButton.setStyleName("my-navigation-button");
         infoLabel = new Label("Info comes here");
         navigationLayout.addComponents(previousButton, infoLabel, nextButton);
+        navigationLayout.setStyleName("my-navigation-layout");
 
 
+        return navigationLayout;
     }
 
     public Button getNextButton() {

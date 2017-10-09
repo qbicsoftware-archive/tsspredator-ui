@@ -11,7 +11,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class ParametersWindow2 extends TSSWindow {
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new VerticalLayout();
         Slider enrichmentFactor = new Slider("Enrichment Factor");
         enrichmentFactor.setMin(0);
@@ -32,8 +32,8 @@ public class ParametersWindow2 extends TSSWindow {
         baseHeight.setEnabled(false);
 
         contentLayout.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
-        setContentLayout(contentLayout);
 
 
+        return contentLayout;
     }
 }

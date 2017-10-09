@@ -11,7 +11,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class ParametersWindow1 extends TSSWindow {
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new VerticalLayout();
         //TODO: Bind the max value of the reduction sliders to the other sliders
         HorizontalLayout heightParams = new HorizontalLayout();
@@ -37,6 +37,6 @@ public class ParametersWindow1 extends TSSWindow {
         factorParams.addComponents(stepFactor,stepFactorReduction);
 
         contentLayout.addComponents(heightParams,factorParams);
-        setContentLayout(contentLayout);
+        return contentLayout;
     }
 }

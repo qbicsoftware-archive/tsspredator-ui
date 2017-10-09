@@ -10,7 +10,7 @@ import com.vaadin.ui.*;
  */
 public class GeneralConfigWindow extends TSSWindow {
     @Override
-    void designContentLayout() {
+    Layout designContentLayout() {
         Layout contentLayout = new FormLayout();
         TextField projectName = new TextField("Enter a name for your project");
 
@@ -31,6 +31,6 @@ public class GeneralConfigWindow extends TSSWindow {
 
 
         contentLayout.addComponents(projectName, projectTypeButtonGroup, alignmentFileUpload);
-        setContentLayout(contentLayout);
+        return contentLayout;
     }
 }

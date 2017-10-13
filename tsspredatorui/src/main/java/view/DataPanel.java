@@ -1,4 +1,4 @@
-package view.tsswindows;
+package view;
 
 import com.vaadin.ui.*;
 
@@ -6,21 +6,26 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * In this window, first, the number of replicates is chosen.
- * Then fasta and gff files are loaded (so far, as Uploads, but this is only provisional)
- * After this, the RNA-seq data is loaded
- * TODO: Try doing this automatically (e.g. by pattern matching over filenames)
+ * This component has a Panel where the user first chooses the number of replicates,
+ * then chooses fasta and gff files to use, as well as the RNA-seq data.
+ * @author jmueller
  */
-public class DataWindow extends TSSWindow {
+public class DataPanel extends CustomComponent {
+
+    private Panel dataPanel;
     //TODO: isConditions must be stored globally - it depends on the user's choice in the GenConfigWindow
-    Boolean isConditions = false;
-    Layout contentLayout;
+    private Boolean isConditions = false;
+    private Layout contentLayout;
     int numOfGenomesOrConditions, numOfReplicates;
     Accordion genomeOrConditionAccordion;
 
+    public DataPanel() {
+        dataPanel = designPanel();
+        setCompositionRoot(dataPanel);
+    }
 
-    @Override
-    Layout designContentLayout() {
+    private Panel designPanel() {
+        Panel panel = new Panel();
         contentLayout = new FormLayout();
         isConditions = false;
         ComboBox<Integer> numOfGenomesOrConditionsBox = new ComboBox<>("Select number of " + (isConditions ? "Conditions" : "Genomes"));
@@ -50,17 +55,22 @@ public class DataWindow extends TSSWindow {
         genomeOrConditionAccordion.setWidth("100%");
         genomeOrConditionAccordion.setVisible(false);
         contentLayout.addComponents(numOfGenomesOrConditionsBox, numOfReplicatesBox, setNumbers, genomeOrConditionAccordion);
-        return contentLayout;
+
+
+        panel.setContent(contentLayout);
+        return panel;
     }
 
     /**
-     *
+     * The genomes/conditions are organized as tabs in an Accordion. When the user changes
+     * the number of genomes/conditions or replicates, this Accordion has to be updated,
+     * which happens here
      */
     private void updateAccordion() {
         genomeOrConditionAccordion.removeAllComponents();
 
         for (int i = 0; i < numOfGenomesOrConditions; i++) {
-            Component currentTab = createAccordionTab(i);
+            Component currentTab = createAccordionTab();
             genomeOrConditionAccordion.addTab(currentTab, isConditions ? "Condition" : "Genome" + (i + 1));
         }
 
@@ -68,7 +78,11 @@ public class DataWindow extends TSSWindow {
 
     }
 
-    private Component createAccordionTab(int genomeOrConditionIndex) {
+    /**
+     * Helper method for updateAccordion()
+     * @return
+     */
+    private Component createAccordionTab() {
         VerticalLayout tab = new VerticalLayout();
         HorizontalLayout genomeOrConditionData = new HorizontalLayout();
         VerticalLayout nameAndId = new VerticalLayout();
@@ -77,31 +91,35 @@ public class DataWindow extends TSSWindow {
         nameAndId.addComponents(name, id);
         VerticalLayout fastaAndGff = new VerticalLayout();
         Upload fasta = new Upload("Genome FASTA", (Upload.Receiver) (s, s1) -> null);
-        Upload gff = new Upload("Genome annotation (GFF)",(Upload.Receiver) (s, s1) -> null);
-        fastaAndGff.addComponents(fasta,gff);
-        genomeOrConditionData.addComponents(nameAndId,fastaAndGff);
+        Upload gff = new Upload("Genome annotation (GFF)", (Upload.Receiver) (s, s1) -> null);
+        fastaAndGff.addComponents(fasta, gff);
+        genomeOrConditionData.addComponents(nameAndId, fastaAndGff);
 
         TabSheet replicatesSheet = new TabSheet();
         for (int replicateIndex = 0; replicateIndex < numOfReplicates; replicateIndex++) {
-            HorizontalLayout replicateTab = createReplicateTab(replicateIndex);
-            replicatesSheet.addTab(replicateTab,"Replicate " + (char)(97+replicateIndex));
+            HorizontalLayout replicateTab = createReplicateTab();
+            replicatesSheet.addTab(replicateTab, "Replicate " + (char) (97 + replicateIndex));
         }
         tab.addComponents(genomeOrConditionData, new Label("RNA-seq graph files:"), replicatesSheet);
         return tab;
 
     }
 
-    private HorizontalLayout createReplicateTab(int replicateIndex) {
+    /**
+     * Helper method for createAccordionTab()
+     * @return
+     */
+    private HorizontalLayout createReplicateTab() {
         HorizontalLayout replicateTab = new HorizontalLayout();
         VerticalLayout enrichedPart = new VerticalLayout();
         Upload eplus = new Upload("Enriched Plus", (Upload.Receiver) (s, s1) -> null);
         Upload eminus = new Upload("Enriched Minus", (Upload.Receiver) (s, s1) -> null);
-        enrichedPart.addComponents(eplus,eminus);
+        enrichedPart.addComponents(eplus, eminus);
         VerticalLayout normalPart = new VerticalLayout();
         Upload nplus = new Upload("Normal Plus", (Upload.Receiver) (s, s1) -> null);
         Upload nminus = new Upload("Normal Minus", (Upload.Receiver) (s, s1) -> null);
-        normalPart.addComponents(nplus,nminus);
-        replicateTab.addComponents(enrichedPart,normalPart);
+        normalPart.addComponents(nplus, nminus);
+        replicateTab.addComponents(enrichedPart, normalPart);
         return replicateTab;
     }
 }

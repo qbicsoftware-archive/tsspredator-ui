@@ -1,17 +1,26 @@
-package view.tsswindows;
-
+package view;
 
 import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
 
 /**
- * In this window, the user chooses a name for his project, selects the type of study,
+ * This component has a panel where the user chooses a name for his project, selects the type of study,
  * and uploads an alignment file (if he selected "Strain or species")
+ * @author jmueller
  */
-public class GeneralConfigWindow extends TSSWindow {
-    @Override
-    Layout designContentLayout() {
-        Layout contentLayout = new FormLayout();
+public class GeneralConfigPanel extends CustomComponent{
+    private Panel generalConfigPanel;
+    private Layout contentLayout;
+
+    public GeneralConfigPanel(){
+        generalConfigPanel = designPanel();
+        setCompositionRoot(generalConfigPanel);
+
+    }
+
+    private Panel designPanel() {
+        Panel panel = new Panel();
+        contentLayout = new FormLayout();
         TextField projectName = new TextField("Enter a name for your project");
 
         RadioButtonGroup<String> projectTypeButtonGroup = new RadioButtonGroup<>("Select type of study");
@@ -31,6 +40,7 @@ public class GeneralConfigWindow extends TSSWindow {
 
 
         contentLayout.addComponents(projectName, projectTypeButtonGroup, alignmentFileUpload);
-        return contentLayout;
+        panel.setContent(contentLayout);
+        return panel;
     }
 }

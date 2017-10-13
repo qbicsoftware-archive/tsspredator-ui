@@ -7,9 +7,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
-import presenter.TSSWindowChainPresenter;
-import view.tsswindows.*;
-import view.TSSWindowChain;
+import view.AccordionLayoutMain;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -23,42 +21,8 @@ public class MyUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        final VerticalLayout layout = new VerticalLayout();
-        Button showWindowButton = new Button("Start TSS-Prediction");
-        TSSWindowChain windowChain = setupTSSWindowChain();
-        layout.addComponent(showWindowButton);
-        showWindowButton.addClickListener(e -> {
-            addWindow(windowChain.getWindowList().peekFirst());
-        });
-
+        AccordionLayoutMain layout = new AccordionLayoutMain();
         setContent(layout);
-    }
-
-
-    /**
-     * Here the sequence of windows that lead through the TSSPredator process is generated as a TSSWindowChain
-     * All of these *Window-objects inherit the abstract class TSSWindow
-     * @return
-     */
-    private TSSWindowChain setupTSSWindowChain() {
-        TSSWindowChain windowChain = new TSSWindowChain();
-
-        //Add the windows, one after the other
-        windowChain.getWindowList().add(new PreliminaryWindow());
-        windowChain.getWindowList().add(new GeneralConfigWindow());
-        windowChain.getWindowList().add(new DataWindow());
-        windowChain.getWindowList().add(new ParametersWindow1());
-        windowChain.getWindowList().add(new ParametersWindow2());
-        windowChain.getWindowList().add(new ParametersWindow3());
-        windowChain.getWindowList().add(new ParametersWindow4());
-
-
-        windowChain.createInfoLabels();
-        TSSWindowChainPresenter windowChainPresenter = new TSSWindowChainPresenter();
-        windowChainPresenter.setWindowChain(windowChain);
-        windowChainPresenter.setupWindowButtons();
-        return windowChain;
-
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)

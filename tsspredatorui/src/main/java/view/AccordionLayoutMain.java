@@ -2,6 +2,10 @@ package view;
 
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.VerticalLayout;
+import view.myfirstview.DataPanel;
+import view.myfirstview.GeneralConfigPanel;
+import view.myfirstview.ParametersPanel;
+import view.myfirstview.PreliminaryPanel;
 
 /**
  * The class {@link AccordionLayoutMain} contains the main layout of the GUI. Its core component

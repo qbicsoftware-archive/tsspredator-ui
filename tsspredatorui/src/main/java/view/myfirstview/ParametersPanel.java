@@ -1,8 +1,9 @@
-package view;
+package view.myfirstview;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import view.ParametersView;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -11,7 +12,7 @@ import java.util.LinkedList;
  * This is a component where the user can set every parameter of his TSSPredator run.
  * @author jmueller
  */
-public class ParametersPanel extends CustomComponent {
+public class ParametersPanel extends CustomComponent implements ParametersView{
     private Panel parametersPanel;
     private Layout contentLayout, buttonLayout, parameterLayout1, parameterLayout2, parameterLayout3, parameterLayout4;
     private LinkedList<Layout> layoutList;

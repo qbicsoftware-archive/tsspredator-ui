@@ -1,6 +1,7 @@
-package view;
+package view.myfirstview;
 
 import com.vaadin.ui.*;
+import view.DataView;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -10,7 +11,7 @@ import java.util.LinkedList;
  * then chooses fasta and gff files to use, as well as the RNA-seq data.
  * @author jmueller
  */
-public class DataPanel extends CustomComponent {
+public class DataPanel extends CustomComponent implements DataView{
 
     private Panel dataPanel;
     //TODO: isConditions must be stored globally - it depends on the user's choice in the GenConfigWindow

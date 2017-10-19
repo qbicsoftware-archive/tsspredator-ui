@@ -1,14 +1,15 @@
-package view;
+package view.myfirstview;
 
 import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
+import view.GeneralConfigView;
 
 /**
  * This component has a panel where the user chooses a name for his project, selects the type of study,
  * and uploads an alignment file (if he selected "Strain or species")
  * @author jmueller
  */
-public class GeneralConfigPanel extends CustomComponent{
+public class GeneralConfigPanel extends CustomComponent implements GeneralConfigView{
     private Panel generalConfigPanel;
     private Layout contentLayout;
 

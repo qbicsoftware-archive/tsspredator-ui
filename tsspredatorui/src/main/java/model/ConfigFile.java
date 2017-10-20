@@ -101,7 +101,10 @@ public class ConfigFile {
     }
 
     private void writeLine(BufferedWriter bw, String key, String value) throws IOException {
-        bw.write(key + " = " + value + "\n");
+        if (value == null)
+            System.err.println("Couldn't create config file! Parameter \'" + key + "\' isn't set.");
+        else
+            bw.write(key + " = " + value + "\n");
 
     }
 

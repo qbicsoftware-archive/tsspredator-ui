@@ -10,6 +10,8 @@ public interface ConfigFileBuilder {
 
     void buildMode();
 
+    void buildAlignmentFile(String alignmentFile);
+
     void addDatasets(int datasetsToAdd);
 
     void removeDatasets(int datasetsToRemove);

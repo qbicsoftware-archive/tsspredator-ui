@@ -8,4 +8,9 @@ public class ExtensiveConditionConfigFileBuilder extends ExtensiveConfigFileBuil
     public void buildMode() {
         configFile.setModeConditions(true);
     }
+
+    @Override
+    public void buildAlignmentFile(String alignmentFile) {
+        //DO NOTHING
+    }
 }

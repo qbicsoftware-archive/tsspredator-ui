@@ -9,6 +9,7 @@ public class ExtensiveGenomeConfigFileBuilder extends ExtensiveConfigFileBuilder
         configFile.setModeConditions(false);
     }
 
+    @Override
     public void buildAlignmentFile(String alignmentFile){
         configFile.setAlignmentFile(alignmentFile);
     }

@@ -15,20 +15,22 @@ public class ExtensiveConfigFileBuilderTest {
     public void testBuildExtensiveGenomeConfigFile() {
         ConfigFileBuilder configFileBuilder = new ExtensiveGenomeConfigFileBuilder();
         configFileBuilder.buildProjectName("test_project");
+        configFileBuilder.buildMode();
         configFileBuilder.buildNumberOfDatasets(datasets);
         configFileBuilder.buildNumberOfReplicates(replicates);
+        configFileBuilder.buildAlignmentFile("MyAlignmentFile.xmfa");
 
         for (int i = 0; i < datasets; i++) {
             configFileBuilder.buildGenomeName(i, "" + i);
-            configFileBuilder.buildGenomeFasta(i, "MyFasta" + i);
+            configFileBuilder.buildGenomeFasta(i, "MyFasta" + i + ".fa");
             configFileBuilder.buildGenomeAlignmentID(i, "" + i);
-            configFileBuilder.buildGenomeAnnotation(i, "MyAnnotation" + i);
+            configFileBuilder.buildGenomeAnnotation(i, "MyAnnotation" + i + ".gff");
             for (int j = 0; j < replicates; j++) {
                 configFileBuilder.buildReplicateID(i, j, "" + (char) (j + 97));
-                configFileBuilder.buildEnrichedPlus(i, j, "MyEnrichedCoding" + i + (char) (j + 97));
-                configFileBuilder.buildEnrichedMinus(i, j, "MyEnrichedTemplate" + i + (char) (j + 97));
-                configFileBuilder.buildNormalPlus(i, j, "MyNormalCoding" + i + (char) (j + 97));
-                configFileBuilder.buildNormalMinus(i, j, "MyNormalTemplate" + i + (char) (j + 97));
+                configFileBuilder.buildEnrichedPlus(i, j, "MyEnrichedCoding" + i + (char) (j + 97) + ".gr");
+                configFileBuilder.buildEnrichedMinus(i, j, "MyEnrichedTemplate" + i + (char) (j + 97) + ".gr");
+                configFileBuilder.buildNormalPlus(i, j, "MyNormalCoding" + i + (char) (j + 97) + ".gr");
+                configFileBuilder.buildNormalMinus(i, j, "MyNormalTemplate" + i + (char) (j + 97) + ".gr");
             }
         }
 
@@ -58,6 +60,5 @@ public class ExtensiveConfigFileBuilderTest {
 
 
     }
-
 
 }

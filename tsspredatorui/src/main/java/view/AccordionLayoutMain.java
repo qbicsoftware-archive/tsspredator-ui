@@ -1,11 +1,17 @@
 package view;
 
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.FileResource;
 import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
-import view.myfirstview.DataPanel;
-import view.myfirstview.GeneralConfigPanel;
-import view.myfirstview.ParametersPanel;
-import view.myfirstview.PreliminaryPanel;
+import presenter.Presenter;
+import view.firstImplementation.DataPanel;
+import view.firstImplementation.GeneralConfigPanel;
+import view.firstImplementation.ParametersPanel;
+import view.firstImplementation.PreliminaryPanel;
+
+import java.io.File;
 
 /**
  * The class {@link AccordionLayoutMain} contains the main layout of the GUI. Its core component
@@ -14,19 +20,63 @@ import view.myfirstview.PreliminaryPanel;
  * @author jmueller
  */
 public class AccordionLayoutMain extends VerticalLayout {
+    private Presenter presenter;
     private Accordion contentAccordion;
+    private Button createConfigButton, downloadButton;
+    private FileDownloader downloader;
+    private PreliminaryPanel preliminaryPanel;
+    private GeneralConfigPanel generalConfigPanel;
+    private DataPanel dataPanel;
+    private ParametersPanel parametersPanel;
 
-    public AccordionLayoutMain() {
+    public AccordionLayoutMain(Presenter presenter) {
+        this.presenter = presenter;
         createContentAccordion();
-        this.addComponents(contentAccordion);
+        createConfigButton = new Button("Create Config File", (Button.ClickListener) clickEvent -> {
+            File file = this.presenter.produceConfigFile();
+            downloader = new FileDownloader(new FileResource(file));
+            downloader.extend(downloadButton);
+        });
+        downloadButton = new Button("Download Config File");
+        this.addComponents(contentAccordion, createConfigButton, downloadButton);
     }
 
     private void createContentAccordion() {
         contentAccordion = new Accordion();
-        contentAccordion.addTab(new PreliminaryPanel(), "Preliminary Settings");
-        contentAccordion.addTab(new GeneralConfigPanel(), "General Configuration");
-        contentAccordion.addTab(new DataPanel(), "Data Settings");
-        contentAccordion.addTab(new ParametersPanel(), "Parameters");
 
+        preliminaryPanel = new PreliminaryPanel(presenter);
+        generalConfigPanel = new GeneralConfigPanel(presenter);
+        dataPanel = new DataPanel(presenter);
+        parametersPanel = new ParametersPanel(presenter);
+
+        contentAccordion.addTab(preliminaryPanel, "Preliminary Settings");
+        contentAccordion.addTab(generalConfigPanel, "General Configuration");
+        contentAccordion.addTab(dataPanel, "Data Settings");
+        contentAccordion.addTab(parametersPanel, "Parameters");
+
+    }
+
+    public Presenter getPresenter() {
+        return presenter;
+    }
+
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
+    }
+
+    public PreliminaryPanel getPreliminaryPanel() {
+        return preliminaryPanel;
+    }
+
+    public GeneralConfigPanel getGeneralConfigPanel() {
+        return generalConfigPanel;
+    }
+
+    public DataPanel getDataPanel() {
+        return dataPanel;
+    }
+
+    public ParametersPanel getParametersPanel() {
+        return parametersPanel;
     }
 }

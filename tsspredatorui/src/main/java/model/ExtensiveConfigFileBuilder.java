@@ -1,8 +1,10 @@
 package model;
 
+import com.vaadin.ui.Notification;
+
 import java.util.ArrayList;
 
-public abstract class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
+public class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
     ConfigFile configFile;
 
     public ExtensiveConfigFileBuilder() {
@@ -21,12 +23,10 @@ public abstract class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
         int delta = number - configFile.getNumberOfDatasets();
         configFile.setNumberOfDatasets(number);
         //Add or remove datasets so they match the given number
-        if(delta > 0)
+        if (delta > 0)
             addDatasets(delta);
         else
             removeDatasets(-delta);
-
-
     }
 
     @Override
@@ -34,32 +34,45 @@ public abstract class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
         int delta = number - configFile.getNumberOfReplicates();
         configFile.setNumberOfReplicates(number);
         //Add or remove replicates so they match the given number
-        if(delta > 0)
+        if (delta > 0)
             addReplicates(delta);
         else
             removeReplicates(-delta);
     }
 
     @Override
-    public abstract void buildMode();
+    public void buildMode(Boolean isConditions) {
+        configFile.setModeConditions(isConditions);
+    }
+
+    @Override
+    public void buildAlignmentFile(String alignmentFile) {
+        configFile.setAlignmentFile(alignmentFile);
+    }
 
     @Override
     public void addDatasets(int datasetsToAdd) {
         for (int i = 0; i < datasetsToAdd; i++) {
-            configFile.getGenomeList().add(new Genome());
+            Genome currentGenome = new Genome();
+            //Add as many replicates as the other Genomes have
+            for (int j = 0; j < configFile.getNumberOfReplicates(); j++) {
+                currentGenome.getReplicateList().add(new Replicate());
+            }
+            configFile.getGenomeList().add(currentGenome);
         }
-
     }
 
     @Override
     public void removeDatasets(int datasetsToRemove) {
-        int startIndex = configFile.getGenomeList().size() - datasetsToRemove;
-        for (int i = startIndex; i < configFile.getGenomeList().size(); i++)
-            configFile.getGenomeList().remove(i);
+        int oldGenomeListSize = configFile.getGenomeList().size();
+        int startIndex = oldGenomeListSize - datasetsToRemove;
+        for (int i = startIndex; i < oldGenomeListSize; i++)
+            //Remove tail until desired size is reached
+            configFile.getGenomeList().remove(configFile.getGenomeList().size() - 1);
     }
 
     @Override
-    public void buildGenomeName(int index, String name) {
+    public void buildDatasetName(int index, String name) {
         configFile.getGenomeList().get(index).setName(name);
     }
 
@@ -89,16 +102,18 @@ public abstract class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
 
     @Override
     public void removeReplicates(int replicatesToRemove) {
-        int startIndex = configFile.getGenomeList().get(0).getReplicateList().size() - replicatesToRemove;
+        int oldReplicateListSize = configFile.getGenomeList().get(0).getReplicateList().size();
+        int startIndex = oldReplicateListSize - replicatesToRemove;
         for (Genome genome : configFile.getGenomeList()) {
-            for (int i = startIndex; i < genome.getReplicateList().size(); i++) {
-                genome.getReplicateList().remove(i);
+            for (int i = startIndex; i < oldReplicateListSize; i++) {
+                //Remove tail until desired size is reached
+                genome.getReplicateList().remove(genome.getReplicateList().size() - 1);
             }
         }
     }
 
     @Override
-    public void buildReplicateID(int genomeIndex, int replicateIndex, String id){
+    public void buildReplicateID(int genomeIndex, int replicateIndex, String id) {
         configFile
                 .getGenomeList()
                 .get(genomeIndex)
@@ -208,12 +223,12 @@ public abstract class ExtensiveConfigFileBuilder implements ConfigFileBuilder {
     }
 
     @Override
-    public void buildTssClusteringDistance(int clusteringDistance) {
+    public void buildClusteringDistance(int clusteringDistance) {
         configFile.setTssClusteringDistance(clusteringDistance);
     }
 
     @Override
-    public void buildAllowedCrossSubjectShift(int allowedCrossSubjectShift) {
+    public void buildAllowedCrossDatasetShift(int allowedCrossSubjectShift) {
         configFile.setAllowedCrossSubjectShift(allowedCrossSubjectShift);
     }
 

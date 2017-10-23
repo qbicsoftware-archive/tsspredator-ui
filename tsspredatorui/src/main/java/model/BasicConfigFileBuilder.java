@@ -3,7 +3,7 @@ package model;
 /**TODO: This should represent a situation where most values of the config file are set to default
  * @author jmueller
  */
-public abstract class BasicConfigFileBuilder implements ConfigFileBuilder{
+public class BasicConfigFileBuilder implements ConfigFileBuilder{
     @Override
     public void buildProjectName(String name) {
 
@@ -20,9 +20,15 @@ public abstract class BasicConfigFileBuilder implements ConfigFileBuilder{
     }
 
     @Override
-    public void buildMode() {
+    public void buildMode(Boolean isConditions) {
 
     }
+
+    @Override
+    public void buildAlignmentFile(String alignmentFile) {
+
+    }
+
 
     @Override
     public void addDatasets(int datasetsToAdd) {
@@ -35,7 +41,7 @@ public abstract class BasicConfigFileBuilder implements ConfigFileBuilder{
     }
 
     @Override
-    public void buildGenomeName(int index, String name) {
+    public void buildDatasetName(int index, String name) {
 
     }
 
@@ -61,6 +67,11 @@ public abstract class BasicConfigFileBuilder implements ConfigFileBuilder{
 
     @Override
     public void removeReplicates(int replicatesToRemove) {
+
+    }
+
+    @Override
+    public void buildReplicateID(int genomeIndex, int replicateIndex, String id) {
 
     }
 
@@ -145,12 +156,12 @@ public abstract class BasicConfigFileBuilder implements ConfigFileBuilder{
     }
 
     @Override
-    public void buildTssClusteringDistance(int distance) {
+    public void buildClusteringDistance(int distance) {
 
     }
 
     @Override
-    public void buildAllowedCrossSubjectShift(int shift) {
+    public void buildAllowedCrossDatasetShift(int shift) {
 
     }
 

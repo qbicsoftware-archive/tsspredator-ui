@@ -7,6 +7,8 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
+import model.ExtensiveConfigFileBuilder;
+import presenter.Presenter;
 import view.AccordionLayoutMain;
 
 /**
@@ -21,7 +23,9 @@ public class MyUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        AccordionLayoutMain layout = new AccordionLayoutMain();
+        //TODO: Replace AccordionLayoutMain with an interface
+        Presenter presenter = new Presenter();
+        AccordionLayoutMain layout = new AccordionLayoutMain(presenter);
         setContent(layout);
     }
 

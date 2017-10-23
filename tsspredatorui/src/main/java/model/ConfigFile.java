@@ -40,7 +40,7 @@ public class ConfigFile {
     public ConfigFile() {
     }
 
-    public void writeConfigFile(File output) {
+    public File writeConfigFile(File output) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(output));
             writeLine(bw, "projectName", projectName);
@@ -97,7 +97,7 @@ public class ConfigFile {
         } catch (IOException e) {
             System.err.println("Output path invalid");
         }
-
+    return output;
     }
 
     private void writeLine(BufferedWriter bw, String key, String value) throws IOException {

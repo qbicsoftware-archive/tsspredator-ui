@@ -3,9 +3,6 @@ package model;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
-
-import static org.junit.Assert.*;
 
 public class ExtensiveConfigFileBuilderTest {
     int datasets = 3;
@@ -13,15 +10,15 @@ public class ExtensiveConfigFileBuilderTest {
 
     @Test
     public void testBuildExtensiveGenomeConfigFile() {
-        ConfigFileBuilder configFileBuilder = new ExtensiveGenomeConfigFileBuilder();
+        ConfigFileBuilder configFileBuilder = new ExtensiveConfigFileBuilder();
         configFileBuilder.buildProjectName("test_project");
-        configFileBuilder.buildMode();
+        configFileBuilder.buildMode(false);
         configFileBuilder.buildNumberOfDatasets(datasets);
         configFileBuilder.buildNumberOfReplicates(replicates);
         configFileBuilder.buildAlignmentFile("MyAlignmentFile.xmfa");
 
         for (int i = 0; i < datasets; i++) {
-            configFileBuilder.buildGenomeName(i, "" + i);
+            configFileBuilder.buildDatasetName(i, "" + i);
             configFileBuilder.buildGenomeFasta(i, "MyFasta" + i + ".fa");
             configFileBuilder.buildGenomeAlignmentID(i, "" + i);
             configFileBuilder.buildGenomeAnnotation(i, "MyAnnotation" + i + ".gff");
@@ -33,7 +30,6 @@ public class ExtensiveConfigFileBuilderTest {
                 configFileBuilder.buildNormalMinus(i, j, "MyNormalTemplate" + i + (char) (j + 97) + ".gr");
             }
         }
-
         configFileBuilder.buildWriteGraphs(true);
         configFileBuilder.buildStepHeight(1);
         configFileBuilder.buildStepHeightReduction(0.1);
@@ -46,8 +42,8 @@ public class ExtensiveConfigFileBuilderTest {
         configFileBuilder.buildNormalizationPercentile(0.7);
         configFileBuilder.buildEnrichmentNormalizationPercentile(0.8);
         configFileBuilder.buildClusterMethod("HIGHEST");
-        configFileBuilder.buildTssClusteringDistance(9);
-        configFileBuilder.buildAllowedCrossSubjectShift(10);
+        configFileBuilder.buildClusteringDistance(9);
+        configFileBuilder.buildAllowedCrossDatasetShift(10);
         configFileBuilder.buildAllowedCrossReplicateShift(11);
         configFileBuilder.buildMatchingReplicates(12);
         configFileBuilder.buildUtrLength(13);

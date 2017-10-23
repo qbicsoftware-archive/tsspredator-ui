@@ -8,15 +8,16 @@ public interface ConfigFileBuilder {
 
     void buildNumberOfReplicates(int number);
 
-    void buildMode();
+    void buildMode(Boolean isConditions);
 
     void buildAlignmentFile(String alignmentFile);
 
+    //TODO: Should the four add/remove methods be visible in the interface?
     void addDatasets(int datasetsToAdd);
 
     void removeDatasets(int datasetsToRemove);
 
-    void buildGenomeName(int index, String name);
+    void buildDatasetName(int index, String name);
 
     void buildGenomeFasta(int index, String fasta);
 
@@ -62,9 +63,9 @@ public interface ConfigFileBuilder {
 
     void buildClusterMethod(String method);
 
-    void buildTssClusteringDistance(int distance);
+    void buildClusteringDistance(int distance);
 
-    void buildAllowedCrossSubjectShift(int shift);
+    void buildAllowedCrossDatasetShift(int shift);
 
     void buildAllowedCrossReplicateShift(int shift);
 

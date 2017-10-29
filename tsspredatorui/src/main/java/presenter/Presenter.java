@@ -25,11 +25,6 @@ public class Presenter {
         configFileBuilder = isConfigExtensive ? new ExtensiveConfigFileBuilder() : new BasicConfigFileBuilder();
     }
 
-
-    public void setMemory(int memory) {
-        //TODO: Do something
-    }
-
     public void setConfigExtensive(boolean configExtensive) {
         isConfigExtensive = configExtensive;
     }
@@ -48,6 +43,7 @@ public class Presenter {
 
     public void updateMode(Boolean isConditions) {
         configFileBuilder.buildMode(isConditions);
+        view.updateDataPanelMode(isConditions);
     }
 
     public void updateAlignmentFile(String alignmentFile) {
@@ -179,6 +175,27 @@ public class Presenter {
 
     public void setConfigFileBuilder(ConfigFileBuilder configFileBuilder) {
         this.configFileBuilder = configFileBuilder;
+    }
+
+
+
+
+    //These three methods are only for temporary use. They are needed because as of now,
+    //the config file stores a genome name, fasta and gff for every dataset, regardless of the workflow variant
+    //However, in the condition variant there's only one of these
+    // --> this needs to be changed in the config logic itself
+    public void updateAllGenomeFastas(String name){
+        for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
+            configFileBuilder.buildGenomeFasta(i, name);
+        }
+
+    }
+
+    public void updateAllGenomeAnnotations(String annotation){
+        for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
+            configFileBuilder.buildGenomeAnnotation(i, annotation);
+        }
+
     }
 
 

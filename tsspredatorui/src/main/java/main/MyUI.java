@@ -26,6 +26,7 @@ public class MyUI extends UI {
         //TODO: Replace AccordionLayoutMain with an interface
         Presenter presenter = new Presenter();
         AccordionLayoutMain layout = new AccordionLayoutMain(presenter);
+        presenter.setView(layout);
         setContent(layout);
     }
 

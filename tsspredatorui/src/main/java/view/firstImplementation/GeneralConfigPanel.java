@@ -35,6 +35,7 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
         String strainOrSpecies = "Compare Strain/Species";
         String conditions = "Compare Conditions";
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
+        projectTypeButtonGroup.setSelectedItem(strainOrSpecies);
 
         alignmentFileUpload = new TextField("Upload alignment file");
         //The uploader should only be visible if strains/species are to be compared

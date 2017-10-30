@@ -46,7 +46,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
 
         Collection<Integer> possibleReplicates = new LinkedList<>();
         //TODO: Extend range to 100 using aa, ab, ac, ...
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < 100; i++) {
             possibleReplicates.add(i + 1);
         }
         numberOfReplicatesBox.setItems(possibleReplicates);
@@ -88,7 +88,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
                 //Add new replicate tabs
                 for (int replicateIndex = oldReplicateCount; replicateIndex < numberOfReplicates; replicateIndex++) {
                     HorizontalLayout replicateTab = createReplicateTab(datasetIndex, replicateIndex);
-                    ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + (char) (97 + replicateIndex));
+                    ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
                 }
             } else {
                 //Remove excess replicate tabs
@@ -143,9 +143,31 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         TextField nminus = new TextField("Normal Minus");
         normalPart.addComponents(nplus, nminus);
         setupReplicateTabListeners(datasetIndex, replicateIndex, eplus, eminus, nplus, nminus);
-        presenter.updateReplicateID(datasetIndex, replicateIndex, String.valueOf((char) (97 + replicateIndex)));
+        presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
         replicateTab.addComponents(enrichedPart, normalPart);
         return replicateTab;
+    }
+
+    /**
+     * Converts the numerical replicateIndex to an 'abc-value' as follows:
+     * 0 -> a
+     * 1 -> b
+     * ...
+     * 25 -> z
+     * 26 -> aa
+     * 27 -> ab
+     * ...
+     */
+    String createReplicateID(int replicateIndex) {
+        StringBuilder builder = new StringBuilder();
+        while (replicateIndex >= 26) {
+            builder.append((char) (97 + (replicateIndex % 26)));
+            replicateIndex /= 26;
+            replicateIndex--;
+        }
+        builder.append((char) (97 + replicateIndex));
+        return builder.reverse().toString();
+
     }
 
     void setupListeners() {

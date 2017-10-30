@@ -158,7 +158,7 @@ public class Presenter {
         configFileBuilder.buildAntisenseUtrLength(aul);
     }
 
-    public File produceConfigFile(){
+    public File produceConfigFile() {
         ConfigFile configFile = configFileBuilder.createConfigFile();
         File file = new File("/tmp/tssconfiguration.conf");
         return configFile.writeConfigFile(file);
@@ -178,20 +178,18 @@ public class Presenter {
     }
 
 
-
-
     //These three methods are only for temporary use. They are needed because as of now,
     //the config file stores a genome name, fasta and gff for every dataset, regardless of the workflow variant
     //However, in the condition variant there's only one of these
     // --> this needs to be changed in the config logic itself
-    public void updateAllGenomeFastas(String name){
+    public void updateAllGenomeFastas(String name) {
         for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
             configFileBuilder.buildGenomeFasta(i, name);
         }
 
     }
 
-    public void updateAllGenomeAnnotations(String annotation){
+    public void updateAllGenomeAnnotations(String annotation) {
         for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
             configFileBuilder.buildGenomeAnnotation(i, annotation);
         }

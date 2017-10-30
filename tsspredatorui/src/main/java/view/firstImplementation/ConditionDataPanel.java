@@ -3,9 +3,8 @@ package view.firstImplementation;
 import com.vaadin.ui.*;
 import presenter.Presenter;
 
-public class ConditionDataPanel extends DataPanel{
+public class ConditionDataPanel extends DataPanel {
     TextField fastaField, gffField, name;
-
 
 
     public ConditionDataPanel(Presenter presenter) {
@@ -31,7 +30,7 @@ public class ConditionDataPanel extends DataPanel{
         TabSheet replicatesSheet = new TabSheet();
         for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
             HorizontalLayout replicateTab = createReplicateTab(index, replicateIndex);
-            replicatesSheet.addTab(replicateTab, "Replicate " + (char) (97 + replicateIndex));
+            replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
         }
         tab.addComponents(name, new Label("RNA-seq graph files:"), replicatesSheet);
         return tab;

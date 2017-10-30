@@ -35,7 +35,7 @@ public class GenomeDataPanel extends DataPanel {
         TabSheet replicatesSheet = new TabSheet();
         for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
             HorizontalLayout replicateTab = createReplicateTab(index, replicateIndex);
-            replicatesSheet.addTab(replicateTab, "Replicate " + (char) (97 + replicateIndex));
+            replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
         }
         tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
         return tab;

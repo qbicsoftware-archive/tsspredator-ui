@@ -97,7 +97,7 @@ public class ConfigFile {
         } catch (IOException e) {
             System.err.println("Output path invalid");
         }
-    return output;
+        return output;
     }
 
     private void writeLine(BufferedWriter bw, String key, String value) throws IOException {

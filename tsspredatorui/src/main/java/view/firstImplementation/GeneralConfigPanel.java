@@ -39,7 +39,8 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
 
         alignmentFileUpload = new TextField("Upload alignment file");
         //The uploader should only be visible if strains/species are to be compared
-        alignmentFileUpload.setVisible(false);
+        //(which is the initial case)
+        alignmentFileUpload.setVisible(true);
         projectTypeButtonGroup.addSelectionListener((SingleSelectionListener<String>) e -> {
             if (e.getSelectedItem().get().equals(strainOrSpecies))
                 alignmentFileUpload.setVisible(true);

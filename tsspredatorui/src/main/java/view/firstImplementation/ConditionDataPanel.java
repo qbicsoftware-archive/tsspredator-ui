@@ -33,6 +33,7 @@ public class ConditionDataPanel extends DataPanel {
             replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
         }
         tab.addComponents(name, new Label("RNA-seq graph files:"), replicatesSheet);
+        name.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
         return tab;
 
 

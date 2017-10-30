@@ -197,7 +197,7 @@ public class ConfigFile {
         this.tssClusteringDistance = tssClusteringDistance;
     }
 
-    public void setAllowedCrossSubjectShift(int allowedCrossSubjectShift) {
+    public void setAllowedCrossDatasetShift(int allowedCrossSubjectShift) {
         this.allowedCrossSubjectShift = allowedCrossSubjectShift;
     }
 

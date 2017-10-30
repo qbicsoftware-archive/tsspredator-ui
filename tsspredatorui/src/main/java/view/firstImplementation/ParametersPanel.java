@@ -17,13 +17,19 @@ import java.util.LinkedList;
 public class ParametersPanel extends CustomComponent implements ParametersView {
     private Presenter presenter;
     private Panel parametersPanel;
-    private Layout contentLayout, buttonLayout, parameterLayout1, parameterLayout2, parameterLayout3, parameterLayout4;
-    private LinkedList<Layout> layoutList;
-    private int layoutIndex;
+    private Layout contentLayout;
+    RadioButtonGroup<String> presetOrCustom;
+    RadioButtonGroup<String> presetSelection;
+
+    //These parameters are shown in custom mode only
+    private VerticalLayout customParameters;
     Slider stepHeight, stepHeightReduction;
     Slider stepFactor, stepFactorReduction;
     Slider enrichmentFactor, processingSiteFactor;
     Slider stepLength, baseHeight;
+
+    //These parameters are always shown
+    private VerticalLayout basicParameters;
     Slider normalizationPercentile, enrichedNormalizationPercentile;
     ComboBox<String> clusterMethod;
     Slider clusteringDistance;
@@ -34,33 +40,34 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
 
 
     public ParametersPanel(Presenter presenter) {
+        this.presenter = presenter;
         parametersPanel = designPanel();
         setCompositionRoot(parametersPanel);
-        this.presenter = presenter;
     }
 
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new VerticalLayout();
 
-
+        presetOrCustom = new RadioButtonGroup<>("Parameters(?)");
+        presetOrCustom.setItems("Preset", "Custom");
+        presetOrCustom.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        presetSelection = new RadioButtonGroup<>("Choose Parameter Preset");
+        presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
+        setupPresetListeners();
         createParameterLayouts();
-        createButtonLayout();
-        for (Layout layout : layoutList) {
-            contentLayout.addComponents(layout);
-        }
-        contentLayout.addComponents(buttonLayout);
+        setupParameterListeners();
+        setInitialValues();
+        contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
         panel.setContent(contentLayout);
         return panel;
     }
 
     private void createParameterLayouts() {
-        layoutIndex = 0;
-        layoutList = new LinkedList<>();
+        customParameters = new VerticalLayout();
 
-        parameterLayout1 = new VerticalLayout();
         //TODO: Bind the max value of the reduction sliders to the other sliders so that they don't exceed them
-        HorizontalLayout heightParams = new HorizontalLayout();
+        HorizontalLayout stepParams = new HorizontalLayout();
         stepHeight = new Slider("Step Height");
         stepHeight.setMin(0);
         stepHeight.setMax(1);
@@ -69,21 +76,17 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         stepHeightReduction.setMin(0);
         stepHeightReduction.setMax(1);
         stepHeightReduction.setResolution(1);
-        heightParams.addComponents(stepHeight, stepHeightReduction);
-        HorizontalLayout factorParams = new HorizontalLayout();
         stepFactor = new Slider("Step Factor");
         stepFactor.setMin(1);
-        stepFactor.setMax(2);
+        stepFactor.setMax(5);
         stepFactor.setResolution(1);
         stepFactorReduction = new Slider("Step Factor Reduction");
         stepFactorReduction.setMin(0);
         stepFactorReduction.setMax(2);
         stepFactorReduction.setResolution(1);
-        factorParams.addComponents(stepFactor, stepFactorReduction);
-        parameterLayout1.addComponents(heightParams, factorParams);
-        layoutList.add(parameterLayout1);
+        stepParams.addComponents(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction);
 
-        parameterLayout2 = new VerticalLayout();
+        HorizontalLayout otherCustomParams = new HorizontalLayout();
         enrichmentFactor = new Slider("Enrichment Factor");
         enrichmentFactor.setMin(0);
         enrichmentFactor.setMax(10);
@@ -98,10 +101,12 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         stepLength.setResolution(0);
         baseHeight = new Slider("Base Height (disabled by default)");
         baseHeight.setEnabled(false);
-        parameterLayout2.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
-        layoutList.add(parameterLayout2);
+        otherCustomParams.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
 
-        parameterLayout3 = new VerticalLayout();
+        customParameters.addComponents(stepParams, otherCustomParams);
+
+        basicParameters = new VerticalLayout();
+
         HorizontalLayout percentiles = new HorizontalLayout();
         normalizationPercentile = new Slider("Normalization Percentile");
         normalizationPercentile.setMin(0);
@@ -120,10 +125,7 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         clusteringDistance.setMax(100);
         clusteringDistance.setResolution(0);
         methodAndDistance.addComponents(clusterMethod, clusteringDistance);
-        parameterLayout3.addComponents(percentiles, methodAndDistance);
-        layoutList.add(parameterLayout3);
 
-        parameterLayout4 = new VerticalLayout();
         HorizontalLayout allowedShifts = new HorizontalLayout();
         //TODO: Change depending on user choice: Genomes vs. Conditions
         crossDatasetShift = new Slider("Allowed Cross-Condition Shift");
@@ -145,70 +147,49 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         HorizontalLayout utrLengths = new HorizontalLayout();
         utrLength = new Slider("UTR length");
         utrLength.setMin(0);
-        utrLength.setMax(100);
+        utrLength.setMax(1000);
         antisenseUtrLength = new Slider("Antisense UTR length");
         antisenseUtrLength.setMin(0);
-        antisenseUtrLength.setMax(100);
+        antisenseUtrLength.setMax(1000);
         utrLengths.addComponents(utrLength, antisenseUtrLength);
         writeGraphs = new CheckBox("Write RNA-Seq graphs");
-        parameterLayout4.addComponents(allowedShifts, matchingReplicates, utrLength, writeGraphs);
-        layoutList.add(parameterLayout4);
+
+        basicParameters.addComponents(percentiles, methodAndDistance, allowedShifts, matchingReplicates, utrLengths, writeGraphs);
 
 
-        //Set all but the first layout invisible
-        for (Layout layout : layoutList) {
-            layout.setVisible(false);
-        }
-        layoutList.getFirst().setVisible(true);
-
-        setupListeners();
-    }
-
-
-    /**
-     * This method enables navigation between the parameter layouts via two buttons at the bottom
-     */
-    private void createButtonLayout() {
-        buttonLayout = new HorizontalLayout();
-        buttonLayout.setSizeFull();
-        Button previousButton = new Button("Previous");
-        previousButton.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
-        previousButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        previousButton.setIcon(VaadinIcons.ARROW_CIRCLE_LEFT_O);
-        Button nextButton = new Button("Next");
-        nextButton.addStyleName(ValoTheme.BUTTON_ICON_ONLY);
-        nextButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
-        nextButton.setIcon(VaadinIcons.ARROW_CIRCLE_RIGHT_O);
-
-        previousButton.setEnabled(false);
-
-        previousButton.addClickListener(event -> {
-            layoutList.get(layoutIndex).setVisible(false);
-            if (layoutIndex == layoutList.size() - 1)
-                nextButton.setEnabled(true);
-            layoutIndex--;
-            layoutList.get(layoutIndex).setVisible(true);
-            if (layoutIndex == 0)
-                previousButton.setEnabled(false);
-        });
-
-
-        nextButton.addClickListener(event -> {
-            layoutList.get(layoutIndex).setVisible(false);
-            if (layoutIndex == 0)
-                previousButton.setEnabled(true);
-            layoutIndex++;
-            layoutList.get(layoutIndex).setVisible(true);
-            if (layoutIndex == layoutList.size() - 1)
-                nextButton.setEnabled(false);
-
-        });
-
-        buttonLayout.addComponents(previousButton, nextButton);
 
     }
 
-    private void setupListeners() {
+    private void setupPresetListeners() {
+        presetOrCustom.addValueChangeListener(vce -> {
+            presenter.setParamsCustom(vce.getValue().equals("Custom"));
+            customParameters.setVisible(vce.getValue().equals("Custom"));
+            presetSelection.setVisible(vce.getValue().equals("Preset"));
+        });
+        presetSelection.addValueChangeListener(vce -> {
+            switch (vce.getValue()) {
+                case "Very Specific":
+                    presenter.setPreset(Presenter.Preset.VERY_SPECIFIC);
+                    break;
+                case "More Specific":
+                    presenter.setPreset(Presenter.Preset.MORE_SPECIFIC);
+                    break;
+                case "Default":
+                    presenter.setPreset(Presenter.Preset.DEFAULT);
+                    break;
+                case "More Sensitive":
+                    presenter.setPreset(Presenter.Preset.MORE_SENSITIVE);
+                    break;
+                case "Very Sensitive":
+                    presenter.setPreset(Presenter.Preset.VERY_SENSITIVE);
+                    break;
+            }
+            presenter.applyPresetParameters();
+        });
+
+    }
+
+    private void setupParameterListeners() {
         stepHeight.addValueChangeListener(vce -> presenter.updateStepHeight(vce.getValue()));
         stepHeightReduction.addValueChangeListener(vce -> presenter.updateStepHeightReduction(vce.getValue()));
         stepFactor.addValueChangeListener(vce -> presenter.updateStepFactor(vce.getValue()));
@@ -229,5 +210,57 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         writeGraphs.addValueChangeListener(vce -> presenter.updateWriteGraphs(vce.getValue()));
 
 
+    }
+
+    private void setInitialValues() {
+        normalizationPercentile.setValue(0.9);
+        enrichedNormalizationPercentile.setValue(0.5);
+        clusterMethod.setValue("HIGHEST");
+        clusteringDistance.setValue(3.);
+        crossDatasetShift.setValue(1.);
+        crossReplicateShift.setValue(1.);
+        matchingReplicates.setValue(1);
+        utrLength.setValue(300.);
+        antisenseUtrLength.setValue(100.);
+    }
+
+    public RadioButtonGroup<String> getPresetOrCustom() {
+        return presetOrCustom;
+    }
+
+    public RadioButtonGroup<String> getPresetSelection() {
+        return presetSelection;
+    }
+
+    public Slider getStepHeight() {
+        return stepHeight;
+    }
+
+    public Slider getStepHeightReduction() {
+        return stepHeightReduction;
+    }
+
+    public Slider getStepFactor() {
+        return stepFactor;
+    }
+
+    public Slider getStepFactorReduction() {
+        return stepFactorReduction;
+    }
+
+    public Slider getEnrichmentFactor() {
+        return enrichmentFactor;
+    }
+
+    public Slider getProcessingSiteFactor() {
+        return processingSiteFactor;
+    }
+
+    public Slider getStepLength() {
+        return stepLength;
+    }
+
+    public Slider getBaseHeight() {
+        return baseHeight;
     }
 }

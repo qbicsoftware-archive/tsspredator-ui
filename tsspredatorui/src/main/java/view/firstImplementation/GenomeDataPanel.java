@@ -43,7 +43,7 @@ public class GenomeDataPanel extends DataPanel {
     }
 
     private void setupDatasetTabListeners(int index, TextField name, TextField id, TextField fasta, TextField gff) {
-        name.addValueChangeListener(vce -> presenter.updateGenomeName(index, vce.getValue()));
+        name.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
         id.addValueChangeListener(vce -> presenter.updateGenomeAlignmentID(index, vce.getValue()));
         fasta.addValueChangeListener(vce -> presenter.updateGenomeFasta(index, vce.getValue()));
         gff.addValueChangeListener(vce -> presenter.updateGenomeAnnotation(index, vce.getValue()));

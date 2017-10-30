@@ -19,7 +19,7 @@ public class ConditionDataPanel extends DataPanel {
         fastaField.addValueChangeListener(vce -> presenter.updateAllGenomeFastas(vce.getValue()));
         gffField.addValueChangeListener(vce -> presenter.updateAllGenomeAnnotations(vce.getValue()));
         contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox,
-                fastaField, gffField, datasetAccordion, setNumbers);
+                fastaField, gffField, setNumbers, datasetAccordion);
     }
 
     @Override

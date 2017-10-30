@@ -1,197 +1,347 @@
 package presenter;
 
-import model.BasicConfigFileBuilder;
-import model.ConfigFile;
-import model.ConfigFileBuilder;
-import model.ExtensiveConfigFileBuilder;
+import model.*;
 import view.AccordionLayoutMain;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * @author jmueller
  */
 public class Presenter {
-    private ConfigFileBuilder configFileBuilder;
-    private boolean isConfigExtensive;
+    private ConfigFile configFile;
+    private boolean isParamsCustom;
     private AccordionLayoutMain view;
 
+    public enum Preset {
+        VERY_SPECIFIC, MORE_SPECIFIC, DEFAULT, MORE_SENSITIVE, VERY_SENSITIVE
+
+    }
+
+    private Preset preset = Preset.DEFAULT;
+
     public Presenter() {
-        isConfigExtensive = true; //Extensive config by default
-        createBuilder(); //TODO: This should be called somewhere else
+        isParamsCustom = false; //Preset parameters by default
+        configFile = new ConfigFile();
+        configFile.setGenomeList(new ArrayList<>());
     }
 
-    public void createBuilder() {
-        configFileBuilder = isConfigExtensive ? new ExtensiveConfigFileBuilder() : new BasicConfigFileBuilder();
+    /**
+     * Initializes the fields of the view
+     * TODO: Move stuff from the view here so the view contains less logic
+     */
+    public void initFields(){
+        view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
+        view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
+
     }
 
-    public void setConfigExtensive(boolean configExtensive) {
-        isConfigExtensive = configExtensive;
+    public void setParamsCustom(boolean paramsCustom) {
+        isParamsCustom = paramsCustom;
     }
 
-    public void updateProjectName(String name) {
-        configFileBuilder.buildProjectName(name);
+    public void updateProjectName(String projectName) {
+        configFile.setProjectName(projectName);
     }
 
     public void updateNumberOfDatasets(int number) {
-        configFileBuilder.buildNumberOfDatasets(number);
+        int delta = number - configFile.getNumberOfDatasets();
+        configFile.setNumberOfDatasets(number);
+        //Add or remove datasets so they match the given number
+        if (delta > 0)
+            addDatasets(delta);
+        else
+            removeDatasets(-delta);
+    }
+
+    public void addDatasets(int datasetsToAdd) {
+        for (int i = 0; i < datasetsToAdd; i++) {
+            Genome currentGenome = new Genome();
+            //Add as many replicates as the other Genomes have
+            for (int j = 0; j < configFile.getNumberOfReplicates(); j++) {
+                currentGenome.getReplicateList().add(new Replicate());
+            }
+            configFile.getGenomeList().add(currentGenome);
+        }
+    }
+
+
+    public void removeDatasets(int datasetsToRemove) {
+        int oldGenomeListSize = configFile.getGenomeList().size();
+        int startIndex = oldGenomeListSize - datasetsToRemove;
+        for (int i = startIndex; i < oldGenomeListSize; i++)
+            //Remove tail until desired size is reached
+            configFile.getGenomeList().remove(configFile.getGenomeList().size() - 1);
     }
 
     public void updateNumberOfReplicates(int number) {
-        configFileBuilder.buildNumberOfReplicates(number);
+        int delta = number - configFile.getNumberOfReplicates();
+        configFile.setNumberOfReplicates(number);
+        //Add or remove replicates so they match the given number
+        if (delta > 0)
+            addReplicates(delta);
+        else
+            removeReplicates(-delta);
+    }
+
+
+    public void addReplicates(int replicatesToAdd) {
+        for (int i = 0; i < replicatesToAdd; i++) {
+            for (Genome genome : configFile.getGenomeList()) {
+                genome.getReplicateList().add(new Replicate());
+            }
+        }
+    }
+
+
+    public void removeReplicates(int replicatesToRemove) {
+        int oldReplicateListSize = configFile.getGenomeList().get(0).getReplicateList().size();
+        int startIndex = oldReplicateListSize - replicatesToRemove;
+        for (Genome genome : configFile.getGenomeList()) {
+            for (int i = startIndex; i < oldReplicateListSize; i++) {
+                //Remove tail until desired size is reached
+                genome.getReplicateList().remove(genome.getReplicateList().size() - 1);
+            }
+        }
     }
 
     public void updateMode(Boolean isConditions) {
-        configFileBuilder.buildMode(isConditions);
+        configFile.setModeConditions(isConditions);
         view.updateDataPanelMode(isConditions);
     }
 
     public void updateAlignmentFile(String alignmentFile) {
-        configFileBuilder.buildAlignmentFile(alignmentFile);
+        configFile.setAlignmentFile(alignmentFile);
     }
 
-    public void updateGenomeName(int index, String name) {
-        configFileBuilder.buildDatasetName(index, name);
+    public void updateDatasetName(int index, String name) {
+        configFile.getGenomeList().get(index).setName(name);
     }
 
-    public void updateGenomeFasta(int index, String name) {
-        configFileBuilder.buildGenomeFasta(index, name);
+    public void updateGenomeFasta(int index, String fasta) {
+        configFile.getGenomeList().get(index).setFasta(fasta);
     }
 
     public void updateGenomeAlignmentID(int index, String id) {
-        configFileBuilder.buildGenomeAlignmentID(index, id);
+        configFile.getGenomeList().get(index).setAlignmentID(id);
     }
 
     public void updateGenomeAnnotation(int index, String annotation) {
-        configFileBuilder.buildGenomeAnnotation(index, annotation);
+        configFile.getGenomeList().get(index).setGff(annotation);
     }
 
     public void updateReplicateID(int datasetIndex, int replicateIndex, String id) {
-        configFileBuilder.buildReplicateID(datasetIndex, replicateIndex, id);
+        configFile
+                .getGenomeList()
+                .get(datasetIndex)
+                .getReplicateList()
+                .get(replicateIndex)
+                .setReplicateID(id);
+
     }
 
     public void updateEnrichedPlus(int datasetIndex, int replicateIndex, String strand) {
-        configFileBuilder.buildEnrichedPlus(datasetIndex, replicateIndex, strand);
+        configFile
+                .getGenomeList()
+                .get(datasetIndex)
+                .getReplicateList()
+                .get(replicateIndex)
+                .setEnrichedCodingStrand(strand);
+
     }
 
     public void updateEnrichedMinus(int datasetIndex, int replicateIndex, String strand) {
-        configFileBuilder.buildEnrichedMinus(datasetIndex, replicateIndex, strand);
+        configFile
+                .getGenomeList()
+                .get(datasetIndex)
+                .getReplicateList()
+                .get(replicateIndex)
+                .setEnrichedTemplateStrand(strand);
+
     }
 
     public void updateNormalPlus(int datasetIndex, int replicateIndex, String strand) {
-        configFileBuilder.buildNormalPlus(datasetIndex, replicateIndex, strand);
+        configFile
+                .getGenomeList()
+                .get(datasetIndex)
+                .getReplicateList()
+                .get(replicateIndex)
+                .setNormalCodingStrand(strand);
+
     }
 
     public void updateNormalMinus(int datasetIndex, int replicateIndex, String strand) {
-        configFileBuilder.buildNormalMinus(datasetIndex, replicateIndex, strand);
+        configFile
+                .getGenomeList()
+                .get(datasetIndex)
+                .getReplicateList()
+                .get(replicateIndex)
+                .setNormalTemplateStrand(strand);
+
     }
 
     public void updateWriteGraphs(boolean writeGraphs) {
-        configFileBuilder.buildWriteGraphs(writeGraphs);
+        configFile.setWriteGraphs(writeGraphs);
     }
 
     public void updateStepHeight(double stepHeight) {
-        configFileBuilder.buildStepHeight(stepHeight);
+        configFile.setStepHeight(stepHeight);
     }
 
-    public void updateStepHeightReduction(double shr) {
-        configFileBuilder.buildStepHeightReduction(shr);
+    public void updateStepHeightReduction(double stepHeightReduction) {
+        configFile.setStepHeightReduction(stepHeightReduction);
     }
 
-    public void updateStepFactor(double sf) {
-        configFileBuilder.buildStepFactor(sf);
+    public void updateStepFactor(double stepFactor) {
+        configFile.setStepFactor(stepFactor);
     }
 
-    public void updateStepFactorReduction(double sfr) {
-        configFileBuilder.buildStepFactor(sfr);
+    public void updateStepFactorReduction(double stepFactorReduction) {
+        configFile.setStepFactorReduction(stepFactorReduction);
     }
 
-    public void updateEnrichmentFactor(double ef) {
-        configFileBuilder.buildEnrichmentFactor(ef);
+    public void updateEnrichmentFactor(double enrichmentFactor) {
+        configFile.setEnrichmentFactor(enrichmentFactor);
     }
 
-    public void updateProcessingSiteFactor(double psf) {
-        configFileBuilder.buildProcessingSiteFactor(psf);
+    public void updateProcessingSiteFactor(double processingSiteFactor) {
+        configFile.setProcessingSiteFactor(processingSiteFactor);
     }
 
-    public void updateStepLength(int sl) {
-        configFileBuilder.buildStepLength(sl);
+    public void updateStepLength(int stepLength) {
+        configFile.setStepLength(stepLength);
     }
 
-    public void updateBaseHeight(double bh) {
-        configFileBuilder.buildBaseHeight(bh);
+    public void updateBaseHeight(double baseHeight) {
+        configFile.setBaseHeight(baseHeight);
     }
 
-    public void updateNormalizationPercentile(double normPerc) {
-        configFileBuilder.buildNormalizationPercentile(normPerc);
+    public void updateNormalizationPercentile(double normalizationPercentile) {
+        configFile.setNormalizationPercentile(normalizationPercentile);
     }
 
-    public void updateEnrichmentNormalizationPercentile(double enrNormPerc) {
-        configFileBuilder.buildEnrichmentNormalizationPercentile(enrNormPerc);
+    public void updateEnrichmentNormalizationPercentile(double enrichmentNormalizationPercentile) {
+        configFile.setEnrichmentNormalizationPercentile(enrichmentNormalizationPercentile);
     }
 
-    public void updateClusterMethod(String method) {
-        configFileBuilder.buildClusterMethod(method);
+    public void updateClusterMethod(String clusterMethod) {
+        configFile.setClusterMethod(clusterMethod);
     }
 
-    public void updateClusteringDistance(int distance) {
-        configFileBuilder.buildClusteringDistance(distance);
+    public void updateClusteringDistance(int clusteringDistance) {
+        configFile.setTssClusteringDistance(clusteringDistance);
     }
 
-    public void updateAllowedCrossDatasetShift(int shift) {
-        configFileBuilder.buildAllowedCrossDatasetShift(shift);
+    public void updateAllowedCrossDatasetShift(int allowedCrossDatasetShift) {
+        configFile.setAllowedCrossDatasetShift(allowedCrossDatasetShift);
     }
 
-    public void updateAllowedCrossReplicateShift(int shift) {
-        configFileBuilder.buildAllowedCrossDatasetShift(shift);
+    public void updateAllowedCrossReplicateShift(int allowedCrossReplicateShift) {
+        configFile.setAllowedCrossReplicateShift(allowedCrossReplicateShift);
     }
 
-    public void updateMatchingReplicates(int mr) {
-        configFileBuilder.buildMatchingReplicates(mr);
+    public void updateMatchingReplicates(int matchingReplicates) {
+        configFile.setMatchingReplicates(matchingReplicates);
     }
 
     public void updateUtrLength(int utrLength) {
-        configFileBuilder.buildUtrLength(utrLength);
+        configFile.setUtrLength(utrLength);
     }
 
-    public void updateAntisenseUtrLength(int aul) {
-        configFileBuilder.buildAntisenseUtrLength(aul);
+    public void updateAntisenseUtrLength(int antisenseUtrLength) {
+        configFile.setAntisenseUtrLength(antisenseUtrLength);
     }
 
     public File produceConfigFile() {
-        ConfigFile configFile = configFileBuilder.createConfigFile();
         File file = new File("/tmp/tssconfiguration.conf");
         return configFile.writeConfigFile(file);
 
+    }
+
+    public void applyPresetParameters() {
+        switch (preset) {
+
+            case VERY_SPECIFIC:
+                view.getParametersPanel().getStepHeight().setValue(1.);
+                view.getParametersPanel().getStepHeightReduction().setValue(.5);
+                view.getParametersPanel().getStepFactor().setValue(2.);
+                view.getParametersPanel().getStepFactorReduction().setValue(.5);
+                view.getParametersPanel().getEnrichmentFactor().setValue(3.);
+                view.getParametersPanel().getProcessingSiteFactor().setValue(1.);
+                view.getParametersPanel().getStepLength().setValue(0.);
+                view.getParametersPanel().getBaseHeight().setValue(0.);
+                break;
+            case MORE_SPECIFIC:
+                view.getParametersPanel().getStepHeight().setValue(0.5);
+                view.getParametersPanel().getStepHeightReduction().setValue(0.2);
+                view.getParametersPanel().getStepFactor().setValue(2.);
+                view.getParametersPanel().getStepFactorReduction().setValue(0.5);
+                view.getParametersPanel().getEnrichmentFactor().setValue(2.);
+                view.getParametersPanel().getProcessingSiteFactor().setValue(1.2);
+                view.getParametersPanel().getStepLength().setValue(0.);
+                view.getParametersPanel().getBaseHeight().setValue(0.);
+                break;
+            case DEFAULT:
+                view.getParametersPanel().getStepHeight().setValue(.3);
+                view.getParametersPanel().getStepHeightReduction().setValue(.2);
+                view.getParametersPanel().getStepFactor().setValue(2.);
+                view.getParametersPanel().getStepFactorReduction().setValue(.5);
+                view.getParametersPanel().getEnrichmentFactor().setValue(2.);
+                view.getParametersPanel().getProcessingSiteFactor().setValue(1.5);
+                view.getParametersPanel().getStepLength().setValue(0.);
+                view.getParametersPanel().getBaseHeight().setValue(0.);
+                break;
+            case MORE_SENSITIVE:
+                view.getParametersPanel().getStepHeight().setValue(0.2);
+                view.getParametersPanel().getStepHeightReduction().setValue(0.15);
+                view.getParametersPanel().getStepFactor().setValue(1.5);
+                view.getParametersPanel().getStepFactorReduction().setValue(0.5);
+                view.getParametersPanel().getEnrichmentFactor().setValue(1.5);
+                view.getParametersPanel().getProcessingSiteFactor().setValue(2.);
+                view.getParametersPanel().getStepLength().setValue(0.);
+                view.getParametersPanel().getBaseHeight().setValue(0.);
+                break;
+            case VERY_SENSITIVE:
+                view.getParametersPanel().getStepHeight().setValue(0.1);
+                view.getParametersPanel().getStepHeightReduction().setValue(0.09);
+                view.getParametersPanel().getStepFactor().setValue(1.);
+                view.getParametersPanel().getStepFactorReduction().setValue(0.);
+                view.getParametersPanel().getEnrichmentFactor().setValue(1.);
+                view.getParametersPanel().getProcessingSiteFactor().setValue(3.);
+                view.getParametersPanel().getStepLength().setValue(0.);
+                view.getParametersPanel().getBaseHeight().setValue(0.);
+                break;
+        }
     }
 
     public void setView(AccordionLayoutMain view) {
         this.view = view;
     }
 
-    public ConfigFileBuilder getConfigFileBuilder() {
-        return configFileBuilder;
+
+    public Preset getPreset() {
+        return preset;
     }
 
-    public void setConfigFileBuilder(ConfigFileBuilder configFileBuilder) {
-        this.configFileBuilder = configFileBuilder;
+    public void setPreset(Preset preset) {
+        this.preset = preset;
     }
-
 
     //These three methods are only for temporary use. They are needed because as of now,
     //the config file stores a genome name, fasta and gff for every dataset, regardless of the workflow variant
     //However, in the condition variant there's only one of these
     // --> this needs to be changed in the config logic itself
     public void updateAllGenomeFastas(String name) {
-        for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
-            configFileBuilder.buildGenomeFasta(i, name);
+        for (int i = 0; i < configFile.getNumberOfDatasets(); i++) {
+            updateGenomeFasta(i, name);
         }
 
     }
 
     public void updateAllGenomeAnnotations(String annotation) {
-        for (int i = 0; i < configFileBuilder.createConfigFile().getNumberOfDatasets(); i++) {
-            configFileBuilder.buildGenomeAnnotation(i, annotation);
+        for (int i = 0; i < configFile.getNumberOfDatasets(); i++) {
+            updateGenomeAnnotation(i, annotation);
         }
 
     }

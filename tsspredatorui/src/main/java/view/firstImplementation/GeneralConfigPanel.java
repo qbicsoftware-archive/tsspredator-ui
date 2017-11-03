@@ -6,7 +6,7 @@ import presenter.Presenter;
 import view.GeneralConfigView;
 
 /**
- * This component has a panel where the user chooses a name for his project, selects the type of study,
+ * This component has a panel where the user chooses a nameField for his project, selects the type of study,
  * and uploads an alignment file (if he selected "Strain or species")
  *
  * @author jmueller
@@ -58,5 +58,17 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
         projectName.addValueChangeListener(vce -> presenter.updateProjectName(vce.getValue()));
         projectTypeButtonGroup.addValueChangeListener(vce -> presenter.updateMode(vce.getValue().equals("Compare Conditions")));
         alignmentFileUpload.addValueChangeListener(vce -> presenter.updateAlignmentFile(vce.getValue()));
+    }
+
+    public TextField getProjectName() {
+        return projectName;
+    }
+
+    public TextField getAlignmentFileUpload() {
+        return alignmentFileUpload;
+    }
+
+    public RadioButtonGroup<String> getProjectTypeButtonGroup() {
+        return projectTypeButtonGroup;
     }
 }

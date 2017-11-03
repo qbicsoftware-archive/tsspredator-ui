@@ -263,4 +263,44 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
     public Slider getBaseHeight() {
         return baseHeight;
     }
+
+    public Slider getNormalizationPercentile() {
+        return normalizationPercentile;
+    }
+
+    public Slider getEnrichedNormalizationPercentile() {
+        return enrichedNormalizationPercentile;
+    }
+
+    public ComboBox<String> getClusterMethod() {
+        return clusterMethod;
+    }
+
+    public Slider getClusteringDistance() {
+        return clusteringDistance;
+    }
+
+    public Slider getCrossDatasetShift() {
+        return crossDatasetShift;
+    }
+
+    public Slider getCrossReplicateShift() {
+        return crossReplicateShift;
+    }
+
+    public ComboBox<Integer> getMatchingReplicates() {
+        return matchingReplicates;
+    }
+
+    public Slider getUtrLength() {
+        return utrLength;
+    }
+
+    public Slider getAntisenseUtrLength() {
+        return antisenseUtrLength;
+    }
+
+    public CheckBox getWriteGraphs() {
+        return writeGraphs;
+    }
 }

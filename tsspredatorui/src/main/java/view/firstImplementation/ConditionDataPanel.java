@@ -22,29 +22,25 @@ public class ConditionDataPanel extends DataPanel {
                 fastaField, gffField, setNumbers, datasetAccordion);
     }
 
-    Component createAccordionTab(int index) {
-        VerticalLayout tab = new VerticalLayout();
-        TextField nameField = new TextField("Name");
-
-        TabSheet replicatesSheet = new TabSheet();
-        for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
-            Component replicateTab = new ReplicateTab(index, replicateIndex);
-            replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
-        }
-        tab.addComponents(nameField, new Label("RNA-seq graph files:"), replicatesSheet);
-        nameField.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
-        return tab;
-
-
-    }
-
     class ConditionTab extends DatasetTab {
-
+        TextField nameField;
 
         public ConditionTab(int index) {
             super(index);
+            nameField = new TextField("Name");
+            this.tab.addComponents(nameField, new Label("RNA-seq graph files:"), replicatesSheet);
+            nameField.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
+
 
         }
+
+        public TextField getNameField() {
+            return nameField;
+        }
+    }
+
+    public ConditionTab createConditionTab(int index){
+        return new ConditionTab(index);
     }
 
     public TextField getFastaField() {

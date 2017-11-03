@@ -1,9 +1,13 @@
 package presenter;
 
+import com.vaadin.data.BeanValidationBinder;
 import model.*;
 import view.AccordionLayoutMain;
 
+import javax.management.Notification;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +17,7 @@ public class Presenter {
     private ConfigFile configFile;
     private boolean isParamsCustom;
     private AccordionLayoutMain view;
+    private BeanValidationBinder<ConfigFile> beanBinder;
 
     public enum Preset {
         VERY_SPECIFIC, MORE_SPECIFIC, DEFAULT, MORE_SENSITIVE, VERY_SENSITIVE
@@ -25,15 +30,47 @@ public class Presenter {
         isParamsCustom = false; //Preset parameters by default
         configFile = new ConfigFile();
         configFile.setGenomeList(new ArrayList<>());
+        beanBinder = new BeanValidationBinder<>(ConfigFile.class);
+        beanBinder.setBean(configFile);
+        initBindings();
     }
 
     /**
      * Initializes the fields of the view
      * TODO: Move stuff from the view here so the view contains less logic
      */
-    public void initFields(){
+    public void initFields() {
         view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
         view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
+
+    }
+
+    public void initBindings(){
+        beanBinder.bind(view.getGeneralConfigPanel().getProjectName(), "projectName");
+        //TODO: beanBinder.bind(numberOfDatasets);
+        //TODO: beanBinder.bind(numberOfReplicates);
+        //TODO: beanBinder.bind(mode); confgFile is easy, but how do I update the view?
+        beanBinder.bind(view.getGeneralConfigPanel().getAlignmentFileUpload(), "alignmentFile");
+        //TODO: DatasetName, Fasta, Annotation: Ambiguous!
+        //TODO: Alignment id, annotation, replicateid, wiggle files
+        beanBinder.bind(view.getParametersPanel().getWriteGraphs(), "writeGraphs");
+        beanBinder.bind(view.getParametersPanel().getStepHeight(), "stepHeight");
+        beanBinder.bind(view.getParametersPanel().getStepHeightReduction(), "stepHeightReduction");
+        beanBinder.bind(view.getParametersPanel().getStepFactor(), "stepFactor");
+        beanBinder.bind(view.getParametersPanel().getStepFactorReduction(), "stepFactorReduction");
+        beanBinder.bind(view.getParametersPanel().getEnrichmentFactor(), "enrichmentFactor");
+        beanBinder.bind(view.getParametersPanel().getProcessingSiteFactor(), "processingSiteFactor");
+        beanBinder.bind(view.getParametersPanel().getStepLength(), "stepLength");
+        beanBinder.bind(view.getParametersPanel().getBaseHeight(), "baseHeight");
+        beanBinder.bind(view.getParametersPanel().getNormalizationPercentile(), "normalizationPercentile");
+        beanBinder.bind(view.getParametersPanel().getEnrichedNormalizationPercentile(), "enrichedNormalizationPercentile");
+        beanBinder.bind(view.getParametersPanel().getClusterMethod(), "clusterMethod");
+        beanBinder.bind(view.getParametersPanel().getClusteringDistance(), "clusteringDistance");
+        beanBinder.bind(view.getParametersPanel().getCrossDatasetShift(), "allowedCrossDatasetShift");
+        beanBinder.bind(view.getParametersPanel().getCrossReplicateShift(), "allowedCrossReplicateShift");
+        beanBinder.bind(view.getParametersPanel().getMatchingReplicates(), "matchingReplicates");
+        beanBinder.bind(view.getParametersPanel().getUtrLength(), "utrLength");
+        beanBinder.bind(view.getParametersPanel().getAntisenseUtrLength(), "antisenseUtrLength");
 
     }
 
@@ -255,7 +292,15 @@ public class Presenter {
 
     public File produceConfigFile() {
         File file = new File("/tmp/tssconfiguration.conf");
-        return configFile.writeConfigFile(file);
+        String configText = configFile.toString();
+        try {
+            FileWriter writer = new FileWriter(file);
+            writer.write(configText);
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
 
     }
 

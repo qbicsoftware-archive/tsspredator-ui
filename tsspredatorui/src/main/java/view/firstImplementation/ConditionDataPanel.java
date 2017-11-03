@@ -4,7 +4,7 @@ import com.vaadin.ui.*;
 import presenter.Presenter;
 
 public class ConditionDataPanel extends DataPanel {
-    TextField fastaField, gffField, name;
+    TextField fastaField, gffField;
 
 
     public ConditionDataPanel(Presenter presenter) {
@@ -22,21 +22,36 @@ public class ConditionDataPanel extends DataPanel {
                 fastaField, gffField, setNumbers, datasetAccordion);
     }
 
-    @Override
     Component createAccordionTab(int index) {
         VerticalLayout tab = new VerticalLayout();
-        name = new TextField("Name");
+        TextField nameField = new TextField("Name");
 
         TabSheet replicatesSheet = new TabSheet();
         for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
-            HorizontalLayout replicateTab = createReplicateTab(index, replicateIndex);
+            Component replicateTab = new ReplicateTab(index, replicateIndex);
             replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
         }
-        tab.addComponents(name, new Label("RNA-seq graph files:"), replicatesSheet);
-        name.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
+        tab.addComponents(nameField, new Label("RNA-seq graph files:"), replicatesSheet);
+        nameField.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
         return tab;
 
 
     }
 
+    class ConditionTab extends DatasetTab {
+
+
+        public ConditionTab(int index) {
+            super(index);
+
+        }
+    }
+
+    public TextField getFastaField() {
+        return fastaField;
+    }
+
+    public TextField getGffField() {
+        return gffField;
+    }
 }

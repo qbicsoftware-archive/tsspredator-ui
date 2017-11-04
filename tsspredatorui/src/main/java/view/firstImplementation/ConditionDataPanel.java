@@ -34,7 +34,8 @@ public class ConditionDataPanel extends DataPanel {
     }
 
     public ConditionTab createConditionTab(int index) {
-        return new ConditionTab(index);
+        ConditionTab tab = new ConditionTab(index);
+        return tab;
     }
 
     public TextField getFastaField() {

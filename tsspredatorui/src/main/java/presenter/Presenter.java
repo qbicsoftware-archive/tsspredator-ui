@@ -5,6 +5,7 @@ import com.vaadin.data.ValueProvider;
 import com.vaadin.server.Setter;
 import model.*;
 import view.AccordionLayoutMain;
+import view.firstImplementation.ConditionDataPanel;
 import view.firstImplementation.DataPanel;
 import view.firstImplementation.GenomeDataPanel;
 
@@ -51,7 +52,6 @@ public class Presenter {
         configFileBinder.bind(view.getGeneralConfigPanel().getProjectName(),
                 ConfigFile::getProjectName,
                 ConfigFile::setProjectName);
-        //TODO: Only works for genome because I can't bind to two fields - workaround needed!
         configFileBinder.bind(view.getGenomeDataPanel().getNumberOfDatasetsBox(),
                 (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
                 (Setter<ConfigFile, Integer>) (configFile, number) -> {
@@ -64,9 +64,21 @@ public class Presenter {
                         removeDatasets(-delta);
 
                 });
-//        //TODO: See above
+        configFileBinder.bind(view.getConditionDataPanel().getNumberOfDatasetsBox(),
+                (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
+                (Setter<ConfigFile, Integer>) (configFile, number) -> {
+                    int delta = number - configFile.getNumberOfDatasets();
+                    configFile.setNumberOfDatasets(number);
+                    //Add or remove datasets so they match the given number
+                    if (delta > 0)
+                        addDatasets(delta);
+                    else
+                        removeDatasets(-delta);
+
+                });
+
         configFileBinder.bind(view.getGenomeDataPanel().getNumberOfReplicatesBox(),
-                (ValueProvider<ConfigFile, Integer>)   configFile1 -> configFile1.getNumberOfReplicates(),
+                (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfReplicates(),
                 (Setter<ConfigFile, Integer>) (configFile, number) -> {
                     int delta = number - configFile.getNumberOfReplicates();
                     configFile.setNumberOfReplicates(number);
@@ -76,6 +88,19 @@ public class Presenter {
                     else
                         removeReplicates(-delta);
                 });
+
+        configFileBinder.bind(view.getConditionDataPanel().getNumberOfReplicatesBox(),
+                (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfReplicates(),
+                (Setter<ConfigFile, Integer>) (configFile, number) -> {
+                    int delta = number - configFile.getNumberOfReplicates();
+                    configFile.setNumberOfReplicates(number);
+                    //Add or remove replicates so they match the given number
+                    if (delta > 0)
+                        addReplicates(delta);
+                    else
+                        removeReplicates(-delta);
+                });
+
         configFileBinder.bind(view.getGeneralConfigPanel().getProjectTypeButtonGroup(),
                 new ValueProvider<ConfigFile, String>() {
                     @Override
@@ -150,9 +175,17 @@ public class Presenter {
                 .withConverter(Double::intValue, Integer::doubleValue)
                 .bind(ConfigFile::getAntisenseUtrLength, ConfigFile::setAntisenseUtrLength);
 
+        //Bindings for conditionDataPanel exclusively
+        configFileBinder.bind(view.getConditionDataPanel().getFastaField(),
+                ConfigFile::getConditionFasta,
+                ConfigFile::setConditionFasta);
+        configFileBinder.bind(view.getConditionDataPanel().getGffField(),
+                ConfigFile::getConditionGFF,
+                ConfigFile::setConditionGFF);
+
     }
 
-    public void setInitialConfigParameters(){
+    public void setInitialConfigParameters() {
         configFile.setNormalizationPercentile(0.9);
         configFile.setEnrichmentNormalizationPercentile(0.5);
         configFile.setClusterMethod("HIGHEST");
@@ -164,70 +197,90 @@ public class Presenter {
         configFile.setAntisenseUtrLength(100);
     }
 
-    //TODO: Yet another method that so far only work for GenomeDataPanel!
     public void initDatasetBindings(int index) {
-        DataPanel.DatasetTab tab = view.getGenomeDataPanel().getDatasetTab(index);
-        GenomeDataPanel.GenomeTab genomeTab = (GenomeDataPanel.GenomeTab) tab;
-        configFileBinder.bind(genomeTab.getNameField(),
-                new ValueProvider<ConfigFile, String>() {
-                    @Override
-                    public String apply(ConfigFile configFile) {
-                        return configFile.getGenomeList().get(index).getName();
-                    }
-                },
-                new Setter<ConfigFile, String>() {
-                    @Override
-                    public void accept(ConfigFile configFile, String name) {
-                        configFile.getGenomeList().get(index).setName(name);
-                    }
-                });
-        configFileBinder.bind(genomeTab.getFastaField(),
-                new ValueProvider<ConfigFile, String>() {
-                    @Override
-                    public String apply(ConfigFile configFile) {
-                        return configFile.getGenomeList().get(index).getFasta();
-                    }
-                },
-                new Setter<ConfigFile, String>() {
-                    @Override
-                    public void accept(ConfigFile configFile, String fasta) {
-                        configFile.getGenomeList().get(index).setFasta(fasta);
-                    }
-                });
-        configFileBinder.bind(genomeTab.getIdField(),
-                new ValueProvider<ConfigFile, String>() {
-                    @Override
-                    public String apply(ConfigFile configFile) {
-                        return configFile.getGenomeList().get(index).getAlignmentID();
-                    }
-                },
-                new Setter<ConfigFile, String>() {
-                    @Override
-                    public void accept(ConfigFile configFile, String id) {
-                        configFile.getGenomeList().get(index).setAlignmentID(id);
-                    }
-                });
-        configFileBinder.bind(genomeTab.getGffField(),
-                new ValueProvider<ConfigFile, String>() {
-                    @Override
-                    public String apply(ConfigFile configFile) {
-                        return configFile.getGenomeList().get(index).getGff();
-                    }
-                },
-                new Setter<ConfigFile, String>() {
-                    @Override
-                    public void accept(ConfigFile configFile, String annotation) {
-                        configFile.getGenomeList().get(index).setGff(annotation);
-                    }
-                });
+        if (configFile.isModeConditions()) {
+            ConditionDataPanel.ConditionTab conditionTab = (ConditionDataPanel.ConditionTab) view.getConditionDataPanel().getDatasetTab(index);
+            configFileBinder.bind(conditionTab.getNameField(),
+                    new ValueProvider<ConfigFile, String>() {
+                        @Override
+                        public String apply(ConfigFile configFile) {
+                            return configFile.getGenomeList().get(index).getName();
+                        }
+                    },
+                    new Setter<ConfigFile, String>() {
+                        @Override
+                        public void accept(ConfigFile configFile, String name) {
+                            configFile.getGenomeList().get(index).setName(name);
+                        }
+                    });
+        } else {
+            GenomeDataPanel.GenomeTab genomeTab = (GenomeDataPanel.GenomeTab) view.getGenomeDataPanel().getDatasetTab(index);
+            configFileBinder.bind(genomeTab.getNameField(),
+                    new ValueProvider<ConfigFile, String>() {
+                        @Override
+                        public String apply(ConfigFile configFile) {
+                            return configFile.getGenomeList().get(index).getName();
+                        }
+                    },
+                    new Setter<ConfigFile, String>() {
+                        @Override
+                        public void accept(ConfigFile configFile, String name) {
+                            configFile.getGenomeList().get(index).setName(name);
+                        }
+                    });
+            configFileBinder.bind(genomeTab.getFastaField(),
+                    new ValueProvider<ConfigFile, String>() {
+                        @Override
+                        public String apply(ConfigFile configFile) {
+                            return configFile.getGenomeList().get(index).getFasta();
+                        }
+                    },
+                    new Setter<ConfigFile, String>() {
+                        @Override
+                        public void accept(ConfigFile configFile, String fasta) {
+                            configFile.getGenomeList().get(index).setFasta(fasta);
+                        }
+                    });
+            configFileBinder.bind(genomeTab.getIdField(),
+                    new ValueProvider<ConfigFile, String>() {
+                        @Override
+                        public String apply(ConfigFile configFile) {
+                            return configFile.getGenomeList().get(index).getAlignmentID();
+                        }
+                    },
+                    new Setter<ConfigFile, String>() {
+                        @Override
+                        public void accept(ConfigFile configFile, String id) {
+                            configFile.getGenomeList().get(index).setAlignmentID(id);
+                        }
+                    });
+            configFileBinder.bind(genomeTab.getGffField(),
+                    new ValueProvider<ConfigFile, String>() {
+                        @Override
+                        public String apply(ConfigFile configFile) {
+                            return configFile.getGenomeList().get(index).getGff();
+                        }
+                    },
+                    new Setter<ConfigFile, String>() {
+                        @Override
+                        public void accept(ConfigFile configFile, String annotation) {
+                            configFile.getGenomeList().get(index).setGff(annotation);
+                        }
+                    });
+
+        }
+
 
     }
 
 
-
-    //TODO: Yet another method that so far only work for GenomeDataPanel!
     public void initReplicateBindings(int datasetIndex, int replicateIndex) {
-        DataPanel.ReplicateTab replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
+        DataPanel.ReplicateTab replicateTab;
+        if (configFile.isModeConditions()) {
+            replicateTab = view.getConditionDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
+        } else {
+            replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
+        }
         configFileBinder.bind(replicateTab.getEplus(),
                 new ValueProvider<ConfigFile, String>() {
                     @Override
@@ -291,6 +344,10 @@ public class Presenter {
     public void addDatasets(int datasetsToAdd) {
         for (int i = 0; i < datasetsToAdd; i++) {
             Genome currentGenome = new Genome();
+            //IDs of conditions are set automatically
+            if (configFile.isModeConditions()) {
+                currentGenome.setAlignmentID("" + (configFile.getNumberOfDatasets() - datasetsToAdd + i));
+            }
             //Add as many replicates as the other Genomes have
             for (int j = 0; j < configFile.getNumberOfReplicates(); j++) {
                 currentGenome.getReplicateList().add(new Replicate());
@@ -307,7 +364,6 @@ public class Presenter {
             //Remove tail until desired size is reached
             configFile.getGenomeList().remove(configFile.getGenomeList().size() - 1);
     }
-
 
 
     public void addReplicates(int replicatesToAdd) {
@@ -437,7 +493,7 @@ public class Presenter {
 
     public void updateAllGenomeAnnotations(String annotation) {
         for (int i = 0; i < configFile.getNumberOfDatasets(); i++) {
-           // updateGenomeGFF(i, annotation);
+            // updateGenomeGFF(i, annotation);
         }
 
     }

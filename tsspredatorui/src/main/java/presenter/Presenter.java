@@ -1,13 +1,15 @@
 package presenter;
 
-import com.vaadin.data.BeanValidationBinder;
+import com.vaadin.data.Binder;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.server.Setter;
 import model.*;
 import view.AccordionLayoutMain;
+import view.firstImplementation.DataPanel;
+import view.firstImplementation.GenomeDataPanel;
 
-import javax.management.Notification;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -17,7 +19,7 @@ public class Presenter {
     private ConfigFile configFile;
     private boolean isParamsCustom;
     private AccordionLayoutMain view;
-    private BeanValidationBinder<ConfigFile> beanBinder;
+    private Binder<ConfigFile> configFileBinder;
 
     public enum Preset {
         VERY_SPECIFIC, MORE_SPECIFIC, DEFAULT, MORE_SENSITIVE, VERY_SENSITIVE
@@ -30,9 +32,9 @@ public class Presenter {
         isParamsCustom = false; //Preset parameters by default
         configFile = new ConfigFile();
         configFile.setGenomeList(new ArrayList<>());
-        beanBinder = new BeanValidationBinder<>(ConfigFile.class);
-        beanBinder.setBean(configFile);
-        initBindings();
+        setInitialConfigParameters();
+        configFileBinder = new Binder<>();
+        configFileBinder.setBean(configFile);
     }
 
     /**
@@ -45,52 +47,246 @@ public class Presenter {
 
     }
 
-    public void initBindings(){
-        beanBinder.bind(view.getGeneralConfigPanel().getProjectName(), "projectName");
-        //TODO: beanBinder.bind(numberOfDatasets);
-        //TODO: beanBinder.bind(numberOfReplicates);
-        //TODO: beanBinder.bind(mode); confgFile is easy, but how do I update the view?
-        beanBinder.bind(view.getGeneralConfigPanel().getAlignmentFileUpload(), "alignmentFile");
-        //TODO: DatasetName, Fasta, Annotation: Ambiguous!
-        //TODO: Alignment id, annotation, replicateid, wiggle files
-        beanBinder.bind(view.getParametersPanel().getWriteGraphs(), "writeGraphs");
-        beanBinder.bind(view.getParametersPanel().getStepHeight(), "stepHeight");
-        beanBinder.bind(view.getParametersPanel().getStepHeightReduction(), "stepHeightReduction");
-        beanBinder.bind(view.getParametersPanel().getStepFactor(), "stepFactor");
-        beanBinder.bind(view.getParametersPanel().getStepFactorReduction(), "stepFactorReduction");
-        beanBinder.bind(view.getParametersPanel().getEnrichmentFactor(), "enrichmentFactor");
-        beanBinder.bind(view.getParametersPanel().getProcessingSiteFactor(), "processingSiteFactor");
-        beanBinder.bind(view.getParametersPanel().getStepLength(), "stepLength");
-        beanBinder.bind(view.getParametersPanel().getBaseHeight(), "baseHeight");
-        beanBinder.bind(view.getParametersPanel().getNormalizationPercentile(), "normalizationPercentile");
-        beanBinder.bind(view.getParametersPanel().getEnrichedNormalizationPercentile(), "enrichedNormalizationPercentile");
-        beanBinder.bind(view.getParametersPanel().getClusterMethod(), "clusterMethod");
-        beanBinder.bind(view.getParametersPanel().getClusteringDistance(), "clusteringDistance");
-        beanBinder.bind(view.getParametersPanel().getCrossDatasetShift(), "allowedCrossDatasetShift");
-        beanBinder.bind(view.getParametersPanel().getCrossReplicateShift(), "allowedCrossReplicateShift");
-        beanBinder.bind(view.getParametersPanel().getMatchingReplicates(), "matchingReplicates");
-        beanBinder.bind(view.getParametersPanel().getUtrLength(), "utrLength");
-        beanBinder.bind(view.getParametersPanel().getAntisenseUtrLength(), "antisenseUtrLength");
+    public void initBindings() {
+        configFileBinder.bind(view.getGeneralConfigPanel().getProjectName(),
+                ConfigFile::getProjectName,
+                ConfigFile::setProjectName);
+        //TODO: Only works for genome because I can't bind to two fields - workaround needed!
+        configFileBinder.bind(view.getGenomeDataPanel().getNumberOfDatasetsBox(),
+                (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
+                (Setter<ConfigFile, Integer>) (configFile, number) -> {
+                    int delta = number - configFile.getNumberOfDatasets();
+                    configFile.setNumberOfDatasets(number);
+                    //Add or remove datasets so they match the given number
+                    if (delta > 0)
+                        addDatasets(delta);
+                    else
+                        removeDatasets(-delta);
+
+                });
+//        //TODO: See above
+        configFileBinder.bind(view.getGenomeDataPanel().getNumberOfReplicatesBox(),
+                (ValueProvider<ConfigFile, Integer>)   configFile1 -> configFile1.getNumberOfReplicates(),
+                (Setter<ConfigFile, Integer>) (configFile, number) -> {
+                    int delta = number - configFile.getNumberOfReplicates();
+                    configFile.setNumberOfReplicates(number);
+                    //Add or remove replicates so they match the given number
+                    if (delta > 0)
+                        addReplicates(delta);
+                    else
+                        removeReplicates(-delta);
+                });
+        configFileBinder.bind(view.getGeneralConfigPanel().getProjectTypeButtonGroup(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        //TODO: Replace hard-coded strings by global variables (and also replace in GeneralConfigPanel!)
+                        return configFile.isModeConditions() ? "Compare Conditions" : "Compare Strain/Species";
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String s) {
+                        view.updateDataPanelMode(s.equals("Compare Conditions"));
+                        configFile.setModeConditions(s.equals("Compare Conditions"));
+                    }
+                }
+        );
+        configFileBinder.bind(view.getGeneralConfigPanel().getAlignmentFileUpload(),
+                ConfigFile::getAlignmentFile,
+                ConfigFile::setAlignmentFile);
+        configFileBinder.bind(view.getParametersPanel().getWriteGraphs(),
+                ConfigFile::isWriteGraphs,
+                ConfigFile::setWriteGraphs);
+        configFileBinder.bind(view.getParametersPanel().getStepHeight(),
+                ConfigFile::getStepHeight,
+                ConfigFile::setStepHeight);
+        configFileBinder.bind(view.getParametersPanel().getStepHeightReduction(),
+                ConfigFile::getStepHeightReduction,
+                ConfigFile::setStepHeightReduction);
+        configFileBinder.bind(view.getParametersPanel().getStepFactor(),
+                ConfigFile::getStepFactor,
+                ConfigFile::setStepFactor);
+        configFileBinder.bind(view.getParametersPanel().getStepFactorReduction(),
+                ConfigFile::getStepFactorReduction,
+                ConfigFile::setStepFactorReduction);
+        configFileBinder.bind(view.getParametersPanel().getEnrichmentFactor(),
+                ConfigFile::getEnrichmentFactor,
+                ConfigFile::setEnrichmentFactor);
+        configFileBinder.bind(view.getParametersPanel().getProcessingSiteFactor(),
+                ConfigFile::getProcessingSiteFactor,
+                ConfigFile::setProcessingSiteFactor);
+        configFileBinder.forField(view.getParametersPanel().getStepLength())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getStepLength, ConfigFile::setStepLength);
+        configFileBinder.bind(view.getParametersPanel().getBaseHeight(),
+                ConfigFile::getBaseHeight,
+                ConfigFile::setBaseHeight);
+        configFileBinder.bind(view.getParametersPanel().getNormalizationPercentile(),
+                ConfigFile::getNormalizationPercentile,
+                ConfigFile::setNormalizationPercentile);
+        configFileBinder.bind(view.getParametersPanel().getEnrichedNormalizationPercentile(),
+                ConfigFile::getEnrichmentNormalizationPercentile,
+                ConfigFile::setEnrichmentNormalizationPercentile);
+        configFileBinder.bind(view.getParametersPanel().getClusterMethod(),
+                ConfigFile::getClusterMethod,
+                ConfigFile::setClusterMethod);
+        configFileBinder.forField(view.getParametersPanel().getClusteringDistance())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getTssClusteringDistance, ConfigFile::setTssClusteringDistance);
+        configFileBinder.forField(view.getParametersPanel().getCrossDatasetShift())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getAllowedCrossDatasetShift, ConfigFile::setAllowedCrossDatasetShift);
+        configFileBinder.forField(view.getParametersPanel().getCrossReplicateShift())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getAllowedCrossReplicateShift, ConfigFile::setAllowedCrossReplicateShift);
+        configFileBinder.bind(view.getParametersPanel().getMatchingReplicates(),
+                ConfigFile::getMatchingReplicates,
+                ConfigFile::setMatchingReplicates);
+        configFileBinder.forField(view.getParametersPanel().getUtrLength())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getUtrLength, ConfigFile::setUtrLength);
+        configFileBinder.forField(view.getParametersPanel().getAntisenseUtrLength())
+                .withConverter(Double::intValue, Integer::doubleValue)
+                .bind(ConfigFile::getAntisenseUtrLength, ConfigFile::setAntisenseUtrLength);
 
     }
+
+    public void setInitialConfigParameters(){
+        configFile.setNormalizationPercentile(0.9);
+        configFile.setEnrichmentNormalizationPercentile(0.5);
+        configFile.setClusterMethod("HIGHEST");
+        configFile.setTssClusteringDistance(3);
+        configFile.setAllowedCrossDatasetShift(1);
+        configFile.setAllowedCrossReplicateShift(1);
+        configFile.setMatchingReplicates(1);
+        configFile.setUtrLength(300);
+        configFile.setAntisenseUtrLength(100);
+    }
+
+    //TODO: Yet another method that so far only work for GenomeDataPanel!
+    public void initDatasetBindings(int index) {
+        DataPanel.DatasetTab tab = view.getGenomeDataPanel().getDatasetTab(index);
+        GenomeDataPanel.GenomeTab genomeTab = (GenomeDataPanel.GenomeTab) tab;
+        configFileBinder.bind(genomeTab.getNameField(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(index).getName();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String name) {
+                        configFile.getGenomeList().get(index).setName(name);
+                    }
+                });
+        configFileBinder.bind(genomeTab.getFastaField(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(index).getFasta();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String fasta) {
+                        configFile.getGenomeList().get(index).setFasta(fasta);
+                    }
+                });
+        configFileBinder.bind(genomeTab.getIdField(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(index).getAlignmentID();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String id) {
+                        configFile.getGenomeList().get(index).setAlignmentID(id);
+                    }
+                });
+        configFileBinder.bind(genomeTab.getGffField(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(index).getGff();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String annotation) {
+                        configFile.getGenomeList().get(index).setGff(annotation);
+                    }
+                });
+
+    }
+
+
+
+    //TODO: Yet another method that so far only work for GenomeDataPanel!
+    public void initReplicateBindings(int datasetIndex, int replicateIndex) {
+        DataPanel.ReplicateTab replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
+        configFileBinder.bind(replicateTab.getEplus(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getEnrichedCodingStrand();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String strand) {
+                        configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedCodingStrand(strand);
+                    }
+                });
+        configFileBinder.bind(replicateTab.getEminus(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getEnrichedTemplateStrand();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String strand) {
+                        configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedTemplateStrand(strand);
+                    }
+                });
+        configFileBinder.bind(replicateTab.getNplus(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getNormalCodingStrand();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String strand) {
+                        configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setNormalCodingStrand(strand);
+                    }
+                });
+        configFileBinder.bind(replicateTab.getNminus(),
+                new ValueProvider<ConfigFile, String>() {
+                    @Override
+                    public String apply(ConfigFile configFile) {
+                        return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getNormalTemplateStrand();
+                    }
+                },
+                new Setter<ConfigFile, String>() {
+                    @Override
+                    public void accept(ConfigFile configFile, String strand) {
+                        configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setNormalTemplateStrand(strand);
+                    }
+                });
+    }
+
 
     public void setParamsCustom(boolean paramsCustom) {
         isParamsCustom = paramsCustom;
     }
 
-    public void updateProjectName(String projectName) {
-        configFile.setProjectName(projectName);
-    }
-
-    public void updateNumberOfDatasets(int number) {
-        int delta = number - configFile.getNumberOfDatasets();
-        configFile.setNumberOfDatasets(number);
-        //Add or remove datasets so they match the given number
-        if (delta > 0)
-            addDatasets(delta);
-        else
-            removeDatasets(-delta);
-    }
 
     public void addDatasets(int datasetsToAdd) {
         for (int i = 0; i < datasetsToAdd; i++) {
@@ -112,15 +308,6 @@ public class Presenter {
             configFile.getGenomeList().remove(configFile.getGenomeList().size() - 1);
     }
 
-    public void updateNumberOfReplicates(int number) {
-        int delta = number - configFile.getNumberOfReplicates();
-        configFile.setNumberOfReplicates(number);
-        //Add or remove replicates so they match the given number
-        if (delta > 0)
-            addReplicates(delta);
-        else
-            removeReplicates(-delta);
-    }
 
 
     public void addReplicates(int replicatesToAdd) {
@@ -143,31 +330,6 @@ public class Presenter {
         }
     }
 
-    public void updateMode(Boolean isConditions) {
-        configFile.setModeConditions(isConditions);
-        view.updateDataPanelMode(isConditions);
-    }
-
-    public void updateAlignmentFile(String alignmentFile) {
-        configFile.setAlignmentFile(alignmentFile);
-    }
-
-    public void updateDatasetName(int index, String name) {
-        configFile.getGenomeList().get(index).setName(name);
-    }
-
-    public void updateGenomeFasta(int index, String fasta) {
-        configFile.getGenomeList().get(index).setFasta(fasta);
-    }
-
-    public void updateGenomeAlignmentID(int index, String id) {
-        configFile.getGenomeList().get(index).setAlignmentID(id);
-    }
-
-    public void updateGenomeAnnotation(int index, String annotation) {
-        configFile.getGenomeList().get(index).setGff(annotation);
-    }
-
     public void updateReplicateID(int datasetIndex, int replicateIndex, String id) {
         configFile
                 .getGenomeList()
@@ -176,118 +338,6 @@ public class Presenter {
                 .get(replicateIndex)
                 .setReplicateID(id);
 
-    }
-
-    public void updateEnrichedPlus(int datasetIndex, int replicateIndex, String strand) {
-        configFile
-                .getGenomeList()
-                .get(datasetIndex)
-                .getReplicateList()
-                .get(replicateIndex)
-                .setEnrichedCodingStrand(strand);
-
-    }
-
-    public void updateEnrichedMinus(int datasetIndex, int replicateIndex, String strand) {
-        configFile
-                .getGenomeList()
-                .get(datasetIndex)
-                .getReplicateList()
-                .get(replicateIndex)
-                .setEnrichedTemplateStrand(strand);
-
-    }
-
-    public void updateNormalPlus(int datasetIndex, int replicateIndex, String strand) {
-        configFile
-                .getGenomeList()
-                .get(datasetIndex)
-                .getReplicateList()
-                .get(replicateIndex)
-                .setNormalCodingStrand(strand);
-
-    }
-
-    public void updateNormalMinus(int datasetIndex, int replicateIndex, String strand) {
-        configFile
-                .getGenomeList()
-                .get(datasetIndex)
-                .getReplicateList()
-                .get(replicateIndex)
-                .setNormalTemplateStrand(strand);
-
-    }
-
-    public void updateWriteGraphs(boolean writeGraphs) {
-        configFile.setWriteGraphs(writeGraphs);
-    }
-
-    public void updateStepHeight(double stepHeight) {
-        configFile.setStepHeight(stepHeight);
-    }
-
-    public void updateStepHeightReduction(double stepHeightReduction) {
-        configFile.setStepHeightReduction(stepHeightReduction);
-    }
-
-    public void updateStepFactor(double stepFactor) {
-        configFile.setStepFactor(stepFactor);
-    }
-
-    public void updateStepFactorReduction(double stepFactorReduction) {
-        configFile.setStepFactorReduction(stepFactorReduction);
-    }
-
-    public void updateEnrichmentFactor(double enrichmentFactor) {
-        configFile.setEnrichmentFactor(enrichmentFactor);
-    }
-
-    public void updateProcessingSiteFactor(double processingSiteFactor) {
-        configFile.setProcessingSiteFactor(processingSiteFactor);
-    }
-
-    public void updateStepLength(int stepLength) {
-        configFile.setStepLength(stepLength);
-    }
-
-    public void updateBaseHeight(double baseHeight) {
-        configFile.setBaseHeight(baseHeight);
-    }
-
-    public void updateNormalizationPercentile(double normalizationPercentile) {
-        configFile.setNormalizationPercentile(normalizationPercentile);
-    }
-
-    public void updateEnrichmentNormalizationPercentile(double enrichmentNormalizationPercentile) {
-        configFile.setEnrichmentNormalizationPercentile(enrichmentNormalizationPercentile);
-    }
-
-    public void updateClusterMethod(String clusterMethod) {
-        configFile.setClusterMethod(clusterMethod);
-    }
-
-    public void updateClusteringDistance(int clusteringDistance) {
-        configFile.setTssClusteringDistance(clusteringDistance);
-    }
-
-    public void updateAllowedCrossDatasetShift(int allowedCrossDatasetShift) {
-        configFile.setAllowedCrossDatasetShift(allowedCrossDatasetShift);
-    }
-
-    public void updateAllowedCrossReplicateShift(int allowedCrossReplicateShift) {
-        configFile.setAllowedCrossReplicateShift(allowedCrossReplicateShift);
-    }
-
-    public void updateMatchingReplicates(int matchingReplicates) {
-        configFile.setMatchingReplicates(matchingReplicates);
-    }
-
-    public void updateUtrLength(int utrLength) {
-        configFile.setUtrLength(utrLength);
-    }
-
-    public void updateAntisenseUtrLength(int antisenseUtrLength) {
-        configFile.setAntisenseUtrLength(antisenseUtrLength);
     }
 
     public File produceConfigFile() {
@@ -308,54 +358,54 @@ public class Presenter {
         switch (preset) {
 
             case VERY_SPECIFIC:
-                view.getParametersPanel().getStepHeight().setValue(1.);
-                view.getParametersPanel().getStepHeightReduction().setValue(.5);
-                view.getParametersPanel().getStepFactor().setValue(2.);
-                view.getParametersPanel().getStepFactorReduction().setValue(.5);
-                view.getParametersPanel().getEnrichmentFactor().setValue(3.);
-                view.getParametersPanel().getProcessingSiteFactor().setValue(1.);
-                view.getParametersPanel().getStepLength().setValue(0.);
-                view.getParametersPanel().getBaseHeight().setValue(0.);
+                configFile.setStepHeight(1);
+                configFile.setStepHeightReduction(0.5);
+                configFile.setStepFactor(2);
+                configFile.setStepFactorReduction(0.5);
+                configFile.setEnrichmentFactor(3);
+                configFile.setProcessingSiteFactor(1);
+                configFile.setStepLength(0);
+                configFile.setBaseHeight(0);
                 break;
             case MORE_SPECIFIC:
-                view.getParametersPanel().getStepHeight().setValue(0.5);
-                view.getParametersPanel().getStepHeightReduction().setValue(0.2);
-                view.getParametersPanel().getStepFactor().setValue(2.);
-                view.getParametersPanel().getStepFactorReduction().setValue(0.5);
-                view.getParametersPanel().getEnrichmentFactor().setValue(2.);
-                view.getParametersPanel().getProcessingSiteFactor().setValue(1.2);
-                view.getParametersPanel().getStepLength().setValue(0.);
-                view.getParametersPanel().getBaseHeight().setValue(0.);
+                configFile.setStepHeight(0.5);
+                configFile.setStepHeightReduction(0.2);
+                configFile.setStepFactor(2);
+                configFile.setStepFactorReduction(0.5);
+                configFile.setEnrichmentFactor(2);
+                configFile.setProcessingSiteFactor(1.2);
+                configFile.setStepLength(0);
+                configFile.setBaseHeight(0);
                 break;
             case DEFAULT:
-                view.getParametersPanel().getStepHeight().setValue(.3);
-                view.getParametersPanel().getStepHeightReduction().setValue(.2);
-                view.getParametersPanel().getStepFactor().setValue(2.);
-                view.getParametersPanel().getStepFactorReduction().setValue(.5);
-                view.getParametersPanel().getEnrichmentFactor().setValue(2.);
-                view.getParametersPanel().getProcessingSiteFactor().setValue(1.5);
-                view.getParametersPanel().getStepLength().setValue(0.);
-                view.getParametersPanel().getBaseHeight().setValue(0.);
+                configFile.setStepHeight(0.3);
+                configFile.setStepHeightReduction(0.2);
+                configFile.setStepFactor(2);
+                configFile.setStepFactorReduction(0.5);
+                configFile.setEnrichmentFactor(2);
+                configFile.setProcessingSiteFactor(1.5);
+                configFile.setStepLength(0);
+                configFile.setBaseHeight(0);
                 break;
             case MORE_SENSITIVE:
-                view.getParametersPanel().getStepHeight().setValue(0.2);
-                view.getParametersPanel().getStepHeightReduction().setValue(0.15);
-                view.getParametersPanel().getStepFactor().setValue(1.5);
-                view.getParametersPanel().getStepFactorReduction().setValue(0.5);
-                view.getParametersPanel().getEnrichmentFactor().setValue(1.5);
-                view.getParametersPanel().getProcessingSiteFactor().setValue(2.);
-                view.getParametersPanel().getStepLength().setValue(0.);
-                view.getParametersPanel().getBaseHeight().setValue(0.);
+                configFile.setStepHeight(0.2);
+                configFile.setStepHeightReduction(0.15);
+                configFile.setStepFactor(1.5);
+                configFile.setStepFactorReduction(0.5);
+                configFile.setEnrichmentFactor(1.5);
+                configFile.setProcessingSiteFactor(2);
+                configFile.setStepLength(0);
+                configFile.setBaseHeight(0);
                 break;
             case VERY_SENSITIVE:
-                view.getParametersPanel().getStepHeight().setValue(0.1);
-                view.getParametersPanel().getStepHeightReduction().setValue(0.09);
-                view.getParametersPanel().getStepFactor().setValue(1.);
-                view.getParametersPanel().getStepFactorReduction().setValue(0.);
-                view.getParametersPanel().getEnrichmentFactor().setValue(1.);
-                view.getParametersPanel().getProcessingSiteFactor().setValue(3.);
-                view.getParametersPanel().getStepLength().setValue(0.);
-                view.getParametersPanel().getBaseHeight().setValue(0.);
+                configFile.setStepHeight(0.1);
+                configFile.setStepHeightReduction(0.09);
+                configFile.setStepFactor(1);
+                configFile.setStepFactorReduction(0.);
+                configFile.setEnrichmentFactor(1);
+                configFile.setProcessingSiteFactor(3);
+                configFile.setStepLength(0);
+                configFile.setBaseHeight(0);
                 break;
         }
     }
@@ -373,20 +423,21 @@ public class Presenter {
         this.preset = preset;
     }
 
-    //These three methods are only for temporary use. They are needed because as of now,
+    //These methods are only for temporary use. They are needed because as of now,
     //the config file stores a genome name, fasta and gff for every dataset, regardless of the workflow variant
     //However, in the condition variant there's only one of these
     // --> this needs to be changed in the config logic itself
+    //TODO: How does this fit into the binder pattern?
     public void updateAllGenomeFastas(String name) {
         for (int i = 0; i < configFile.getNumberOfDatasets(); i++) {
-            updateGenomeFasta(i, name);
+            //updateGenomeFasta(i, name);
         }
 
     }
 
     public void updateAllGenomeAnnotations(String annotation) {
         for (int i = 0; i < configFile.getNumberOfDatasets(); i++) {
-            updateGenomeAnnotation(i, annotation);
+           // updateGenomeGFF(i, annotation);
         }
 
     }

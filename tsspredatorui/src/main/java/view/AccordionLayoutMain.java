@@ -30,6 +30,7 @@ public class AccordionLayoutMain extends VerticalLayout {
     public AccordionLayoutMain(Presenter presenter) {
         this.presenter = presenter;
         createContentAccordion();
+        //TODO: DELAY LISTENER SETUP FOR THIS BUTTON- THEN REMOVE LISTENERS BELOW SO WE DON'T NEED TO HAND PRESENTER TO CONSTRUCTOR! AS SOON AS THE BINDER WORKS THESE LISTENERS AREN'T NEEDED ANYWAY!
         createConfigButton = new Button("Create Config File", (Button.ClickListener) clickEvent -> {
             File file = this.presenter.produceConfigFile();
             downloader = new FileDownloader(new FileResource(file));

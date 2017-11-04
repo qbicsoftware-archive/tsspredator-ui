@@ -32,6 +32,7 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
         projectName = new TextField("Enter a name for your project");
 
         projectTypeButtonGroup = new RadioButtonGroup<>("Select type of study");
+        //TODO: Replace hard-coded strings by global variables (and also replace in Presenter!)
         String strainOrSpecies = "Compare Strain/Species";
         String conditions = "Compare Conditions";
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
@@ -48,17 +49,11 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
                 alignmentFileUpload.setVisible(false);
         });
 
-        setupListeners();
         contentLayout.addComponents(projectName, projectTypeButtonGroup, alignmentFileUpload);
         panel.setContent(contentLayout);
         return panel;
     }
 
-    private void setupListeners() {
-        projectName.addValueChangeListener(vce -> presenter.updateProjectName(vce.getValue()));
-        projectTypeButtonGroup.addValueChangeListener(vce -> presenter.updateMode(vce.getValue().equals("Compare Conditions")));
-        alignmentFileUpload.addValueChangeListener(vce -> presenter.updateAlignmentFile(vce.getValue()));
-    }
 
     public TextField getProjectName() {
         return projectName;

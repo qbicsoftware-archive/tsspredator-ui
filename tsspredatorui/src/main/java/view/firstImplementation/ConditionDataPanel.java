@@ -13,23 +13,17 @@ public class ConditionDataPanel extends DataPanel {
         fastaField = new TextField("Genome FASTA");
         gffField = new TextField("Genome Annotation");
 
-        //Setup listeners for the two fields
-        //For now, every dataset holds every value, however this makes no sense for the condition variant
-        //since there's only one fasta and gff there
-        fastaField.addValueChangeListener(vce -> presenter.updateAllGenomeFastas(vce.getValue()));
-        gffField.addValueChangeListener(vce -> presenter.updateAllGenomeAnnotations(vce.getValue()));
         contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox,
                 fastaField, gffField, setNumbers, datasetAccordion);
     }
 
-    class ConditionTab extends DatasetTab {
+    public class ConditionTab extends DatasetTab {
         TextField nameField;
 
         public ConditionTab(int index) {
             super(index);
             nameField = new TextField("Name");
             this.tab.addComponents(nameField, new Label("RNA-seq graph files:"), replicatesSheet);
-            nameField.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
 
 
         }
@@ -39,7 +33,7 @@ public class ConditionDataPanel extends DataPanel {
         }
     }
 
-    public ConditionTab createConditionTab(int index){
+    public ConditionTab createConditionTab(int index) {
         return new ConditionTab(index);
     }
 

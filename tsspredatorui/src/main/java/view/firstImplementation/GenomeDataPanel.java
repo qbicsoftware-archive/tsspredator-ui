@@ -12,7 +12,7 @@ public class GenomeDataPanel extends DataPanel {
 
     }
 
-    class GenomeTab extends DatasetTab {
+    public class GenomeTab extends DatasetTab {
         TextField nameField, idField, fasta, gff;
 
         public GenomeTab(int index) {
@@ -25,7 +25,6 @@ public class GenomeDataPanel extends DataPanel {
             VerticalLayout fastaAndGff = new VerticalLayout();
             fasta = new TextField("Genome FASTA");
             gff = new TextField("Genome annotation (GFF)");
-            setupDatasetTabListeners(index, nameField, idField, fasta, gff);
             fastaAndGff.addComponents(fasta, gff);
             genomeData.addComponents(nameAndId, fastaAndGff);
             this.tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
@@ -40,25 +39,18 @@ public class GenomeDataPanel extends DataPanel {
             return idField;
         }
 
-        public TextField getFasta() {
+        public TextField getFastaField() {
             return fasta;
         }
 
-        public TextField getGff() {
+        public TextField getGffField() {
             return gff;
         }
     }
 
-    public GenomeTab createGenomeTab(int index){
+    public GenomeTab createGenomeTab(int index) {
         return new GenomeTab(index);
     }
 
 
-    private void setupDatasetTabListeners(int index, TextField name, TextField id, TextField fasta, TextField gff) {
-        name.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
-        id.addValueChangeListener(vce -> presenter.updateGenomeAlignmentID(index, vce.getValue()));
-        fasta.addValueChangeListener(vce -> presenter.updateGenomeFasta(index, vce.getValue()));
-        gff.addValueChangeListener(vce -> presenter.updateGenomeAnnotation(index, vce.getValue()));
-
-    }
 }

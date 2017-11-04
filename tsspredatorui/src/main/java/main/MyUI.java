@@ -27,6 +27,7 @@ public class MyUI extends UI {
         AccordionLayoutMain layout = new AccordionLayoutMain(presenter);
         presenter.setView(layout);
         presenter.initFields();
+        presenter.initBindings();
         setContent(layout);
     }
 

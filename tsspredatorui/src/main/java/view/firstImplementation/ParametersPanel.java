@@ -56,8 +56,6 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
         setupPresetListeners();
         createParameterLayouts();
-        setupParameterListeners();
-        setInitialValues();
         contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
         panel.setContent(contentLayout);
         return panel;
@@ -189,41 +187,6 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
 
     }
 
-    private void setupParameterListeners() {
-        stepHeight.addValueChangeListener(vce -> presenter.updateStepHeight(vce.getValue()));
-        stepHeightReduction.addValueChangeListener(vce -> presenter.updateStepHeightReduction(vce.getValue()));
-        stepFactor.addValueChangeListener(vce -> presenter.updateStepFactor(vce.getValue()));
-        stepFactorReduction.addValueChangeListener(vce -> presenter.updateStepFactorReduction(vce.getValue()));
-        enrichmentFactor.addValueChangeListener(vce -> presenter.updateEnrichmentFactor(vce.getValue()));
-        processingSiteFactor.addValueChangeListener(vce -> presenter.updateProcessingSiteFactor(vce.getValue()));
-        stepLength.addValueChangeListener(vce -> presenter.updateStepLength(vce.getValue().intValue()));
-        baseHeight.addValueChangeListener(vce -> presenter.updateBaseHeight(vce.getValue()));
-        normalizationPercentile.addValueChangeListener(vce -> presenter.updateNormalizationPercentile(vce.getValue()));
-        enrichedNormalizationPercentile.addValueChangeListener(vce -> presenter.updateEnrichmentNormalizationPercentile(vce.getValue()));
-        clusterMethod.addValueChangeListener(vce -> presenter.updateClusterMethod(vce.getValue()));
-        clusteringDistance.addValueChangeListener(vce -> presenter.updateClusteringDistance(vce.getValue().intValue()));
-        crossDatasetShift.addValueChangeListener(vce -> presenter.updateAllowedCrossDatasetShift(vce.getValue().intValue()));
-        crossReplicateShift.addValueChangeListener(vce -> presenter.updateAllowedCrossReplicateShift(vce.getValue().intValue()));
-        matchingReplicates.addValueChangeListener(vce -> presenter.updateMatchingReplicates(vce.getValue()));
-        utrLength.addValueChangeListener(vce -> presenter.updateUtrLength(vce.getValue().intValue()));
-        antisenseUtrLength.addValueChangeListener(vce -> presenter.updateAntisenseUtrLength(vce.getValue().intValue()));
-        writeGraphs.addValueChangeListener(vce -> presenter.updateWriteGraphs(vce.getValue()));
-
-
-    }
-
-    private void setInitialValues() {
-        normalizationPercentile.setValue(0.9);
-        enrichedNormalizationPercentile.setValue(0.5);
-        clusterMethod.setValue("HIGHEST");
-        clusteringDistance.setValue(3.);
-        crossDatasetShift.setValue(1.);
-        crossReplicateShift.setValue(1.);
-        matchingReplicates.setValue(1);
-        utrLength.setValue(300.);
-        antisenseUtrLength.setValue(100.);
-    }
-
     public RadioButtonGroup<String> getPresetOrCustom() {
         return presetOrCustom;
     }
@@ -262,5 +225,45 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
 
     public Slider getBaseHeight() {
         return baseHeight;
+    }
+
+    public Slider getNormalizationPercentile() {
+        return normalizationPercentile;
+    }
+
+    public Slider getEnrichedNormalizationPercentile() {
+        return enrichedNormalizationPercentile;
+    }
+
+    public ComboBox<String> getClusterMethod() {
+        return clusterMethod;
+    }
+
+    public Slider getClusteringDistance() {
+        return clusteringDistance;
+    }
+
+    public Slider getCrossDatasetShift() {
+        return crossDatasetShift;
+    }
+
+    public Slider getCrossReplicateShift() {
+        return crossReplicateShift;
+    }
+
+    public ComboBox<Integer> getMatchingReplicates() {
+        return matchingReplicates;
+    }
+
+    public Slider getUtrLength() {
+        return utrLength;
+    }
+
+    public Slider getAntisenseUtrLength() {
+        return antisenseUtrLength;
+    }
+
+    public CheckBox getWriteGraphs() {
+        return writeGraphs;
     }
 }

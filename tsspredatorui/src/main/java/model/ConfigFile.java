@@ -1,9 +1,5 @@
 package model;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -16,6 +12,8 @@ public class ConfigFile {
     private boolean isModeConditions;
     private String alignmentFile;
     private ArrayList<Genome> genomeList;
+    //If we choose to compare conditions, there's only one fasta and one gff file.
+    private String conditionFasta, conditionGFF;
 
     private boolean writeGraphs;
     private double stepHeight;
@@ -31,7 +29,7 @@ public class ConfigFile {
     private double enrichmentNormalizationPercentile;
     private String clusterMethod;
     private int tssClusteringDistance;
-    private int allowedCrossSubjectShift;
+    private int allowedCrossDatasetShift;
     private int allowedCrossReplicateShift;
     private int matchingReplicates;
     private int utrLength;
@@ -40,74 +38,86 @@ public class ConfigFile {
     public ConfigFile() {
     }
 
-    public File writeConfigFile(File output) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(output));
-            writeLine(bw, "projectName", projectName);
-            writeLine(bw, "numberOfDatasets", Integer.toString(numberOfDatasets));
-            writeLine(bw, "numReplicates", Integer.toString(numberOfReplicates));
-            if (!isModeConditions)
-                writeLine(bw, "xmfa", alignmentFile);
-            writeLine(bw, "writeGraphs", writeGraphs ? "1" : "0");
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        buildLine(builder, "projectName", projectName);
+        buildLine(builder, "numberOfDatasets", Integer.toString(numberOfDatasets));
+        buildLine(builder, "numReplicates", Integer.toString(numberOfReplicates));
+        if (!isModeConditions)
+            buildLine(builder, "xmfa", alignmentFile);
+        buildLine(builder, "writeGraphs", writeGraphs ? "1" : "0");
+
+        if (isModeConditions) {
+            buildLine(builder, "fasta", conditionFasta);
+            buildLine(builder, "annotation", conditionGFF);
             for (Genome genome : genomeList) {
-                writeLine(bw, "genome_" + genome.getAlignmentID(), genome.getFasta());
-                writeLine(bw, "annotation_" + genome.getAlignmentID(), genome.getGff());
-                writeLine(bw, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
+                buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
                 for (Replicate replicate : genome.getReplicateList()) {
-                    writeLine(bw, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
-                    writeLine(bw, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
-                    writeLine(bw, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
-                    writeLine(bw, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
                 }
             }
-            StringBuilder idList = new StringBuilder();
+
+        } else {
             for (Genome genome : genomeList) {
-                idList.append(genome.getAlignmentID()).append(",");
+                buildLine(builder, "genome_" + genome.getAlignmentID(), genome.getFasta());
+                buildLine(builder, "annotation_" + genome.getAlignmentID(), genome.getGff());
+                buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
+                for (Replicate replicate : genome.getReplicateList()) {
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                }
             }
-            writeLine(bw, "allowedCompareShift", Integer.toString(allowedCrossSubjectShift));
-            writeLine(bw, "allowedRepCompareShift", Integer.toString(allowedCrossReplicateShift));
-            writeLine(bw, "idList", idList.toString().substring(0, idList.length() - 1));
-            writeLine(bw, "maxUTRlength", Integer.toString(utrLength));
-            writeLine(bw, "maxASutrLength", Integer.toString(antisenseUtrLength));
-            writeLine(bw, "maxNormalTo5primeFactor", Double.toString(processingSiteFactor));
-            writeLine(bw, "maxTSSinClusterDistance", Integer.toString(tssClusteringDistance));
-            writeLine(bw, "min5primeToNormalFactor", Double.toString(enrichmentFactor));
-            writeLine(bw, "minCliffFactor", Double.toString(stepFactor));
-            writeLine(bw, "minCliffFactorDiscount", Double.toString(stepFactorReduction));
-            writeLine(bw, "minCliffHeight", Double.toString(stepHeight));
-            writeLine(bw, "minCliffHeightDiscount", Double.toString(stepHeightReduction));
-            writeLine(bw, "minNormalHeight", Double.toString(baseHeight));
-            writeLine(bw, "minNumRepMatches", Integer.toString(matchingReplicates));
-            writeLine(bw, "minPlateauLength", Integer.toString(stepLength));
-            writeLine(bw, "mode", isModeConditions ? "cond" : "align");
-            writeLine(bw, "normPercentile", Double.toString(normalizationPercentile));
-            writeLine(bw, "textNormPercentile", Double.toString(enrichmentNormalizationPercentile));
-            writeLine(bw, "TSSinClusterSelectionMethod", clusterMethod);
 
-
-            //TODO: These values appear in the config file, but aren't customisable yet
-            writeLine(bw, "maxGapLengthInGene", "42");
-            writeLine(bw, "superGraphCompatibility", "igb");
-            writeLine(bw, "writeNocornacFiles", "0");
-
-            bw.close();
-
-        } catch (NullPointerException npe) {
-            System.err.println("Config file couldn't be created! Something seems to be missing...");
-        } catch (IOException e) {
-            System.err.println("Output path invalid");
         }
-        return output;
+        StringBuilder idList = new StringBuilder();
+        for (Genome genome : genomeList) {
+            idList.append(genome.getAlignmentID()).append(",");
+        }
+        buildLine(builder, "idList", idList.toString().substring(0, idList.length() - 1));
+        buildLine(builder, "allowedCompareShift", Integer.toString(allowedCrossDatasetShift));
+        buildLine(builder, "allowedRepCompareShift", Integer.toString(allowedCrossReplicateShift));
+        buildLine(builder, "maxUTRlength", Integer.toString(utrLength));
+        buildLine(builder, "maxASutrLength", Integer.toString(antisenseUtrLength));
+        buildLine(builder, "maxNormalTo5primeFactor", Double.toString(processingSiteFactor));
+        buildLine(builder, "maxTSSinClusterDistance", Integer.toString(tssClusteringDistance));
+        buildLine(builder, "min5primeToNormalFactor", Double.toString(enrichmentFactor));
+        buildLine(builder, "minCliffFactor", Double.toString(stepFactor));
+        buildLine(builder, "minCliffFactorDiscount", Double.toString(stepFactorReduction));
+        buildLine(builder, "minCliffHeight", Double.toString(stepHeight));
+        buildLine(builder, "minCliffHeightDiscount", Double.toString(stepHeightReduction));
+        buildLine(builder, "minNormalHeight", Double.toString(baseHeight));
+        buildLine(builder, "minNumRepMatches", Integer.toString(matchingReplicates));
+        buildLine(builder, "minPlateauLength", Integer.toString(stepLength));
+        buildLine(builder, "mode", isModeConditions ? "cond" : "align");
+        buildLine(builder, "normPercentile", Double.toString(normalizationPercentile));
+        buildLine(builder, "textNormPercentile", Double.toString(enrichmentNormalizationPercentile));
+        buildLine(builder, "TSSinClusterSelectionMethod", clusterMethod);
+
+
+        //TODO: These values appear in the config file, but aren't customisable yet
+        buildLine(builder, "maxGapLengthInGene", "42");
+        buildLine(builder, "superGraphCompatibility", "igb");
+        buildLine(builder, "writeNocornacFiles", "0");
+
+        return builder.toString();
     }
 
-    private void writeLine(BufferedWriter bw, String key, String value) throws IOException {
+    private void buildLine(StringBuilder builder, String key, String value) {
         if (value == null)
             System.err.println("Couldn't create config file! Parameter \'" + key + "\' isn't set.");
         else
-            bw.write(key + " = " + value + "\n");
-
+            builder.append(key).append(" = ").append(value).append("\n");
     }
 
+    public String getProjectName() {
+        return projectName;
+    }
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
@@ -129,8 +139,16 @@ public class ConfigFile {
         this.numberOfReplicates = numberOfReplicates;
     }
 
+    public boolean isModeConditions() {
+        return isModeConditions;
+    }
+
     public void setModeConditions(boolean modeConditions) {
         isModeConditions = modeConditions;
+    }
+
+    public String getAlignmentFile() {
+        return alignmentFile;
     }
 
     public void setAlignmentFile(String alignmentFile) {
@@ -145,72 +163,160 @@ public class ConfigFile {
         this.genomeList = genomeList;
     }
 
+    public String getConditionFasta() {
+        return conditionFasta;
+    }
+
+    public void setConditionFasta(String conditionFasta) {
+        this.conditionFasta = conditionFasta;
+    }
+
+    public String getConditionGFF() {
+        return conditionGFF;
+    }
+
+    public void setConditionGFF(String conditionGFF) {
+        this.conditionGFF = conditionGFF;
+    }
+
+    public boolean isWriteGraphs() {
+        return writeGraphs;
+    }
+
     public void setWriteGraphs(boolean writeGraphs) {
         this.writeGraphs = writeGraphs;
+    }
+
+    public double getStepHeight() {
+        return stepHeight;
     }
 
     public void setStepHeight(double stepHeight) {
         this.stepHeight = stepHeight;
     }
 
+    public double getStepHeightReduction() {
+        return stepHeightReduction;
+    }
+
     public void setStepHeightReduction(double stepHeightReduction) {
         this.stepHeightReduction = stepHeightReduction;
+    }
+
+    public double getStepFactor() {
+        return stepFactor;
     }
 
     public void setStepFactor(double stepFactor) {
         this.stepFactor = stepFactor;
     }
 
+    public double getStepFactorReduction() {
+        return stepFactorReduction;
+    }
+
     public void setStepFactorReduction(double stepFactorReduction) {
         this.stepFactorReduction = stepFactorReduction;
+    }
+
+    public double getEnrichmentFactor() {
+        return enrichmentFactor;
     }
 
     public void setEnrichmentFactor(double enrichmentFactor) {
         this.enrichmentFactor = enrichmentFactor;
     }
 
+    public double getProcessingSiteFactor() {
+        return processingSiteFactor;
+    }
+
     public void setProcessingSiteFactor(double processingSiteFactor) {
         this.processingSiteFactor = processingSiteFactor;
+    }
+
+    public int getStepLength() {
+        return stepLength;
     }
 
     public void setStepLength(int stepLength) {
         this.stepLength = stepLength;
     }
 
+    public double getBaseHeight() {
+        return baseHeight;
+    }
+
     public void setBaseHeight(double baseHeight) {
         this.baseHeight = baseHeight;
+    }
+
+    public double getNormalizationPercentile() {
+        return normalizationPercentile;
     }
 
     public void setNormalizationPercentile(double normalizationPercentile) {
         this.normalizationPercentile = normalizationPercentile;
     }
 
+    public double getEnrichmentNormalizationPercentile() {
+        return enrichmentNormalizationPercentile;
+    }
+
     public void setEnrichmentNormalizationPercentile(double enrichmentNormalizationPercentile) {
         this.enrichmentNormalizationPercentile = enrichmentNormalizationPercentile;
+    }
+
+    public String getClusterMethod() {
+        return clusterMethod;
     }
 
     public void setClusterMethod(String clusterMethod) {
         this.clusterMethod = clusterMethod;
     }
 
+    public int getTssClusteringDistance() {
+        return tssClusteringDistance;
+    }
+
     public void setTssClusteringDistance(int tssClusteringDistance) {
         this.tssClusteringDistance = tssClusteringDistance;
     }
 
+    public int getAllowedCrossDatasetShift() {
+        return allowedCrossDatasetShift;
+    }
+
     public void setAllowedCrossDatasetShift(int allowedCrossSubjectShift) {
-        this.allowedCrossSubjectShift = allowedCrossSubjectShift;
+        this.allowedCrossDatasetShift = allowedCrossSubjectShift;
+    }
+
+    public int getAllowedCrossReplicateShift() {
+        return allowedCrossReplicateShift;
     }
 
     public void setAllowedCrossReplicateShift(int allowedCrossReplicateShift) {
         this.allowedCrossReplicateShift = allowedCrossReplicateShift;
     }
 
+    public int getMatchingReplicates() {
+        return matchingReplicates;
+    }
+
     public void setMatchingReplicates(int matchingReplicates) {
         this.matchingReplicates = matchingReplicates;
     }
 
+    public int getUtrLength() {
+        return utrLength;
+    }
+
     public void setUtrLength(int utrLength) {
         this.utrLength = utrLength;
+    }
+
+    public int getAntisenseUtrLength() {
+        return antisenseUtrLength;
     }
 
     public void setAntisenseUtrLength(int antisenseUtrLength) {

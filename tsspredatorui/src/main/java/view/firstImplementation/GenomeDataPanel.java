@@ -12,41 +12,45 @@ public class GenomeDataPanel extends DataPanel {
 
     }
 
-    /**
-     * Helper method for updateAccordion()
-     *
-     * @return
-     */
-    @Override
-    Component createAccordionTab(int index) {
-        VerticalLayout tab = new VerticalLayout();
-        HorizontalLayout genomeData = new HorizontalLayout();
-        VerticalLayout nameAndId = new VerticalLayout();
-        TextField name = new TextField("Name");
-        TextField id = new TextField("Alignment ID");
-        nameAndId.addComponents(name, id);
-        VerticalLayout fastaAndGff = new VerticalLayout();
-        TextField fasta = new TextField("Genome FASTA");
-        TextField gff = new TextField("Genome annotation (GFF)");
-        setupDatasetTabListeners(index, name, id, fasta, gff);
-        fastaAndGff.addComponents(fasta, gff);
-        genomeData.addComponents(nameAndId, fastaAndGff);
+    public class GenomeTab extends DatasetTab {
+        TextField nameField, idField, fasta, gff;
 
-        TabSheet replicatesSheet = new TabSheet();
-        for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
-            HorizontalLayout replicateTab = createReplicateTab(index, replicateIndex);
-            replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
+        public GenomeTab(int index) {
+            super(index);
+            HorizontalLayout genomeData = new HorizontalLayout();
+            VerticalLayout nameAndId = new VerticalLayout();
+            nameField = new TextField("Name");
+            idField = new TextField("Alignment ID");
+            nameAndId.addComponents(nameField, idField);
+            VerticalLayout fastaAndGff = new VerticalLayout();
+            fasta = new TextField("Genome FASTA");
+            gff = new TextField("Genome annotation (GFF)");
+            fastaAndGff.addComponents(fasta, gff);
+            genomeData.addComponents(nameAndId, fastaAndGff);
+            this.tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
+
         }
-        tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
-        return tab;
 
+        public TextField getNameField() {
+            return nameField;
+        }
+
+        public TextField getIdField() {
+            return idField;
+        }
+
+        public TextField getFastaField() {
+            return fasta;
+        }
+
+        public TextField getGffField() {
+            return gff;
+        }
     }
 
-    private void setupDatasetTabListeners(int index, TextField name, TextField id, TextField fasta, TextField gff) {
-        name.addValueChangeListener(vce -> presenter.updateDatasetName(index, vce.getValue()));
-        id.addValueChangeListener(vce -> presenter.updateGenomeAlignmentID(index, vce.getValue()));
-        fasta.addValueChangeListener(vce -> presenter.updateGenomeFasta(index, vce.getValue()));
-        gff.addValueChangeListener(vce -> presenter.updateGenomeAnnotation(index, vce.getValue()));
-
+    public GenomeTab createGenomeTab(int index) {
+        return new GenomeTab(index);
     }
+
+
 }

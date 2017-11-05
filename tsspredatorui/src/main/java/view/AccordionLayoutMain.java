@@ -91,4 +91,14 @@ public class AccordionLayoutMain extends VerticalLayout {
     public ParametersPanel getParametersPanel() {
         return parametersPanel;
     }
+
+    public GenomeDataPanel getGenomeDataPanel() {
+        return genomeDataPanel;
+    }
+
+    public ConditionDataPanel getConditionDataPanel() {
+        return conditionDataPanel;
+    }
+
+
 }

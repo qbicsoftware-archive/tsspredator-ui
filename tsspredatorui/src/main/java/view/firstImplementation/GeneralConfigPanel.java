@@ -3,7 +3,6 @@ package view.firstImplementation;
 import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
 import presenter.Presenter;
-import view.GeneralConfigView;
 
 /**
  * This component has a panel where the user chooses a nameField for his project, selects the type of study,
@@ -11,7 +10,7 @@ import view.GeneralConfigView;
  *
  * @author jmueller
  */
-public class GeneralConfigPanel extends CustomComponent implements GeneralConfigView {
+public class GeneralConfigPanel extends CustomComponent{
     private Presenter presenter;
     private Panel generalConfigPanel;
     private Layout contentLayout;

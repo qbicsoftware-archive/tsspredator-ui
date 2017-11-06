@@ -4,7 +4,6 @@ import com.vaadin.ui.*;
 import model.Genome;
 import model.Replicate;
 import presenter.Presenter;
-import view.DataView;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -16,7 +15,7 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public abstract class DataPanel extends CustomComponent implements DataView {
+public abstract class DataPanel extends CustomComponent{
     Presenter presenter;
     Panel dataPanel;
     Layout contentLayout;

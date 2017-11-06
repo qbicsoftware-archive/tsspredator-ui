@@ -4,7 +4,6 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import presenter.Presenter;
-import view.ParametersView;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,7 +13,7 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public class ParametersPanel extends CustomComponent implements ParametersView {
+public class ParametersPanel extends CustomComponent {
     private Presenter presenter;
     private Panel parametersPanel;
     private Layout contentLayout;

@@ -12,6 +12,8 @@ public class ConfigFile {
     private boolean isModeConditions;
     private String alignmentFile;
     private ArrayList<Genome> genomeList;
+    //If we choose to compare conditions, there's only one fasta and one gff file.
+    private String conditionFasta, conditionGFF;
 
     private boolean writeGraphs;
     private double stepHeight;
@@ -45,24 +47,41 @@ public class ConfigFile {
         if (!isModeConditions)
             buildLine(builder, "xmfa", alignmentFile);
         buildLine(builder, "writeGraphs", writeGraphs ? "1" : "0");
-        for (Genome genome : genomeList) {
-            buildLine(builder, "genome_" + genome.getAlignmentID(), genome.getFasta());
-            buildLine(builder, "annotation_" + genome.getAlignmentID(), genome.getGff());
-            buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
-            for (Replicate replicate : genome.getReplicateList()) {
-                buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
-                buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
-                buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
-                buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+
+        if (isModeConditions) {
+            buildLine(builder, "fasta", conditionFasta);
+            buildLine(builder, "annotation", conditionGFF);
+            for (Genome genome : genomeList) {
+                buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
+                for (Replicate replicate : genome.getReplicateList()) {
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                }
             }
+
+        } else {
+            for (Genome genome : genomeList) {
+                buildLine(builder, "genome_" + genome.getAlignmentID(), genome.getFasta());
+                buildLine(builder, "annotation_" + genome.getAlignmentID(), genome.getGff());
+                buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
+                for (Replicate replicate : genome.getReplicateList()) {
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                }
+            }
+
         }
         StringBuilder idList = new StringBuilder();
         for (Genome genome : genomeList) {
             idList.append(genome.getAlignmentID()).append(",");
         }
+        buildLine(builder, "idList", idList.toString().substring(0, idList.length() - 1));
         buildLine(builder, "allowedCompareShift", Integer.toString(allowedCrossDatasetShift));
         buildLine(builder, "allowedRepCompareShift", Integer.toString(allowedCrossReplicateShift));
-        buildLine(builder, "idList", idList.toString().substring(0, idList.length() - 1));
         buildLine(builder, "maxUTRlength", Integer.toString(utrLength));
         buildLine(builder, "maxASutrLength", Integer.toString(antisenseUtrLength));
         buildLine(builder, "maxNormalTo5primeFactor", Double.toString(processingSiteFactor));
@@ -142,6 +161,22 @@ public class ConfigFile {
 
     public void setGenomeList(ArrayList<Genome> genomeList) {
         this.genomeList = genomeList;
+    }
+
+    public String getConditionFasta() {
+        return conditionFasta;
+    }
+
+    public void setConditionFasta(String conditionFasta) {
+        this.conditionFasta = conditionFasta;
+    }
+
+    public String getConditionGFF() {
+        return conditionGFF;
+    }
+
+    public void setConditionGFF(String conditionGFF) {
+        this.conditionGFF = conditionGFF;
     }
 
     public boolean isWriteGraphs() {

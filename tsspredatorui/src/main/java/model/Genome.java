@@ -9,9 +9,9 @@ import java.util.HashMap;
  */
 public class Genome {
     private String name;
-    private String fasta;
+    private String fasta; //Only set if it's a genome and not a condition
     private String alignmentID;
-    private String gff;
+    private String gff; //Only set if it's a genome and not a condition
     private ArrayList<Replicate> replicateList;
 
     public Genome(){

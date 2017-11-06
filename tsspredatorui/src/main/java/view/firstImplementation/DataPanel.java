@@ -65,7 +65,6 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         datasetAccordion.setWidth("100%");
         datasetAccordion.setVisible(false);
 
-        setupListeners();
         panel.setContent(contentLayout);
         return panel;
     }
@@ -90,6 +89,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
                 for (int replicateIndex = oldReplicateCount; replicateIndex < numberOfReplicates; replicateIndex++) {
                     Component replicateTab = new ReplicateTab(datasetIndex, replicateIndex);
                     ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
+                    presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             } else {
                 //Remove excess replicate tabs
@@ -107,7 +107,12 @@ public abstract class DataPanel extends CustomComponent implements DataView {
                 Component currentTab = this instanceof GenomeDataPanel
                         ? ((GenomeDataPanel) this).createGenomeTab(datasetIndex)
                         : ((ConditionDataPanel) this).createConditionTab(datasetIndex);
+                //Tell presenter to set up bindings
                 datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
+                presenter.initDatasetBindings(datasetIndex);
+                for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+                    presenter.initReplicateBindings(datasetIndex, replicateIndex);
+                }
             }
         } else {
             //Remove excess dataset tabs
@@ -122,7 +127,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
     /**
      * This class is extended by GenomeTab in GenomeDataPanel and ConditionTab in ConditionDataPanel.
      */
-    abstract class DatasetTab extends CustomComponent {
+    public abstract class DatasetTab extends CustomComponent {
         VerticalLayout tab;
         TabSheet replicatesSheet;
 
@@ -146,7 +151,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
      * This inner class represents a replicate tab in the dataset accordion.
      * It works for both the genome and the condition variants.
      */
-    class ReplicateTab extends CustomComponent {
+    public class ReplicateTab extends CustomComponent {
         HorizontalLayout layout;
         TextField eplus, eminus, nplus, nminus;
 
@@ -160,10 +165,10 @@ public abstract class DataPanel extends CustomComponent implements DataView {
             nplus = new TextField("Normal Plus");
             nminus = new TextField("Normal Minus");
             normalPart.addComponents(nplus, nminus);
-            setupReplicateTabListeners(datasetIndex, replicateIndex, eplus, eminus, nplus, nminus);
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
             layout.addComponents(enrichedPart, normalPart);
             setCompositionRoot(layout);
+
         }
 
         public TextField getEplus() {
@@ -205,20 +210,6 @@ public abstract class DataPanel extends CustomComponent implements DataView {
 
     }
 
-    void setupListeners() {
-        numberOfDatasetsBox.addValueChangeListener(vce -> presenter.updateNumberOfDatasets(vce.getValue()));
-        numberOfReplicatesBox.addValueChangeListener(vce -> presenter.updateNumberOfReplicates(vce.getValue()));
-    }
-
-    void setupReplicateTabListeners(int datasetIndex, int replicateIndex,
-                                    TextField eplus, TextField eminus, TextField nplus, TextField nminus) {
-        eplus.addValueChangeListener(vce -> presenter.updateEnrichedPlus(datasetIndex, replicateIndex, eplus.getValue()));
-        eminus.addValueChangeListener(vce -> presenter.updateEnrichedMinus(datasetIndex, replicateIndex, eminus.getValue()));
-        nplus.addValueChangeListener(vce -> presenter.updateNormalPlus(datasetIndex, replicateIndex, nplus.getValue()));
-        nminus.addValueChangeListener(vce -> presenter.updateNormalMinus(datasetIndex, replicateIndex, nminus.getValue()));
-
-    }
-
     public ComboBox<Integer> getNumberOfDatasetsBox() {
         return numberOfDatasetsBox;
     }
@@ -240,7 +231,7 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         return null;
     }
 
-    public DatasetTab getDatasetTab(int index){
+    public DatasetTab getDatasetTab(int index) {
         return (DatasetTab) datasetAccordion.getTab(index).getComponent();
     }
 }

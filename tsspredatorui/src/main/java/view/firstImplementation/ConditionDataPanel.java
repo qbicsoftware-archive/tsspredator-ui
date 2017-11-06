@@ -1,20 +1,28 @@
 package view.firstImplementation;
 
 import com.vaadin.ui.*;
+import model.beans.AnnotationFileBean;
+import model.beans.FastaFileBean;
 import presenter.Presenter;
 
 public class ConditionDataPanel extends DataPanel {
-    TextField fastaField, gffField;
+    Grid<FastaFileBean> fastaGrid;
+    Grid<AnnotationFileBean> gffGrid;
 
 
     public ConditionDataPanel(Presenter presenter) {
         super(presenter);
         numberOfDatasetsBox.setCaption("Select number of Conditions");
-        fastaField = new TextField("Genome FASTA");
-        gffField = new TextField("Genome Annotation");
-
+        fastaGrid = new Grid<>("Genome FASTA");
+        fastaGrid.addColumn(FastaFileBean::getName).setCaption("File name");
+        fastaGrid.addColumn(FastaFileBean::getCreationDate).setCaption("Creation Date");
+        fastaGrid.addColumn(FastaFileBean::getSizeInKB).setCaption("Size in KB");
+        gffGrid = new Grid<>("Genome annotation (GFF)");
+        gffGrid.addColumn(AnnotationFileBean::getName).setCaption("File name");
+        gffGrid.addColumn(AnnotationFileBean::getCreationDate).setCaption("Creation Date");
+        gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size in KB");
         contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox,
-                fastaField, gffField, setNumbers, datasetAccordion);
+                new HorizontalLayout(fastaGrid, gffGrid), setNumbers, datasetAccordion);
     }
 
     public class ConditionTab extends DatasetTab {
@@ -38,11 +46,11 @@ public class ConditionDataPanel extends DataPanel {
         return tab;
     }
 
-    public TextField getFastaField() {
-        return fastaField;
+    public Grid<FastaFileBean> getFastaGrid() {
+        return fastaGrid;
     }
 
-    public TextField getGffField() {
-        return gffField;
+    public Grid<AnnotationFileBean> getGffGrid() {
+        return gffGrid;
     }
 }

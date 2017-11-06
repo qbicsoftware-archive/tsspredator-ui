@@ -1,6 +1,8 @@
 package view.firstImplementation;
 
 import com.vaadin.ui.*;
+import model.beans.AnnotationFileBean;
+import model.beans.FastaFileBean;
 import presenter.Presenter;
 
 public class GenomeDataPanel extends DataPanel {
@@ -13,7 +15,9 @@ public class GenomeDataPanel extends DataPanel {
     }
 
     public class GenomeTab extends DatasetTab {
-        TextField nameField, idField, fasta, gff;
+        TextField nameField, idField;
+        Grid<FastaFileBean> fastaGrid;
+        Grid<AnnotationFileBean> gffGrid;
 
         public GenomeTab(int index) {
             super(index);
@@ -22,10 +26,16 @@ public class GenomeDataPanel extends DataPanel {
             nameField = new TextField("Name");
             idField = new TextField("Alignment ID");
             nameAndId.addComponents(nameField, idField);
-            VerticalLayout fastaAndGff = new VerticalLayout();
-            fasta = new TextField("Genome FASTA");
-            gff = new TextField("Genome annotation (GFF)");
-            fastaAndGff.addComponents(fasta, gff);
+            HorizontalLayout fastaAndGff = new HorizontalLayout();
+            fastaGrid = new Grid<>("Genome FASTA");
+            fastaGrid.addColumn(FastaFileBean::getName).setCaption("File name");
+            fastaGrid.addColumn(FastaFileBean::getCreationDate).setCaption("Creation Date");
+            fastaGrid.addColumn(FastaFileBean::getSizeInKB).setCaption("Size in KB");
+            gffGrid = new Grid<>("Genome annotation (GFF)");
+            gffGrid.addColumn(AnnotationFileBean::getName).setCaption("File name");
+            gffGrid.addColumn(AnnotationFileBean::getCreationDate).setCaption("Creation Date");
+            gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size in KB");
+            fastaAndGff.addComponents(fastaGrid, gffGrid);
             genomeData.addComponents(nameAndId, fastaAndGff);
             this.tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
 
@@ -39,12 +49,12 @@ public class GenomeDataPanel extends DataPanel {
             return idField;
         }
 
-        public TextField getFastaField() {
-            return fasta;
+        public Grid<FastaFileBean> getFastaGrid() {
+            return fastaGrid;
         }
 
-        public TextField getGffField() {
-            return gff;
+        public Grid<AnnotationFileBean> getGffGrid() {
+            return gffGrid;
         }
     }
 

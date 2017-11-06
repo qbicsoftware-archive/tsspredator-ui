@@ -1,8 +1,7 @@
 package view.firstImplementation;
 
 import com.vaadin.ui.*;
-import model.Genome;
-import model.Replicate;
+import model.beans.GraphFileBean;
 import presenter.Presenter;
 
 import java.util.Collection;
@@ -151,39 +150,47 @@ public abstract class DataPanel extends CustomComponent{
      * It works for both the genome and the condition variants.
      */
     public class ReplicateTab extends CustomComponent {
-        HorizontalLayout layout;
-        TextField eplus, eminus, nplus, nminus;
+        VerticalLayout layout;
+        TextField enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
+        Grid<GraphFileBean> graphFileGrid;
 
         public ReplicateTab(int datasetIndex, int replicateIndex) {
-            layout = new HorizontalLayout();
+            layout = new VerticalLayout();
+
             VerticalLayout enrichedPart = new VerticalLayout();
-            eplus = new TextField("Enriched Plus");
-            eminus = new TextField("Enriched Minus");
-            enrichedPart.addComponents(eplus, eminus);
+            enrichedCoding = new TextField("Enriched Coding Strand");
+            enrichedTemplate = new TextField("Enriched Template Strand");
+            enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
             VerticalLayout normalPart = new VerticalLayout();
-            nplus = new TextField("Normal Plus");
-            nminus = new TextField("Normal Minus");
-            normalPart.addComponents(nplus, nminus);
+            normalCoding = new TextField("Normal Coding Strand");
+            normalTemplate = new TextField("Normal Template Strand");
+            normalPart.addComponents(normalCoding, normalTemplate);
+
+            graphFileGrid = new Grid<>("Graph Files");
+            graphFileGrid.addColumn(GraphFileBean::getName).setCaption("File name");
+            graphFileGrid.addColumn(GraphFileBean::getCreationDate).setCaption("Creation Date");
+            graphFileGrid.addColumn(GraphFileBean::getSizeInKB).setCaption("Size in KB");
+
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
-            layout.addComponents(enrichedPart, normalPart);
+            layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
             setCompositionRoot(layout);
 
         }
 
-        public TextField getEplus() {
-            return eplus;
+        public TextField getEnrichedCoding() {
+            return enrichedCoding;
         }
 
-        public TextField getEminus() {
-            return eminus;
+        public TextField getEnrichedTemplate() {
+            return enrichedTemplate;
         }
 
-        public TextField getNplus() {
-            return nplus;
+        public TextField getNormalCoding() {
+            return normalCoding;
         }
 
-        public TextField getNminus() {
-            return nminus;
+        public TextField getNormalTemplate() {
+            return normalTemplate;
         }
     }
 

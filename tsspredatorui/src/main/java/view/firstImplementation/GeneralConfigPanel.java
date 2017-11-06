@@ -2,6 +2,8 @@ package view.firstImplementation;
 
 import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
+import model.beans.AlignmentFileBean;
+import model.beans.ProjectBean;
 import presenter.Presenter;
 
 /**
@@ -14,8 +16,8 @@ public class GeneralConfigPanel extends CustomComponent{
     private Presenter presenter;
     private Panel generalConfigPanel;
     private Layout contentLayout;
-    private TextField projectName;
-    private TextField alignmentFileUpload;
+    private Grid<ProjectBean> projectGrid;
+    private Grid<AlignmentFileBean> alignmentFileGrid;
     RadioButtonGroup<String> projectTypeButtonGroup;
 
     public GeneralConfigPanel(Presenter presenter) {
@@ -28,7 +30,9 @@ public class GeneralConfigPanel extends CustomComponent{
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new FormLayout();
-        projectName = new TextField("Enter a name for your project");
+        projectGrid = new Grid<>("Select your project");
+        projectGrid.addColumn(ProjectBean::getName).setCaption("Project Name");
+        projectGrid.addColumn(ProjectBean::getRegistrationDate).setCaption("Registration Date");
 
         projectTypeButtonGroup = new RadioButtonGroup<>("Select type of study");
         //TODO: Replace hard-coded strings by global variables (and also replace in Presenter!)
@@ -37,29 +41,31 @@ public class GeneralConfigPanel extends CustomComponent{
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
         projectTypeButtonGroup.setSelectedItem(strainOrSpecies);
 
-        alignmentFileUpload = new TextField("Upload alignment file");
+        alignmentFileGrid = new Grid<>("Select alignment file");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getName).setCaption("File name");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size in KB");
         //The uploader should only be visible if strains/species are to be compared
         //(which is the initial case)
-        alignmentFileUpload.setVisible(true);
+        alignmentFileGrid.setVisible(true);
         projectTypeButtonGroup.addSelectionListener((SingleSelectionListener<String>) e -> {
             if (e.getSelectedItem().get().equals(strainOrSpecies))
-                alignmentFileUpload.setVisible(true);
+                alignmentFileGrid.setVisible(true);
             else
-                alignmentFileUpload.setVisible(false);
+                alignmentFileGrid.setVisible(false);
         });
-
-        contentLayout.addComponents(projectName, projectTypeButtonGroup, alignmentFileUpload);
+        contentLayout.addComponents(projectTypeButtonGroup, new HorizontalLayout(projectGrid, alignmentFileGrid));
         panel.setContent(contentLayout);
         return panel;
     }
 
 
-    public TextField getProjectName() {
-        return projectName;
+    public Grid<ProjectBean> getProjectGrid() {
+        return projectGrid;
     }
 
-    public TextField getAlignmentFileUpload() {
-        return alignmentFileUpload;
+    public Grid<AlignmentFileBean> getAlignmentFileGrid() {
+        return alignmentFileGrid;
     }
 
     public RadioButtonGroup<String> getProjectTypeButtonGroup() {

@@ -1,4 +1,4 @@
-package model;
+package model.config;
 
 /**
  * Contains all the information about a replicate that are written to the config file

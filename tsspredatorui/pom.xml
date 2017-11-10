@@ -73,7 +73,13 @@
             <artifactId>junit</artifactId>
             <version>RELEASE</version>
         </dependency>
-    </dependencies>
+		<!--Context help addon-->
+		<dependency>
+			<groupId>org.vaadin.jonatan</groupId>
+			<artifactId>contexthelp</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>

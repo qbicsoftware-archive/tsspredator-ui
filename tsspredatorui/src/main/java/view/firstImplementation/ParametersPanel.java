@@ -1,11 +1,15 @@
 package view.firstImplementation;
 
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.vaadin.jonatan.contexthelp.ContextHelp;
 import presenter.Presenter;
-import view.ParametersView;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -14,10 +18,10 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public class ParametersPanel extends CustomComponent implements ParametersView {
+public class ParametersPanel extends CustomComponent {
     private Presenter presenter;
     private Panel parametersPanel;
-    private Layout contentLayout;
+    private VerticalLayout contentLayout;
     RadioButtonGroup<String> presetOrCustom;
     RadioButtonGroup<String> presetSelection;
 
@@ -38,6 +42,8 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
     Slider utrLength, antisenseUtrLength;
     CheckBox writeGraphs;
 
+    ContextHelp contextHelp;
+
 
     public ParametersPanel(Presenter presenter) {
         this.presenter = presenter;
@@ -56,13 +62,51 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
         setupPresetListeners();
         createParameterLayouts();
+        setupContextHelp();
         contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
         panel.setContent(contentLayout);
         return panel;
     }
 
+    private void setupPresetListeners() {
+        presetOrCustom.addValueChangeListener(vce -> {
+            customParameters.setVisible(vce.getValue().equals("Custom"));
+            presetSelection.setVisible(vce.getValue().equals("Preset"));
+        });
+        presetSelection.addValueChangeListener(vce -> {
+            switch (vce.getValue()) {
+                case "Very Specific":
+                    presenter.setPreset(Presenter.Preset.VERY_SPECIFIC);
+                    break;
+                case "More Specific":
+                    presenter.setPreset(Presenter.Preset.MORE_SPECIFIC);
+                    break;
+                case "Default":
+                    presenter.setPreset(Presenter.Preset.DEFAULT);
+                    break;
+                case "More Sensitive":
+                    presenter.setPreset(Presenter.Preset.MORE_SENSITIVE);
+                    break;
+                case "Very Sensitive":
+                    presenter.setPreset(Presenter.Preset.VERY_SENSITIVE);
+                    break;
+            }
+            presenter.applyPresetParameters();
+        });
+
+    }
+
     private void createParameterLayouts() {
         customParameters = new VerticalLayout();
+
+        VerticalLayout helpLayout = new VerticalLayout();
+        String basepath = VaadinService.getCurrent().getBaseDirectory().getParent();
+        FileResource resource = new FileResource(new File(basepath + "/resources/Dummy.svg"));
+        Image image = new Image(null, resource);
+        helpLayout.addComponent(image);
+        PopupView helpView = new PopupView(null, helpLayout);
+        contentLayout.addComponent(helpView);
+        contentLayout.setComponentAlignment(helpView, Alignment.MIDDLE_CENTER);
 
         //TODO: Bind the max value of the reduction sliders to the other sliders so that they don't exceed them
         HorizontalLayout stepParams = new HorizontalLayout();
@@ -70,36 +114,93 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         stepHeight.setMin(0);
         stepHeight.setMax(1);
         stepHeight.setResolution(1);
+        //TODO: Create ONE style and set this style to all of the buttons here
+        Button stepHeightInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        stepHeightInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepHeightInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         stepHeightReduction = new Slider("Step Height Reduction");
         stepHeightReduction.setMin(0);
         stepHeightReduction.setMax(1);
         stepHeightReduction.setResolution(1);
+        Button stepHeightReductionInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        stepHeightReductionInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepHeightReductionInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         stepFactor = new Slider("Step Factor");
         stepFactor.setMin(1);
         stepFactor.setMax(5);
         stepFactor.setResolution(1);
+        Button stepFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        stepFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepFactorInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         stepFactorReduction = new Slider("Step Factor Reduction");
         stepFactorReduction.setMin(0);
         stepFactorReduction.setMax(2);
         stepFactorReduction.setResolution(1);
-        stepParams.addComponents(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction);
+        Button stepFactorReductionInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        stepFactorReductionInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepFactorReductionInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
+        stepParams.addComponents(
+                new HorizontalLayout(stepHeight, stepHeightInfo),
+                new HorizontalLayout(stepHeightReduction, stepHeightReductionInfo),
+                new HorizontalLayout(stepFactor, stepFactorInfo),
+                new HorizontalLayout(stepFactorReduction, stepFactorReductionInfo));
 
         HorizontalLayout otherCustomParams = new HorizontalLayout();
         enrichmentFactor = new Slider("Enrichment Factor");
         enrichmentFactor.setMin(0);
         enrichmentFactor.setMax(10);
         enrichmentFactor.setResolution(1);
+        Button enrichmentFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        enrichmentFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        enrichmentFactorInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         processingSiteFactor = new Slider("Processing Site Factor");
         processingSiteFactor.setMin(0);
         processingSiteFactor.setMax(10);
         processingSiteFactor.setResolution(1);
+        Button processingSiteFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        processingSiteFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        processingSiteFactorInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         stepLength = new Slider("Step Length");
         stepLength.setMin(0);
         stepLength.setMax(100);
         stepLength.setResolution(0);
+        Button stepLengthInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        stepLengthInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepLengthInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+
         baseHeight = new Slider("Base Height (disabled by default)");
         baseHeight.setEnabled(false);
-        otherCustomParams.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
+        Button baseHeightInfo = new Button(VaadinIcons.INFO_CIRCLE);
+        baseHeightInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        baseHeightInfo.addClickListener(clickEvent -> {
+            helpView.setPopupVisible(true);
+        });
+        baseHeightInfo.setVisible(false);
+        otherCustomParams.addComponents(
+                new HorizontalLayout(enrichmentFactor, enrichmentFactorInfo),
+                new HorizontalLayout(processingSiteFactor, processingSiteFactorInfo),
+                new HorizontalLayout(stepLength, stepLengthInfo),
+                new HorizontalLayout(baseHeight, baseHeightInfo));
 
         customParameters.addComponents(stepParams, otherCustomParams);
 
@@ -155,36 +256,12 @@ public class ParametersPanel extends CustomComponent implements ParametersView {
         basicParameters.addComponents(percentiles, methodAndDistance, allowedShifts, matchingReplicates, utrLengths, writeGraphs);
 
 
-
     }
 
-    private void setupPresetListeners() {
-        presetOrCustom.addValueChangeListener(vce -> {
-            presenter.setParamsCustom(vce.getValue().equals("Custom"));
-            customParameters.setVisible(vce.getValue().equals("Custom"));
-            presetSelection.setVisible(vce.getValue().equals("Preset"));
-        });
-        presetSelection.addValueChangeListener(vce -> {
-            switch (vce.getValue()) {
-                case "Very Specific":
-                    presenter.setPreset(Presenter.Preset.VERY_SPECIFIC);
-                    break;
-                case "More Specific":
-                    presenter.setPreset(Presenter.Preset.MORE_SPECIFIC);
-                    break;
-                case "Default":
-                    presenter.setPreset(Presenter.Preset.DEFAULT);
-                    break;
-                case "More Sensitive":
-                    presenter.setPreset(Presenter.Preset.MORE_SENSITIVE);
-                    break;
-                case "Very Sensitive":
-                    presenter.setPreset(Presenter.Preset.VERY_SENSITIVE);
-                    break;
-            }
-            presenter.applyPresetParameters();
-        });
-
+    private void setupContextHelp() {
+        contextHelp = new ContextHelp();
+        contextHelp.extend(UI.getCurrent());
+        contextHelp.addHelpForComponent(stepHeight, "MyPersonalStepHeightHelp");
     }
 
     public RadioButtonGroup<String> getPresetOrCustom() {

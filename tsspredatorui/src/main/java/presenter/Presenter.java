@@ -1,14 +1,16 @@
 package presenter;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.ValueProvider;
+import com.vaadin.data.*;
 import com.vaadin.data.validator.IntegerRangeValidator;
-import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.server.Setter;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import model.*;
+import model.beans.AlignmentFileBean;
+import model.beans.AnnotationFileBean;
+import model.beans.FastaFileBean;
+import model.beans.ProjectBean;
+import model.config.ConfigFile;
+import model.config.Genome;
+import model.config.Replicate;
 import view.AccordionLayoutMain;
 import view.firstImplementation.ConditionDataPanel;
 import view.firstImplementation.DataPanel;
@@ -17,13 +19,13 @@ import view.firstImplementation.GenomeDataPanel;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * @author jmueller
  */
 public class Presenter {
     private ConfigFile configFile;
-    private boolean isParamsCustom;
     private AccordionLayoutMain view;
     private Binder<ConfigFile> configFileBinder;
 
@@ -35,9 +37,11 @@ public class Presenter {
     private Preset preset = Preset.DEFAULT;
 
     public Presenter() {
-        isParamsCustom = false; //Preset parameters by default
         configFile = new ConfigFile();
         configFile.setGenomeList(new ArrayList<>());
+        //We start with one Dataset and one replicate
+        addDatasets(1);
+        addReplicates(1);
         setInitialConfigParameters();
         configFileBinder = new Binder<>();
         configFileBinder.setBean(configFile);
@@ -50,26 +54,43 @@ public class Presenter {
     public void initFields() {
         view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
         view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
+        view.getGenomeDataPanel().initAccordion();
 
     }
 
     public void initBindings() {
-        configFileBinder.forField(view.getGeneralConfigPanel().getProjectName())
-                .asRequired("Please enter a Project Name")
-                .bind(ConfigFile::getProjectName, ConfigFile::setProjectName);
+        configFileBinder.forField(view.getGeneralConfigPanel().getProjectGrid().asSingleSelect())
+                .withValidator(Objects::nonNull, "Please select a project from the list")
+                .bind(new ValueProvider<ConfigFile, ProjectBean>() {
+                          @Override
+                          public ProjectBean apply(ConfigFile configFile) {
+                              return new ProjectBean(); //TODO: Return something useful here
+                          }
+                      },
+                        new Setter<ConfigFile, ProjectBean>() {
+                            @Override
+                            public void accept(ConfigFile configFile, ProjectBean projectBean) {
+                                configFile.setProjectName(projectBean.getName());
+                            }
+                        });
+
         configFileBinder.forField(view.getGenomeDataPanel().getNumberOfDatasetsBox())
                 .asRequired("Please set a number")
                 .withValidator(new IntegerRangeValidator("Please set at least to 1", 1, Integer.MAX_VALUE))
                 .bind(
                         (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfDatasets();
+                            int oldDatasetCount = configFile.getNumberOfDatasets();
+                            //Add or remove datasets in the ConfigFile so they match the given number
+                            int delta = number - oldDatasetCount;
                             configFile.setNumberOfDatasets(number);
-                            //Add or remove datasets so they match the given number
-                            if (delta > 0)
+                            if (delta > 0) {
                                 addDatasets(delta);
-                            else
+                            } else {
                                 removeDatasets(-delta);
+                            }
+                            //Update view
+                            view.getGenomeDataPanel().updateAccordion(oldDatasetCount, getNumberOfReplicates());
 
                         });
         configFileBinder.forField(view.getConditionDataPanel().getNumberOfDatasetsBox())
@@ -78,14 +99,16 @@ public class Presenter {
                 .bind(
                         (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfDatasets();
+                            int oldDatasetCount = configFile.getNumberOfDatasets();
+                            //Add or remove datasets in the ConfigFile so they match the given number
+                            int delta = number - oldDatasetCount;
                             configFile.setNumberOfDatasets(number);
-                            //Add or remove datasets so they match the given number
                             if (delta > 0)
                                 addDatasets(delta);
                             else
                                 removeDatasets(-delta);
-
+                            //Update view
+                            view.getConditionDataPanel().updateAccordion(oldDatasetCount, getNumberOfReplicates());
                         });
 
         configFileBinder.forField(view.getGenomeDataPanel().getNumberOfReplicatesBox())
@@ -93,13 +116,16 @@ public class Presenter {
                 .withValidator(new IntegerRangeValidator("Please set at least to 1", 1, Integer.MAX_VALUE))
                 .bind((ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfReplicates(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfReplicates();
+                            int oldReplicateCount = configFile.getNumberOfReplicates();
+                            int delta = number - oldReplicateCount;
                             configFile.setNumberOfReplicates(number);
                             //Add or remove replicates so they match the given number
                             if (delta > 0)
                                 addReplicates(delta);
                             else
                                 removeReplicates(-delta);
+                            //Update view
+                            view.getGenomeDataPanel().updateAccordion(getNumberOfDatasets(), oldReplicateCount);
                         });
 
         configFileBinder.forField(view.getConditionDataPanel().getNumberOfReplicatesBox())
@@ -107,13 +133,15 @@ public class Presenter {
                 .withValidator(new IntegerRangeValidator("Please set at least to 1", 1, Integer.MAX_VALUE))
                 .bind(configFile1 -> configFile1.getNumberOfReplicates(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfReplicates();
+                            int oldReplicateCount = configFile.getNumberOfReplicates();
+                            int delta = number - oldReplicateCount;
                             configFile.setNumberOfReplicates(number);
                             //Add or remove replicates so they match the given number
                             if (delta > 0)
                                 addReplicates(delta);
                             else
                                 removeReplicates(-delta);
+                            view.getConditionDataPanel().updateAccordion(getNumberOfDatasets(), oldReplicateCount);
                         });
 
         configFileBinder.forField(view.getGeneralConfigPanel().getProjectTypeButtonGroup())
@@ -127,15 +155,43 @@ public class Presenter {
                         new Setter<ConfigFile, String>() {
                             @Override
                             public void accept(ConfigFile configFile, String s) {
-                                view.updateDataPanelMode(s.equals("Compare Conditions"));
-                                configFile.setModeConditions(s.equals("Compare Conditions"));
+                                boolean isModeConditions = s.equals("Compare Conditions");
+                                view.updateDataPanelMode(isModeConditions);
+                                configFile.setModeConditions(isModeConditions);
+                                configFile.setNumberOfDatasets(1);
+                                configFile.setNumberOfReplicates(1);
+                                view.getGeneralConfigPanel().getAlignmentFileGrid().setVisible(!isModeConditions);
+                                if (isModeConditions) {
+                                    view.getGenomeDataPanel().getDatasetAccordion().removeAllComponents();
+                                    view.getConditionDataPanel().initAccordion();
+                                    view.getConditionDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                    view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
+                                } else {
+                                    view.getConditionDataPanel().getDatasetAccordion().removeAllComponents();
+                                    view.getGenomeDataPanel().initAccordion();
+                                    view.getGenomeDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                    view.getGenomeDataPanel().getNumberOfReplicatesBox().setValue(1);
+
+                                }
+
                             }
                         }
                 );
-        configFileBinder.forField(view.getGeneralConfigPanel().getAlignmentFileUpload())
-                .asRequired("Please choose an alignment file (*.xmfa)")
-                .bind(ConfigFile::getAlignmentFile,
-                        ConfigFile::setAlignmentFile);
+        configFileBinder.forField(view.getGeneralConfigPanel().getAlignmentFileGrid().asSingleSelect())
+                .withValidator(Objects::nonNull, "Please select an alignment file from the list")
+                .bind(new ValueProvider<ConfigFile, AlignmentFileBean>() {
+                          @Override
+                          public AlignmentFileBean apply(ConfigFile configFile) {
+                              return new AlignmentFileBean(); //TODO: Return something useful here
+                          }
+                      },
+                        new Setter<ConfigFile, AlignmentFileBean>() {
+                            @Override
+                            public void accept(ConfigFile configFile, AlignmentFileBean alignmentFileBean) {
+                                configFile.setAlignmentFile(alignmentFileBean.getName());
+                            }
+                        });
+
         configFileBinder.forField(view.getParametersPanel().getWriteGraphs())
                 .bind(ConfigFile::isWriteGraphs,
                         ConfigFile::setWriteGraphs);
@@ -192,18 +248,39 @@ public class Presenter {
                 .bind(ConfigFile::getAntisenseUtrLength, ConfigFile::setAntisenseUtrLength);
 
         //Bindings for conditionDataPanel exclusively
-        configFileBinder.forField(view.getConditionDataPanel().getFastaField())
-                .asRequired("Please select a Fasta file (*.fasta)")
-                .bind(ConfigFile::getConditionFasta,
-                        ConfigFile::setConditionFasta);
-        configFileBinder.forField(view.getConditionDataPanel().getGffField())
-                .asRequired("Please select an annotation file (*.gff)")
-                .bind(ConfigFile::getConditionGFF,
-                        ConfigFile::setConditionGFF);
-
+        configFileBinder.forField(view.getConditionDataPanel().getFastaGrid().asSingleSelect())
+                .withValidator(Objects::nonNull, "Please select a Fasta file (*.fasta)")
+                .bind(new ValueProvider<ConfigFile, FastaFileBean>() {
+                          @Override
+                          public FastaFileBean apply(ConfigFile configFile) {
+                              return new FastaFileBean();
+                          }
+                      },
+                        new Setter<ConfigFile, FastaFileBean>() {
+                            @Override
+                            public void accept(ConfigFile configFile, FastaFileBean fastaFileBean) {
+                                configFile.setConditionFasta(fastaFileBean.getName());
+                            }
+                        });
+        configFileBinder.forField(view.getConditionDataPanel().getGffGrid().asSingleSelect())
+                .withValidator(Objects::nonNull, "Please select an annotation file (*.gff)")
+                .bind(new ValueProvider<ConfigFile, AnnotationFileBean>() {
+                    @Override
+                    public AnnotationFileBean apply(ConfigFile configFile) {
+                        return new AnnotationFileBean();
+                    }
+                }, new Setter<ConfigFile, AnnotationFileBean>() {
+                    @Override
+                    public void accept(ConfigFile configFile, AnnotationFileBean annotationFileBean) {
+                        configFile.setConditionGFF(annotationFileBean.getName());
+                    }
+                });
     }
 
     public void setInitialConfigParameters() {
+        configFile.setModeConditions(false);
+        configFile.setNumberOfDatasets(1);
+        configFile.setNumberOfReplicates(1);
         configFile.setNormalizationPercentile(0.9);
         configFile.setEnrichmentNormalizationPercentile(0.5);
         configFile.setClusterMethod("HIGHEST");
@@ -246,19 +323,21 @@ public class Presenter {
                                     configFile.getGenomeList().get(index).setName(name);
                                 }
                             });
-            configFileBinder.forField(genomeTab.getFastaField()).asRequired("Please select the fasta file of this genome (*.fasta)")
-                    .bind(new ValueProvider<ConfigFile, String>() {
-                              @Override
-                              public String apply(ConfigFile configFile) {
-                                  return configFile.getGenomeList().get(index).getFasta();
-                              }
-                          },
-                            new Setter<ConfigFile, String>() {
-                                @Override
-                                public void accept(ConfigFile configFile, String fasta) {
-                                    configFile.getGenomeList().get(index).setFasta(fasta);
-                                }
-                            });
+
+            configFileBinder.forField(genomeTab.getFastaGrid().asSingleSelect())
+                    .withValidator(Objects::nonNull, "Please select the fasta file of this genome (*.fasta)")
+                    .bind(new ValueProvider<ConfigFile, FastaFileBean>() {
+                        @Override
+                        public FastaFileBean apply(ConfigFile configFile) {
+                            return new FastaFileBean();
+                        }
+                    }, new Setter<ConfigFile, FastaFileBean>() {
+                        @Override
+                        public void accept(ConfigFile configFile, FastaFileBean fastaFileBean) {
+                            configFile.getGenomeList().get(index).setFasta(fastaFileBean.getName());
+                        }
+                    });
+
             configFileBinder.forField(genomeTab.getIdField()).asRequired("Please enter the alignment id of this genome")
                     .bind(new ValueProvider<ConfigFile, String>() {
                               @Override
@@ -272,20 +351,20 @@ public class Presenter {
                                     configFile.getGenomeList().get(index).setAlignmentID(id);
                                 }
                             });
-            configFileBinder.forField(genomeTab.getGffField()).asRequired("Please select the annotation file of this genome (*.gff)")
-                    .bind(new ValueProvider<ConfigFile, String>() {
-                              @Override
-                              public String apply(ConfigFile configFile) {
-                                  return configFile.getGenomeList().get(index).getGff();
-                              }
-                          },
-                            new Setter<ConfigFile, String>() {
-                                @Override
-                                public void accept(ConfigFile configFile, String annotation) {
-                                    configFile.getGenomeList().get(index).setGff(annotation);
-                                }
-                            });
 
+            configFileBinder.forField(genomeTab.getGffGrid().asSingleSelect())
+                    .withValidator(Objects::nonNull, "Please select the annotation file of this genome (*.gff)")
+                    .bind(new ValueProvider<ConfigFile, AnnotationFileBean>() {
+                        @Override
+                        public AnnotationFileBean apply(ConfigFile configFile) {
+                            return new AnnotationFileBean();
+                        }
+                    }, new Setter<ConfigFile, AnnotationFileBean>() {
+                        @Override
+                        public void accept(ConfigFile configFile, AnnotationFileBean annotationFileBean) {
+                            configFile.getGenomeList().get(index).setGff(annotationFileBean.getName());
+                        }
+                    });
         }
 
 
@@ -299,7 +378,7 @@ public class Presenter {
         } else {
             replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
         }
-        configFileBinder.forField(replicateTab.getEplus()).asRequired("Please select a graph file (*.gr)")
+        configFileBinder.forField(replicateTab.getEnrichedCoding()).asRequired("Please select a graph file (*.gr)")
                 .bind(new ValueProvider<ConfigFile, String>() {
                           @Override
                           public String apply(ConfigFile configFile) {
@@ -312,7 +391,7 @@ public class Presenter {
                                 configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedCodingStrand(strand);
                             }
                         });
-        configFileBinder.forField(replicateTab.getEminus()).asRequired("Please select a graph file (*.gr)")
+        configFileBinder.forField(replicateTab.getEnrichedTemplate()).asRequired("Please select a graph file (*.gr)")
                 .bind(new ValueProvider<ConfigFile, String>() {
                           @Override
                           public String apply(ConfigFile configFile) {
@@ -325,7 +404,7 @@ public class Presenter {
                                 configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedTemplateStrand(strand);
                             }
                         });
-        configFileBinder.forField(replicateTab.getNplus()).asRequired("Please select a graph file (*.gr)")
+        configFileBinder.forField(replicateTab.getNormalCoding()).asRequired("Please select a graph file (*.gr)")
                 .bind(new ValueProvider<ConfigFile, String>() {
                           @Override
                           public String apply(ConfigFile configFile) {
@@ -338,7 +417,7 @@ public class Presenter {
                                 configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setNormalCodingStrand(strand);
                             }
                         });
-        configFileBinder.forField(replicateTab.getNminus()).asRequired("Please select a graph file (*.gr)")
+        configFileBinder.forField(replicateTab.getNormalTemplate()).asRequired("Please select a graph file (*.gr)")
                 .bind(new ValueProvider<ConfigFile, String>() {
                           @Override
                           public String apply(ConfigFile configFile) {
@@ -352,12 +431,6 @@ public class Presenter {
                             }
                         });
     }
-
-
-    public void setParamsCustom(boolean paramsCustom) {
-        isParamsCustom = paramsCustom;
-    }
-
 
     public void addDatasets(int datasetsToAdd) {
         for (int i = 0; i < datasetsToAdd; i++) {
@@ -506,5 +579,13 @@ public class Presenter {
 
     public void setPreset(Preset preset) {
         this.preset = preset;
+    }
+
+    public int getNumberOfDatasets() {
+        return configFile.getNumberOfDatasets();
+    }
+
+    public int getNumberOfReplicates() {
+        return configFile.getNumberOfReplicates();
     }
 }

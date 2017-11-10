@@ -1,7 +1,6 @@
-package model;
+package model.config;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Contains all the information about a genome that are written to the config file

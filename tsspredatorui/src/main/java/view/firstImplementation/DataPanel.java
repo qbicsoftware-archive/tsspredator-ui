@@ -1,10 +1,8 @@
 package view.firstImplementation;
 
 import com.vaadin.ui.*;
-import model.Genome;
-import model.Replicate;
+import model.beans.GraphFileBean;
 import presenter.Presenter;
-import view.DataView;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -16,15 +14,14 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public abstract class DataPanel extends CustomComponent implements DataView {
+public abstract class DataPanel extends CustomComponent {
     Presenter presenter;
     Panel dataPanel;
     Layout contentLayout;
-    int numberOfDatasets, numberOfReplicates;
     Accordion datasetAccordion;
     ComboBox<Integer> numberOfDatasetsBox;
     ComboBox<Integer> numberOfReplicatesBox;
-    Button setNumbers;
+    //Button setNumbers;
 
     public DataPanel(Presenter presenter) {
         dataPanel = designPanel();
@@ -51,22 +48,33 @@ public abstract class DataPanel extends CustomComponent implements DataView {
             possibleReplicates.add(i + 1);
         }
         numberOfReplicatesBox.setItems(possibleReplicates);
-        setNumbers = new Button("Set selection", e -> {
-            int oldDatasetCount = numberOfDatasets;
-            int oldReplicateCount = numberOfReplicates;
-            numberOfDatasets = numberOfDatasetsBox.getValue();
-            numberOfReplicates = numberOfReplicatesBox.getValue();
-            updateAccordion(oldDatasetCount, oldReplicateCount);
 
-        });
+//        setNumbers = new Button("Set selection", e -> {
+//            int oldDatasetCount = presenter.getNumberOfDatasets();
+//            int oldReplicateCount = presenter.getNumberOfReplicates();
+//            updateAccordion(oldDatasetCount, oldReplicateCount);
+//
+//        });
 
 
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
-        datasetAccordion.setVisible(false);
 
         panel.setContent(contentLayout);
         return panel;
+    }
+
+    /**
+     * The accordion is initialized with one dataset (genome/condition) and one replicate
+     */
+    public void initAccordion(){
+        Component initialTab = this instanceof GenomeDataPanel
+                ? ((GenomeDataPanel) this).createGenomeTab(0)
+                : ((ConditionDataPanel) this).createConditionTab(0);
+        //Tell presenter to set up bindings
+        datasetAccordion.addTab(initialTab, "Genome " + 1);
+        presenter.initDatasetBindings(0);
+        presenter.initReplicateBindings(0,0);
     }
 
 
@@ -75,52 +83,55 @@ public abstract class DataPanel extends CustomComponent implements DataView {
      * the number of genomes/conditions or replicates, this Accordion has to be updated,
      * which happens here
      */
-    void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
+    public void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
         //Adjust number of replicate tabs for each dataset tab
-        int replicateDelta = numberOfReplicates - oldReplicateCount;
+        int replicateDelta = presenter.getNumberOfReplicates() - oldReplicateCount;
         for (int datasetIndex = 0; datasetIndex < oldDatasetCount; datasetIndex++) {
             datasetAccordion.getTab(datasetIndex);
             TabSheet.Tab tab = datasetAccordion.getTab(datasetIndex);
             //Access the replicate sheet of the current tab
             //It's the last of its three components, so its index is 2
-            Component currentReplicateSheet = ((VerticalLayout) tab.getComponent()).getComponent(2);
+            TabSheet currentReplicateSheet = ((DatasetTab) tab.getComponent()).replicatesSheet;
             if (replicateDelta > 0) {
                 //Add new replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = oldReplicateCount;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     Component replicateTab = new ReplicateTab(datasetIndex, replicateIndex);
-                    ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
+                    currentReplicateSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             } else {
                 //Remove excess replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex > numberOfReplicates; replicateIndex--) {
-                    ((TabSheet) currentReplicateSheet).removeTab(((TabSheet) currentReplicateSheet).getTab(replicateIndex - 1));
+                for (int replicateIndex = oldReplicateCount; replicateIndex > presenter.getNumberOfReplicates(); replicateIndex--) {
+                    currentReplicateSheet.removeTab(currentReplicateSheet.getTab(replicateIndex - 1));
                 }
             }
         }
 
 
-        int datasetDelta = numberOfDatasets - oldDatasetCount;
+        int datasetDelta = presenter.getNumberOfDatasets() - oldDatasetCount;
         if (datasetDelta > 0) {
             //Add new dataset tabs
-            for (int datasetIndex = oldDatasetCount; datasetIndex < numberOfDatasets; datasetIndex++) {
+            for (int datasetIndex = oldDatasetCount; datasetIndex < presenter.getNumberOfDatasets(); datasetIndex++) {
                 Component currentTab = this instanceof GenomeDataPanel
                         ? ((GenomeDataPanel) this).createGenomeTab(datasetIndex)
                         : ((ConditionDataPanel) this).createConditionTab(datasetIndex);
                 //Tell presenter to set up bindings
                 datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
                 presenter.initDatasetBindings(datasetIndex);
-                for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = 0;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             }
         } else {
             //Remove excess dataset tabs
-            for (int i = oldDatasetCount; i > numberOfDatasets; i--) {
+            for (int i = oldDatasetCount; i > presenter.getNumberOfDatasets(); i--) {
                 datasetAccordion.removeTab(datasetAccordion.getTab(i - 1));
             }
         }
-        datasetAccordion.setVisible(true);
 
     }
 
@@ -134,7 +145,9 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         public DatasetTab(int index) {
             tab = new VerticalLayout();
             replicatesSheet = new TabSheet();
-            for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+            for (int replicateIndex = 0;
+                 replicateIndex < presenter.getNumberOfReplicates();
+                 replicateIndex++) {
                 ReplicateTab replicateTab = new ReplicateTab(index, replicateIndex);
                 replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
             }
@@ -152,39 +165,47 @@ public abstract class DataPanel extends CustomComponent implements DataView {
      * It works for both the genome and the condition variants.
      */
     public class ReplicateTab extends CustomComponent {
-        HorizontalLayout layout;
-        TextField eplus, eminus, nplus, nminus;
+        VerticalLayout layout;
+        TextField enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
+        Grid<GraphFileBean> graphFileGrid;
 
         public ReplicateTab(int datasetIndex, int replicateIndex) {
-            layout = new HorizontalLayout();
+            layout = new VerticalLayout();
+
             VerticalLayout enrichedPart = new VerticalLayout();
-            eplus = new TextField("Enriched Plus");
-            eminus = new TextField("Enriched Minus");
-            enrichedPart.addComponents(eplus, eminus);
+            enrichedCoding = new TextField("Enriched Coding Strand");
+            enrichedTemplate = new TextField("Enriched Template Strand");
+            enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
             VerticalLayout normalPart = new VerticalLayout();
-            nplus = new TextField("Normal Plus");
-            nminus = new TextField("Normal Minus");
-            normalPart.addComponents(nplus, nminus);
+            normalCoding = new TextField("Normal Coding Strand");
+            normalTemplate = new TextField("Normal Template Strand");
+            normalPart.addComponents(normalCoding, normalTemplate);
+
+            graphFileGrid = new Grid<>("Graph Files");
+            graphFileGrid.addColumn(GraphFileBean::getName).setCaption("File name");
+            graphFileGrid.addColumn(GraphFileBean::getCreationDate).setCaption("Creation Date");
+            graphFileGrid.addColumn(GraphFileBean::getSizeInKB).setCaption("Size in KB");
+
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
-            layout.addComponents(enrichedPart, normalPart);
+            layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
             setCompositionRoot(layout);
 
         }
 
-        public TextField getEplus() {
-            return eplus;
+        public TextField getEnrichedCoding() {
+            return enrichedCoding;
         }
 
-        public TextField getEminus() {
-            return eminus;
+        public TextField getEnrichedTemplate() {
+            return enrichedTemplate;
         }
 
-        public TextField getNplus() {
-            return nplus;
+        public TextField getNormalCoding() {
+            return normalCoding;
         }
 
-        public TextField getNminus() {
-            return nminus;
+        public TextField getNormalTemplate() {
+            return normalTemplate;
         }
     }
 
@@ -214,16 +235,8 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         return numberOfDatasetsBox;
     }
 
-    public void setNumberOfDatasetsBox(ComboBox<Integer> numberOfDatasetsBox) {
-        this.numberOfDatasetsBox = numberOfDatasetsBox;
-    }
-
     public ComboBox<Integer> getNumberOfReplicatesBox() {
         return numberOfReplicatesBox;
-    }
-
-    public void setNumberOfReplicatesBox(ComboBox<Integer> numberOfReplicatesBox) {
-        this.numberOfReplicatesBox = numberOfReplicatesBox;
     }
 
     public TextField getGenomeNameField(int index) {
@@ -231,7 +244,12 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         return null;
     }
 
+    public Accordion getDatasetAccordion() {
+        return datasetAccordion;
+    }
+
     public DatasetTab getDatasetTab(int index) {
         return (DatasetTab) datasetAccordion.getTab(index).getComponent();
     }
+
 }

@@ -10,7 +10,7 @@ public class GenomeDataPanel extends DataPanel {
     public GenomeDataPanel(Presenter presenter) {
         super(presenter);
         numberOfDatasetsBox.setCaption("Select number of Genomes");
-        contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox, setNumbers, datasetAccordion);
+        contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox, datasetAccordion);
 
     }
 

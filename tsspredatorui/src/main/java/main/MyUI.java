@@ -22,7 +22,6 @@ public class MyUI extends UI {
 
 
     protected void init(VaadinRequest vaadinRequest) {
-        //TODO: Replace AccordionLayoutMain with an interface
         Presenter presenter = new Presenter();
         AccordionLayoutMain layout = new AccordionLayoutMain(presenter);
         presenter.setView(layout);

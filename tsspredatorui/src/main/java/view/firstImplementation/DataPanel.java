@@ -21,7 +21,7 @@ public abstract class DataPanel extends CustomComponent {
     Accordion datasetAccordion;
     ComboBox<Integer> numberOfDatasetsBox;
     ComboBox<Integer> numberOfReplicatesBox;
-    Button setNumbers;
+    //Button setNumbers;
 
     public DataPanel(Presenter presenter) {
         dataPanel = designPanel();
@@ -48,17 +48,17 @@ public abstract class DataPanel extends CustomComponent {
             possibleReplicates.add(i + 1);
         }
         numberOfReplicatesBox.setItems(possibleReplicates);
-        setNumbers = new Button("Set selection", e -> {
-            int oldDatasetCount = presenter.getNumberOfDatasets();
-            int oldReplicateCount = presenter.getNumberOfReplicates();
-            updateAccordion(oldDatasetCount, oldReplicateCount);
 
-        });
+//        setNumbers = new Button("Set selection", e -> {
+//            int oldDatasetCount = presenter.getNumberOfDatasets();
+//            int oldReplicateCount = presenter.getNumberOfReplicates();
+//            updateAccordion(oldDatasetCount, oldReplicateCount);
+//
+//        });
 
 
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
-        datasetAccordion.setVisible(false);
 
         panel.setContent(contentLayout);
         return panel;
@@ -132,7 +132,6 @@ public abstract class DataPanel extends CustomComponent {
                 datasetAccordion.removeTab(datasetAccordion.getTab(i - 1));
             }
         }
-        datasetAccordion.setVisible(true);
 
     }
 

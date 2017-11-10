@@ -22,7 +22,7 @@ public class ConditionDataPanel extends DataPanel {
         gffGrid.addColumn(AnnotationFileBean::getCreationDate).setCaption("Creation Date");
         gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size in KB");
         contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox,
-                new HorizontalLayout(fastaGrid, gffGrid), setNumbers, datasetAccordion);
+                new HorizontalLayout(fastaGrid, gffGrid), datasetAccordion);
     }
 
     public class ConditionTab extends DatasetTab {

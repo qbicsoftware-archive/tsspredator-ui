@@ -54,6 +54,7 @@ public class Presenter {
     public void initFields() {
         view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
         view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
+        view.getGenomeDataPanel().initAccordion();
 
     }
 
@@ -157,6 +158,8 @@ public class Presenter {
                                 boolean isModeConditions = s.equals("Compare Conditions");
                                 view.updateDataPanelMode(isModeConditions);
                                 configFile.setModeConditions(isModeConditions);
+                                configFile.setNumberOfDatasets(1);
+                                configFile.setNumberOfReplicates(1);
                                 view.getGeneralConfigPanel().getAlignmentFileGrid().setVisible(!isModeConditions);
                                 if (isModeConditions) {
                                     view.getGenomeDataPanel().getDatasetAccordion().removeAllComponents();
@@ -167,7 +170,7 @@ public class Presenter {
                                     view.getConditionDataPanel().getDatasetAccordion().removeAllComponents();
                                     view.getGenomeDataPanel().initAccordion();
                                     view.getGenomeDataPanel().getNumberOfDatasetsBox().setValue(1);
-                                    view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
+                                    view.getGenomeDataPanel().getNumberOfReplicatesBox().setValue(1);
 
                                 }
 

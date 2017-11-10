@@ -14,11 +14,10 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public abstract class DataPanel extends CustomComponent{
+public abstract class DataPanel extends CustomComponent {
     Presenter presenter;
     Panel dataPanel;
     Layout contentLayout;
-    int numberOfDatasets, numberOfReplicates;
     Accordion datasetAccordion;
     ComboBox<Integer> numberOfDatasetsBox;
     ComboBox<Integer> numberOfReplicatesBox;
@@ -50,10 +49,8 @@ public abstract class DataPanel extends CustomComponent{
         }
         numberOfReplicatesBox.setItems(possibleReplicates);
         setNumbers = new Button("Set selection", e -> {
-            int oldDatasetCount = numberOfDatasets;
-            int oldReplicateCount = numberOfReplicates;
-            numberOfDatasets = numberOfDatasetsBox.getValue();
-            numberOfReplicates = numberOfReplicatesBox.getValue();
+            int oldDatasetCount = presenter.getNumberOfDatasets();
+            int oldReplicateCount = presenter.getNumberOfReplicates();
             updateAccordion(oldDatasetCount, oldReplicateCount);
 
         });
@@ -67,54 +64,71 @@ public abstract class DataPanel extends CustomComponent{
         return panel;
     }
 
+    /**
+     * The accordion is initialized with one dataset (genome/condition) and one replicate
+     */
+    public void initAccordion(){
+        Component initialTab = this instanceof GenomeDataPanel
+                ? ((GenomeDataPanel) this).createGenomeTab(0)
+                : ((ConditionDataPanel) this).createConditionTab(0);
+        //Tell presenter to set up bindings
+        datasetAccordion.addTab(initialTab, "Genome " + 1);
+        presenter.initDatasetBindings(0);
+        presenter.initReplicateBindings(0,0);
+    }
+
 
     /**
      * The genomes/conditions are organized as tabs in an Accordion. When the user changes
      * the number of genomes/conditions or replicates, this Accordion has to be updated,
      * which happens here
      */
-    void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
+    public void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
         //Adjust number of replicate tabs for each dataset tab
-        int replicateDelta = numberOfReplicates - oldReplicateCount;
+        int replicateDelta = presenter.getNumberOfReplicates() - oldReplicateCount;
         for (int datasetIndex = 0; datasetIndex < oldDatasetCount; datasetIndex++) {
             datasetAccordion.getTab(datasetIndex);
             TabSheet.Tab tab = datasetAccordion.getTab(datasetIndex);
             //Access the replicate sheet of the current tab
             //It's the last of its three components, so its index is 2
-            Component currentReplicateSheet = ((VerticalLayout) tab.getComponent()).getComponent(2);
+            TabSheet currentReplicateSheet = ((DatasetTab) tab.getComponent()).replicatesSheet;
             if (replicateDelta > 0) {
                 //Add new replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = oldReplicateCount;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     Component replicateTab = new ReplicateTab(datasetIndex, replicateIndex);
-                    ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
+                    currentReplicateSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             } else {
                 //Remove excess replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex > numberOfReplicates; replicateIndex--) {
-                    ((TabSheet) currentReplicateSheet).removeTab(((TabSheet) currentReplicateSheet).getTab(replicateIndex - 1));
+                for (int replicateIndex = oldReplicateCount; replicateIndex > presenter.getNumberOfReplicates(); replicateIndex--) {
+                    currentReplicateSheet.removeTab(currentReplicateSheet.getTab(replicateIndex - 1));
                 }
             }
         }
 
 
-        int datasetDelta = numberOfDatasets - oldDatasetCount;
+        int datasetDelta = presenter.getNumberOfDatasets() - oldDatasetCount;
         if (datasetDelta > 0) {
             //Add new dataset tabs
-            for (int datasetIndex = oldDatasetCount; datasetIndex < numberOfDatasets; datasetIndex++) {
+            for (int datasetIndex = oldDatasetCount; datasetIndex < presenter.getNumberOfDatasets(); datasetIndex++) {
                 Component currentTab = this instanceof GenomeDataPanel
                         ? ((GenomeDataPanel) this).createGenomeTab(datasetIndex)
                         : ((ConditionDataPanel) this).createConditionTab(datasetIndex);
                 //Tell presenter to set up bindings
                 datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
                 presenter.initDatasetBindings(datasetIndex);
-                for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = 0;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             }
         } else {
             //Remove excess dataset tabs
-            for (int i = oldDatasetCount; i > numberOfDatasets; i--) {
+            for (int i = oldDatasetCount; i > presenter.getNumberOfDatasets(); i--) {
                 datasetAccordion.removeTab(datasetAccordion.getTab(i - 1));
             }
         }
@@ -132,7 +146,9 @@ public abstract class DataPanel extends CustomComponent{
         public DatasetTab(int index) {
             tab = new VerticalLayout();
             replicatesSheet = new TabSheet();
-            for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+            for (int replicateIndex = 0;
+                 replicateIndex < presenter.getNumberOfReplicates();
+                 replicateIndex++) {
                 ReplicateTab replicateTab = new ReplicateTab(index, replicateIndex);
                 replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
             }
@@ -220,16 +236,8 @@ public abstract class DataPanel extends CustomComponent{
         return numberOfDatasetsBox;
     }
 
-    public void setNumberOfDatasetsBox(ComboBox<Integer> numberOfDatasetsBox) {
-        this.numberOfDatasetsBox = numberOfDatasetsBox;
-    }
-
     public ComboBox<Integer> getNumberOfReplicatesBox() {
         return numberOfReplicatesBox;
-    }
-
-    public void setNumberOfReplicatesBox(ComboBox<Integer> numberOfReplicatesBox) {
-        this.numberOfReplicatesBox = numberOfReplicatesBox;
     }
 
     public TextField getGenomeNameField(int index) {
@@ -237,7 +245,12 @@ public abstract class DataPanel extends CustomComponent{
         return null;
     }
 
+    public Accordion getDatasetAccordion() {
+        return datasetAccordion;
+    }
+
     public DatasetTab getDatasetTab(int index) {
         return (DatasetTab) datasetAccordion.getTab(index).getComponent();
     }
+
 }

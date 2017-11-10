@@ -57,7 +57,7 @@ public class AccordionLayoutMain extends VerticalLayout {
         contentAccordion.addTab(conditionDataPanel, "Data Settings");
         //Initially, the "Data Settings"-panel is a GenomeDataPanel,
         // since "Genome" is the initial selection in the respective checkbox.
-        //We thus set conditionDataPanel to invisible.
+        //We thus set conditionDataPanel to invisible
         contentAccordion.getTab(2).setVisible(false);
         contentAccordion.addTab(parametersPanel, "Parameters");
 

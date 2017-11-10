@@ -70,7 +70,6 @@ public class ParametersPanel extends CustomComponent {
 
     private void setupPresetListeners() {
         presetOrCustom.addValueChangeListener(vce -> {
-            presenter.setParamsCustom(vce.getValue().equals("Custom"));
             customParameters.setVisible(vce.getValue().equals("Custom"));
             presetSelection.setVisible(vce.getValue().equals("Preset"));
         });

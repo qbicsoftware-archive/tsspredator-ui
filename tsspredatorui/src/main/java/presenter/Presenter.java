@@ -26,7 +26,6 @@ import java.util.Objects;
  */
 public class Presenter {
     private ConfigFile configFile;
-    private boolean isParamsCustom;
     private AccordionLayoutMain view;
     private Binder<ConfigFile> configFileBinder;
 
@@ -38,9 +37,11 @@ public class Presenter {
     private Preset preset = Preset.DEFAULT;
 
     public Presenter() {
-        isParamsCustom = false; //Preset parameters by default
         configFile = new ConfigFile();
         configFile.setGenomeList(new ArrayList<>());
+        //We start with one Dataset and one replicate
+        addDatasets(1);
+        addReplicates(1);
         setInitialConfigParameters();
         configFileBinder = new Binder<>();
         configFileBinder.setBean(configFile);
@@ -78,13 +79,17 @@ public class Presenter {
                 .bind(
                         (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfDatasets();
+                            int oldDatasetCount = configFile.getNumberOfDatasets();
+                            //Add or remove datasets in the ConfigFile so they match the given number
+                            int delta = number - oldDatasetCount;
                             configFile.setNumberOfDatasets(number);
-                            //Add or remove datasets so they match the given number
-                            if (delta > 0)
+                            if (delta > 0) {
                                 addDatasets(delta);
-                            else
+                            } else {
                                 removeDatasets(-delta);
+                            }
+                            //Update view
+                            view.getGenomeDataPanel().updateAccordion(oldDatasetCount, getNumberOfReplicates());
 
                         });
         configFileBinder.forField(view.getConditionDataPanel().getNumberOfDatasetsBox())
@@ -93,14 +98,16 @@ public class Presenter {
                 .bind(
                         (ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfDatasets(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfDatasets();
+                            int oldDatasetCount = configFile.getNumberOfDatasets();
+                            //Add or remove datasets in the ConfigFile so they match the given number
+                            int delta = number - oldDatasetCount;
                             configFile.setNumberOfDatasets(number);
-                            //Add or remove datasets so they match the given number
                             if (delta > 0)
                                 addDatasets(delta);
                             else
                                 removeDatasets(-delta);
-
+                            //Update view
+                            view.getConditionDataPanel().updateAccordion(oldDatasetCount, getNumberOfReplicates());
                         });
 
         configFileBinder.forField(view.getGenomeDataPanel().getNumberOfReplicatesBox())
@@ -108,13 +115,16 @@ public class Presenter {
                 .withValidator(new IntegerRangeValidator("Please set at least to 1", 1, Integer.MAX_VALUE))
                 .bind((ValueProvider<ConfigFile, Integer>) configFile1 -> configFile1.getNumberOfReplicates(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfReplicates();
+                            int oldReplicateCount = configFile.getNumberOfReplicates();
+                            int delta = number - oldReplicateCount;
                             configFile.setNumberOfReplicates(number);
                             //Add or remove replicates so they match the given number
                             if (delta > 0)
                                 addReplicates(delta);
                             else
                                 removeReplicates(-delta);
+                            //Update view
+                            view.getGenomeDataPanel().updateAccordion(getNumberOfDatasets(), oldReplicateCount);
                         });
 
         configFileBinder.forField(view.getConditionDataPanel().getNumberOfReplicatesBox())
@@ -122,13 +132,15 @@ public class Presenter {
                 .withValidator(new IntegerRangeValidator("Please set at least to 1", 1, Integer.MAX_VALUE))
                 .bind(configFile1 -> configFile1.getNumberOfReplicates(),
                         (Setter<ConfigFile, Integer>) (configFile, number) -> {
-                            int delta = number - configFile.getNumberOfReplicates();
+                            int oldReplicateCount = configFile.getNumberOfReplicates();
+                            int delta = number - oldReplicateCount;
                             configFile.setNumberOfReplicates(number);
                             //Add or remove replicates so they match the given number
                             if (delta > 0)
                                 addReplicates(delta);
                             else
                                 removeReplicates(-delta);
+                            view.getConditionDataPanel().updateAccordion(getNumberOfDatasets(), oldReplicateCount);
                         });
 
         configFileBinder.forField(view.getGeneralConfigPanel().getProjectTypeButtonGroup())
@@ -142,8 +154,23 @@ public class Presenter {
                         new Setter<ConfigFile, String>() {
                             @Override
                             public void accept(ConfigFile configFile, String s) {
-                                view.updateDataPanelMode(s.equals("Compare Conditions"));
-                                configFile.setModeConditions(s.equals("Compare Conditions"));
+                                boolean isModeConditions = s.equals("Compare Conditions");
+                                view.updateDataPanelMode(isModeConditions);
+                                configFile.setModeConditions(isModeConditions);
+                                view.getGeneralConfigPanel().getAlignmentFileGrid().setVisible(!isModeConditions);
+                                if (isModeConditions) {
+                                    view.getGenomeDataPanel().getDatasetAccordion().removeAllComponents();
+                                    view.getConditionDataPanel().initAccordion();
+                                    view.getConditionDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                    view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
+                                } else {
+                                    view.getConditionDataPanel().getDatasetAccordion().removeAllComponents();
+                                    view.getGenomeDataPanel().initAccordion();
+                                    view.getGenomeDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                    view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
+
+                                }
+
                             }
                         }
                 );
@@ -248,6 +275,9 @@ public class Presenter {
     }
 
     public void setInitialConfigParameters() {
+        configFile.setModeConditions(false);
+        configFile.setNumberOfDatasets(1);
+        configFile.setNumberOfReplicates(1);
         configFile.setNormalizationPercentile(0.9);
         configFile.setEnrichmentNormalizationPercentile(0.5);
         configFile.setClusterMethod("HIGHEST");
@@ -399,12 +429,6 @@ public class Presenter {
                         });
     }
 
-
-    public void setParamsCustom(boolean paramsCustom) {
-        isParamsCustom = paramsCustom;
-    }
-
-
     public void addDatasets(int datasetsToAdd) {
         for (int i = 0; i < datasetsToAdd; i++) {
             Genome currentGenome = new Genome();
@@ -552,5 +576,13 @@ public class Presenter {
 
     public void setPreset(Preset preset) {
         this.preset = preset;
+    }
+
+    public int getNumberOfDatasets() {
+        return configFile.getNumberOfDatasets();
+    }
+
+    public int getNumberOfReplicates() {
+        return configFile.getNumberOfReplicates();
     }
 }

@@ -39,21 +39,17 @@ public class GeneralConfigPanel extends CustomComponent{
         String strainOrSpecies = "Compare Strain/Species";
         String conditions = "Compare Conditions";
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
+
+
         projectTypeButtonGroup.setSelectedItem(strainOrSpecies);
 
         alignmentFileGrid = new Grid<>("Select alignment file");
         alignmentFileGrid.addColumn(AlignmentFileBean::getName).setCaption("File name");
         alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
         alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size in KB");
-        //The uploader should only be visible if strains/species are to be compared
+        //The alignment file selection should only be visible if strains/species are to be compared
         //(which is the initial case)
         alignmentFileGrid.setVisible(true);
-        projectTypeButtonGroup.addSelectionListener((SingleSelectionListener<String>) e -> {
-            if (e.getSelectedItem().get().equals(strainOrSpecies))
-                alignmentFileGrid.setVisible(true);
-            else
-                alignmentFileGrid.setVisible(false);
-        });
         contentLayout.addComponents(projectTypeButtonGroup, new HorizontalLayout(projectGrid, alignmentFileGrid));
         panel.setContent(contentLayout);
         return panel;

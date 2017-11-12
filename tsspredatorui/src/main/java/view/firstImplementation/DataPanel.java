@@ -6,6 +6,9 @@ import presenter.Presenter;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * In this abstract class, the parts of the DataPanel which are common to both
@@ -36,26 +39,13 @@ public abstract class DataPanel extends CustomComponent {
         numberOfReplicatesBox = new ComboBox<>("Select number of Replicates");
 
 
-        //TODO: Is this the most elegant way to do this?
-        Collection<Integer> possibleGenomesOrConditions = new LinkedList<>();
-        for (int i = 0; i < 100; i++) {
-            possibleGenomesOrConditions.add(i + 1);
-        }
-        numberOfDatasetsBox.setItems(possibleGenomesOrConditions);
+        List<Integer> possibleDatasetNumber =
+                IntStream.rangeClosed(1, 100).boxed().collect(Collectors.toList());
+        numberOfDatasetsBox.setItems(possibleDatasetNumber);
 
-        Collection<Integer> possibleReplicates = new LinkedList<>();
-        for (int i = 0; i < 100; i++) {
-            possibleReplicates.add(i + 1);
-        }
-        numberOfReplicatesBox.setItems(possibleReplicates);
-
-//        setNumbers = new Button("Set selection", e -> {
-//            int oldDatasetCount = presenter.getNumberOfDatasets();
-//            int oldReplicateCount = presenter.getNumberOfReplicates();
-//            updateAccordion(oldDatasetCount, oldReplicateCount);
-//
-//        });
-
+        List<Integer> possibleReplicateNumber =
+                IntStream.rangeClosed(1, 100).boxed().collect(Collectors.toList());
+        numberOfReplicatesBox.setItems(possibleReplicateNumber);
 
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
@@ -67,14 +57,14 @@ public abstract class DataPanel extends CustomComponent {
     /**
      * The accordion is initialized with one dataset (genome/condition) and one replicate
      */
-    public void initAccordion(){
+    public void initAccordion() {
         Component initialTab = this instanceof GenomeDataPanel
                 ? ((GenomeDataPanel) this).createGenomeTab(0)
                 : ((ConditionDataPanel) this).createConditionTab(0);
         //Tell presenter to set up bindings
         datasetAccordion.addTab(initialTab, "Genome " + 1);
         presenter.initDatasetBindings(0);
-        presenter.initReplicateBindings(0,0);
+        presenter.initReplicateBindings(0, 0);
     }
 
 

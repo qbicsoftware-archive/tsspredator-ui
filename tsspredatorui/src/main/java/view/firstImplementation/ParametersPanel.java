@@ -1,17 +1,22 @@
 package view.firstImplementation;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileResource;
-import com.vaadin.server.ThemeResource;
+import com.vaadin.server.Setter;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-import org.vaadin.jonatan.contexthelp.ContextHelp;
+import model.Globals;
 import presenter.Presenter;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * This is a component where the user can set every parameter of his TSSPredator run.
@@ -42,8 +47,6 @@ public class ParametersPanel extends CustomComponent {
     Slider utrLength, antisenseUtrLength;
     CheckBox writeGraphs;
 
-    ContextHelp contextHelp;
-
 
     public ParametersPanel(Presenter presenter) {
         this.presenter = presenter;
@@ -55,14 +58,13 @@ public class ParametersPanel extends CustomComponent {
         Panel panel = new Panel();
         contentLayout = new VerticalLayout();
 
-        presetOrCustom = new RadioButtonGroup<>("Parameters(?)");
-        presetOrCustom.setItems("Preset", "Custom");
+        presetOrCustom = new RadioButtonGroup<>();
+        presetOrCustom.setItems(Globals.PARAMETERS_PRESET, Globals.PARAMETERS_CUSTOM);
         presetOrCustom.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         presetSelection = new RadioButtonGroup<>("Choose Parameter Preset");
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
         setupPresetListeners();
         createParameterLayouts();
-        setupContextHelp();
         contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
         panel.setContent(contentLayout);
         return panel;
@@ -70,8 +72,8 @@ public class ParametersPanel extends CustomComponent {
 
     private void setupPresetListeners() {
         presetOrCustom.addValueChangeListener(vce -> {
-            customParameters.setVisible(vce.getValue().equals("Custom"));
-            presetSelection.setVisible(vce.getValue().equals("Preset"));
+            customParameters.setVisible(vce.getValue().equals(Globals.PARAMETERS_CUSTOM));
+            presetSelection.setVisible(vce.getValue().equals(Globals.PARAMETERS_PRESET));
         });
         presetSelection.addValueChangeListener(vce -> {
             switch (vce.getValue()) {
@@ -218,7 +220,7 @@ public class ParametersPanel extends CustomComponent {
         percentiles.addComponents(normalizationPercentile, enrichedNormalizationPercentile);
         HorizontalLayout methodAndDistance = new HorizontalLayout();
         clusterMethod = new ComboBox<>("Clustering Method");
-        clusterMethod.setItems("HIGHEST", "FIRST");
+        clusterMethod.setItems(Globals.CLUSTER_METHOD_HIGHEST, Globals.CLUSTER_METHOD_FIRST);
         clusteringDistance = new Slider("TSS Clustering Distance");
         clusteringDistance.setMin(0);
         clusteringDistance.setMax(100);
@@ -226,8 +228,10 @@ public class ParametersPanel extends CustomComponent {
         methodAndDistance.addComponents(clusterMethod, clusteringDistance);
 
         HorizontalLayout allowedShifts = new HorizontalLayout();
-        //TODO: Change depending on user choice: Genomes vs. Conditions
-        crossDatasetShift = new Slider("Allowed Cross-Condition Shift");
+        crossDatasetShift = new Slider();
+        crossDatasetShift.setCaption(presenter.isModeConditions()
+                ? "Allowed Cross-Condition Shift"
+                : "Allowed Cross-Genome Shift");
         crossDatasetShift.setMin(0);
         crossDatasetShift.setMax(100);
         crossReplicateShift = new Slider("Allowed Cross-Replication Shift");
@@ -235,14 +239,8 @@ public class ParametersPanel extends CustomComponent {
         crossReplicateShift.setMax(100);
         allowedShifts.addComponents(crossDatasetShift, crossReplicateShift);
         matchingReplicates = new ComboBox<>("Matching Replicates");
-        //TODO: Is this the most elegant way to do this?
-        //TODO: Replace numReplicates with the actual number of replicates
-        int numReplicates = 42;
-        Collection<Integer> replicateList = new LinkedList<>();
-        for (int i = 0; i < numReplicates; i++) {
-            replicateList.add(i + 1);
-        }
-        matchingReplicates.setItems(replicateList);
+        matchingReplicates.setItems(IntStream.rangeClosed(1, presenter.getNumberOfReplicates())
+                        .boxed().collect(Collectors.toList()));
         HorizontalLayout utrLengths = new HorizontalLayout();
         utrLength = new Slider("UTR length");
         utrLength.setMin(0);
@@ -256,12 +254,6 @@ public class ParametersPanel extends CustomComponent {
         basicParameters.addComponents(percentiles, methodAndDistance, allowedShifts, matchingReplicates, utrLengths, writeGraphs);
 
 
-    }
-
-    private void setupContextHelp() {
-        contextHelp = new ContextHelp();
-        contextHelp.extend(UI.getCurrent());
-        contextHelp.addHelpForComponent(stepHeight, "MyPersonalStepHeightHelp");
     }
 
     public RadioButtonGroup<String> getPresetOrCustom() {

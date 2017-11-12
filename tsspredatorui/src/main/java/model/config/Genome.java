@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class Genome {
     private String name;
     private String fasta; //Only set if it's a genome and not a condition
-    private String alignmentID;
     private String gff; //Only set if it's a genome and not a condition
+    private String alignmentID;
     private ArrayList<Replicate> replicateList;
 
     public Genome(){
@@ -54,7 +54,4 @@ public class Genome {
         return replicateList;
     }
 
-    public void setReplicateList(ArrayList<Replicate> replicateList) {
-        this.replicateList = replicateList;
-    }
 }

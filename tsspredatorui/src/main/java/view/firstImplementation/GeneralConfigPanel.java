@@ -2,6 +2,7 @@ package view.firstImplementation;
 
 import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
+import model.Globals;
 import model.beans.AlignmentFileBean;
 import model.beans.ProjectBean;
 import presenter.Presenter;
@@ -35,9 +36,8 @@ public class GeneralConfigPanel extends CustomComponent{
         projectGrid.addColumn(ProjectBean::getRegistrationDate).setCaption("Registration Date");
 
         projectTypeButtonGroup = new RadioButtonGroup<>("Select type of study");
-        //TODO: Replace hard-coded strings by global variables (and also replace in Presenter!)
-        String strainOrSpecies = "Compare Strain/Species";
-        String conditions = "Compare Conditions";
+        String strainOrSpecies = Globals.COMPARE_GENOMES;
+        String conditions = Globals.COMPARE_CONDITIONS;
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
 
 
@@ -48,8 +48,7 @@ public class GeneralConfigPanel extends CustomComponent{
         alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
         alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size in KB");
         //The alignment file selection should only be visible if strains/species are to be compared
-        //(which is the initial case)
-        alignmentFileGrid.setVisible(true);
+        alignmentFileGrid.setVisible(!Globals.IS_CONDITIONS_INIT);
         contentLayout.addComponents(projectTypeButtonGroup, new HorizontalLayout(projectGrid, alignmentFileGrid));
         panel.setContent(contentLayout);
         return panel;

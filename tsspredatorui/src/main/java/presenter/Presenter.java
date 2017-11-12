@@ -4,6 +4,7 @@ import com.vaadin.data.*;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.server.Setter;
 import com.vaadin.ui.Notification;
+import model.Globals;
 import model.beans.AlignmentFileBean;
 import model.beans.AnnotationFileBean;
 import model.beans.FastaFileBean;
@@ -20,6 +21,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author jmueller
@@ -148,14 +151,19 @@ public class Presenter {
                 .bind(new ValueProvider<ConfigFile, String>() {
                           @Override
                           public String apply(ConfigFile configFile) {
-                              //TODO: Replace hard-coded strings by global variables (and also replace in GeneralConfigPanel!)
-                              return configFile.isModeConditions() ? "Compare Conditions" : "Compare Strain/Species";
+                              return configFile.isModeConditions() ? Globals.COMPARE_CONDITIONS : Globals.COMPARE_GENOMES;
                           }
                       },
                         new Setter<ConfigFile, String>() {
                             @Override
                             public void accept(ConfigFile configFile, String s) {
-                                boolean isModeConditions = s.equals("Compare Conditions");
+                                view.getGenomeDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                view.getGenomeDataPanel().getNumberOfReplicatesBox().setValue(1);
+                                view.getConditionDataPanel().getNumberOfDatasetsBox().setValue(1);
+                                view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
+
+
+                                boolean isModeConditions = s.equals(Globals.COMPARE_CONDITIONS);
                                 view.updateDataPanelMode(isModeConditions);
                                 configFile.setModeConditions(isModeConditions);
                                 configFile.setNumberOfDatasets(1);
@@ -164,15 +172,11 @@ public class Presenter {
                                 if (isModeConditions) {
                                     view.getGenomeDataPanel().getDatasetAccordion().removeAllComponents();
                                     view.getConditionDataPanel().initAccordion();
-                                    view.getConditionDataPanel().getNumberOfDatasetsBox().setValue(1);
-                                    view.getConditionDataPanel().getNumberOfReplicatesBox().setValue(1);
                                 } else {
                                     view.getConditionDataPanel().getDatasetAccordion().removeAllComponents();
                                     view.getGenomeDataPanel().initAccordion();
-                                    view.getGenomeDataPanel().getNumberOfDatasetsBox().setValue(1);
-                                    view.getGenomeDataPanel().getNumberOfReplicatesBox().setValue(1);
-
                                 }
+
 
                             }
                         }
@@ -239,7 +243,11 @@ public class Presenter {
                 .bind(ConfigFile::getAllowedCrossReplicateShift, ConfigFile::setAllowedCrossReplicateShift);
         configFileBinder.forField(view.getParametersPanel().getMatchingReplicates()).bind(
                 ConfigFile::getMatchingReplicates,
-                ConfigFile::setMatchingReplicates);
+                (configFile, value) -> {
+                    if (value != null)
+                        configFile.setMatchingReplicates(value);
+
+                });
         configFileBinder.forField(view.getParametersPanel().getUtrLength())
                 .withConverter(Double::intValue, Integer::doubleValue)
                 .bind(ConfigFile::getUtrLength, ConfigFile::setUtrLength);
@@ -275,21 +283,34 @@ public class Presenter {
                         configFile.setConditionGFF(annotationFileBean.getName());
                     }
                 });
+
+        //Bind the matching replicates combobox in the parameters panel
+        // to the number of replicates comboboxes in the two data panels
+        // using change listeners
+        view.getGenomeDataPanel().getNumberOfReplicatesBox().addValueChangeListener(vce -> {
+            view.getParametersPanel().getMatchingReplicates().setItems(IntStream.rangeClosed(1, getNumberOfReplicates())
+                    .boxed().collect(Collectors.toList()));
+        });
+        view.getConditionDataPanel().getNumberOfReplicatesBox().addValueChangeListener(vce -> {
+            view.getParametersPanel().getMatchingReplicates().setItems(IntStream.rangeClosed(1, getNumberOfReplicates())
+                    .boxed().collect(Collectors.toList()));
+        });
+
     }
 
     public void setInitialConfigParameters() {
-        configFile.setModeConditions(false);
-        configFile.setNumberOfDatasets(1);
-        configFile.setNumberOfReplicates(1);
-        configFile.setNormalizationPercentile(0.9);
-        configFile.setEnrichmentNormalizationPercentile(0.5);
-        configFile.setClusterMethod("HIGHEST");
-        configFile.setTssClusteringDistance(3);
-        configFile.setAllowedCrossDatasetShift(1);
-        configFile.setAllowedCrossReplicateShift(1);
-        configFile.setMatchingReplicates(1);
-        configFile.setUtrLength(300);
-        configFile.setAntisenseUtrLength(100);
+        configFile.setModeConditions(Globals.IS_CONDITIONS_INIT);
+        configFile.setNumberOfDatasets(Globals.NUMBER_OF_DATASETS_INIT);
+        configFile.setNumberOfReplicates(Globals.NUMBER_OF_REPLICATES_INIT);
+        configFile.setNormalizationPercentile(Globals.NORMALIZATION_PERCENTILE_INIT);
+        configFile.setEnrichmentNormalizationPercentile(Globals.ENRICHMENT_NORMALIZATION_PERCENTILE_INIT);
+        configFile.setClusterMethod(Globals.CLUSTER_METHOD_INIT);
+        configFile.setTssClusteringDistance(Globals.TSS_CLUSTERING_DISTANCE_INIT);
+        configFile.setAllowedCrossDatasetShift(Globals.CROSS_DATASET_SHIFT_INIT);
+        configFile.setAllowedCrossReplicateShift(Globals.CROSS_REPLICATE_SHIFT_INIT);
+        configFile.setMatchingReplicates(Globals.MATCHING_REPLICATES_INIT);
+        configFile.setUtrLength(Globals.UTR_LENGTH_INIT);
+        configFile.setAntisenseUtrLength(Globals.ANTISENSE_UTR_LENGTH_INIT);
     }
 
     public void initDatasetBindings(int index) {
@@ -488,7 +509,7 @@ public class Presenter {
     }
 
     public File produceConfigFile() {
-        File file = new File("/tmp/tssconfiguration.conf");
+        File file = new File(Globals.CONFIG_FILE_TMP_PATH);
         //Check all validators and fields that are set as required
         BinderValidationStatus<ConfigFile> validationStatus = configFileBinder.validate();
         //There will always be 'silent' errors because of non-visible fields.
@@ -579,6 +600,10 @@ public class Presenter {
 
     public void setPreset(Preset preset) {
         this.preset = preset;
+    }
+
+    public boolean isModeConditions() {
+        return configFile.isModeConditions();
     }
 
     public int getNumberOfDatasets() {

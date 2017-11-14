@@ -6,7 +6,6 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-import org.vaadin.jonatan.contexthelp.ContextHelp;
 import presenter.Presenter;
 
 import java.io.File;
@@ -42,7 +41,6 @@ public class ParametersPanel extends CustomComponent {
     Slider utrLength, antisenseUtrLength;
     CheckBox writeGraphs;
 
-    ContextHelp contextHelp;
 
 
     public ParametersPanel(Presenter presenter) {
@@ -62,7 +60,6 @@ public class ParametersPanel extends CustomComponent {
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
         setupPresetListeners();
         createParameterLayouts();
-        setupContextHelp();
         contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
         panel.setContent(contentLayout);
         return panel;
@@ -256,12 +253,6 @@ public class ParametersPanel extends CustomComponent {
         basicParameters.addComponents(percentiles, methodAndDistance, allowedShifts, matchingReplicates, utrLengths, writeGraphs);
 
 
-    }
-
-    private void setupContextHelp() {
-        contextHelp = new ContextHelp();
-        contextHelp.extend(UI.getCurrent());
-        contextHelp.addHelpForComponent(stepHeight, "MyPersonalStepHeightHelp");
     }
 
     public RadioButtonGroup<String> getPresetOrCustom() {

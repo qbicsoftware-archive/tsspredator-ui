@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author jmueller
@@ -31,6 +33,8 @@ public class Presenter {
     private ConfigFile configFile;
     private AccordionLayoutMain view;
     private Binder<ConfigFile> configFileBinder;
+    private final static Logger presenterLogger = Logger.getLogger(Presenter.class.getName());
+
 
     public enum Preset {
         VERY_SPECIFIC, MORE_SPECIFIC, DEFAULT, MORE_SENSITIVE, VERY_SENSITIVE
@@ -526,8 +530,7 @@ public class Presenter {
                 writer.write(configText);
                 writer.close();
             } catch (Exception e) {
-                //TODO: Log this using Log4J
-                e.printStackTrace();
+                presenterLogger.log(Level.ALL, "Error producing config file:" + e.getMessage());
             }
         }
         return file;

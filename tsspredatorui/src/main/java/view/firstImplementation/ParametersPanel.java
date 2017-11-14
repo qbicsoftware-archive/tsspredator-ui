@@ -48,6 +48,7 @@ public class ParametersPanel extends CustomComponent {
     CheckBox writeGraphs;
 
 
+
     public ParametersPanel(Presenter presenter) {
         this.presenter = presenter;
         parametersPanel = designPanel();

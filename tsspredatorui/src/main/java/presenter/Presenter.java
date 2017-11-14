@@ -59,7 +59,6 @@ public class Presenter {
      * TODO: Move stuff from the view here so the view contains less logic
      */
     public void initFields() {
-        view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
         view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
         view.getGenomeDataPanel().initAccordion();
 
@@ -538,6 +537,9 @@ public class Presenter {
     }
 
     public void applyPresetParameters() {
+        if (preset == null) { //Happens when custom is selected
+            return;
+        }
         switch (preset) {
 
             case VERY_SPECIFIC:
@@ -590,7 +592,10 @@ public class Presenter {
                 configFile.setStepLength(0);
                 configFile.setBaseHeight(0);
                 break;
+
         }
+        configFileBinder.readBean(configFile);
+
     }
 
     public void setView(AccordionLayoutMain view) {

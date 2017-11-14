@@ -21,15 +21,14 @@ public class ParametersPanel extends CustomComponent {
     private Presenter presenter;
     private Panel parametersPanel;
     private VerticalLayout contentLayout;
-    RadioButtonGroup<String> presetOrCustom;
     RadioButtonGroup<String> presetSelection;
 
-    //These parameters are shown in custom mode only
+    //These parameters may be set by a preset
     private VerticalLayout customParameters;
-    ParameterSetter stepHeight, stepHeightReduction;
-    ParameterSetter stepFactor, stepFactorReduction;
-    ParameterSetter enrichmentFactor, processingSiteFactor;
-    ParameterSetter stepLength, baseHeight;
+    private ParameterSetter stepHeight, stepHeightReduction;
+    private ParameterSetter stepFactor, stepFactorReduction;
+    private ParameterSetter enrichmentFactor, processingSiteFactor;
+    private ParameterSetter stepLength, baseHeight;
 
     //These parameters are always shown
     private VerticalLayout basicParameters;
@@ -51,24 +50,17 @@ public class ParametersPanel extends CustomComponent {
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new VerticalLayout();
-
-        presetOrCustom = new RadioButtonGroup<>();
-        presetOrCustom.setItems(Globals.PARAMETERS_PRESET, Globals.PARAMETERS_CUSTOM);
-        presetOrCustom.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
         presetSelection = new RadioButtonGroup<>("Choose Parameter Preset");
-        presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive");
+        //TODO: Add some kind of separator between Presets and "Custom"
+        presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive", Globals.PARAMETERS_CUSTOM);
         setupPresetListeners();
         createParameterLayouts();
-        contentLayout.addComponents(presetOrCustom, presetSelection, customParameters, basicParameters);
+        contentLayout.addComponents(new HorizontalLayout(presetSelection, customParameters), basicParameters);
         panel.setContent(contentLayout);
         return panel;
     }
 
     private void setupPresetListeners() {
-        presetOrCustom.addValueChangeListener(vce -> {
-            customParameters.setVisible(vce.getValue().equals(Globals.PARAMETERS_CUSTOM));
-            presetSelection.setVisible(vce.getValue().equals(Globals.PARAMETERS_PRESET));
-        });
         presetSelection.addValueChangeListener(vce -> {
             switch (vce.getValue()) {
                 case "Very Specific":
@@ -86,6 +78,8 @@ public class ParametersPanel extends CustomComponent {
                 case "Very Sensitive":
                     presenter.setPreset(Presenter.Preset.VERY_SENSITIVE);
                     break;
+                case Globals.PARAMETERS_CUSTOM:
+                    presenter.setPreset(null);
             }
             presenter.applyPresetParameters();
         });
@@ -108,6 +102,11 @@ public class ParametersPanel extends CustomComponent {
             slider.setMin(minValue);
             slider.setMax(maxValue);
             slider.setResolution(resolution);
+            slider.addValueChangeListener(vce -> {
+                if (vce.isUserOriginated()) {
+                    presetSelection.setSelectedItem(Globals.PARAMETERS_CUSTOM);
+                }
+            });
 
             //Setup valueDisplay, bind label to value of slider
             valueDisplay = new Label();
@@ -213,9 +212,6 @@ public class ParametersPanel extends CustomComponent {
 
     }
 
-    public RadioButtonGroup<String> getPresetOrCustom() {
-        return presetOrCustom;
-    }
 
     public RadioButtonGroup<String> getPresetSelection() {
         return presetSelection;

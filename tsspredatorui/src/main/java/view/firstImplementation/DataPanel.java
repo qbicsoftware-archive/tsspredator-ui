@@ -175,10 +175,23 @@ public abstract class DataPanel extends CustomComponent {
             graphFileGrid.addColumn(GraphFileBean::getName).setCaption("File name");
             graphFileGrid.addColumn(GraphFileBean::getCreationDate).setCaption("Creation Date");
             graphFileGrid.addColumn(GraphFileBean::getSizeInKB).setCaption("Size in KB");
+            graphFileGrid.addStyleName("my-file-grid");
 
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
             layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
             setCompositionRoot(layout);
+
+            //<-- DEBUG
+            List<GraphFileBean> graphFileBeanList = new LinkedList<>();
+            for (int i = 0; i < 10; i++) {
+                GraphFileBean gfb = new GraphFileBean();
+                gfb.setName("Test Graph File " + i);
+                gfb.setCreationDate("01-01-01");
+                gfb.setSizeInKB(42);
+                graphFileBeanList.add(gfb);
+            }
+            graphFileGrid.setItems(graphFileBeanList);
+            //DEBUG -->
 
         }
 

@@ -44,15 +44,6 @@
     visibility: hidden;
   }
 
-  .my-tsswindow {
-    width: 80%;
-    height: 80%;
-  }
-
-  .my-navigation-button {
-
-  }
-
   .my-navigation-layout {
     float: left;
     position: absolute;
@@ -60,5 +51,16 @@
     height: 2.75em;
     bottom: 0;
 
+  }
+
+  .my-info-button {
+    position: relative;
+    left: -50%;
+    top: -0.25cm;
+
+  }
+
+  .my-file-grid{
+    height: 5cm !important;
   }
 }

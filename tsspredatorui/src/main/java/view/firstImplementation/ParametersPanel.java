@@ -120,6 +120,7 @@ public class ParametersPanel extends CustomComponent {
         //TODO: Create ONE style and set this style to all of the buttons here
         Button stepHeightInfo = new Button(VaadinIcons.INFO_CIRCLE);
         stepHeightInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepHeightInfo.addStyleName("my-info-button");
         stepHeightInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -130,6 +131,7 @@ public class ParametersPanel extends CustomComponent {
         stepHeightReduction.setResolution(1);
         Button stepHeightReductionInfo = new Button(VaadinIcons.INFO_CIRCLE);
         stepHeightReductionInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepHeightReductionInfo.addStyleName("my-info-button");
         stepHeightReductionInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -140,6 +142,7 @@ public class ParametersPanel extends CustomComponent {
         stepFactor.setResolution(1);
         Button stepFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
         stepFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepFactorInfo.addStyleName("my-info-button");
         stepFactorInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -150,6 +153,7 @@ public class ParametersPanel extends CustomComponent {
         stepFactorReduction.setResolution(1);
         Button stepFactorReductionInfo = new Button(VaadinIcons.INFO_CIRCLE);
         stepFactorReductionInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepFactorReductionInfo.addStyleName("my-info-button");
         stepFactorReductionInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -167,6 +171,7 @@ public class ParametersPanel extends CustomComponent {
         enrichmentFactor.setResolution(1);
         Button enrichmentFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
         enrichmentFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        enrichmentFactorInfo.addStyleName("my-info-button");
         enrichmentFactorInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -177,6 +182,7 @@ public class ParametersPanel extends CustomComponent {
         processingSiteFactor.setResolution(1);
         Button processingSiteFactorInfo = new Button(VaadinIcons.INFO_CIRCLE);
         processingSiteFactorInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        processingSiteFactorInfo.addStyleName("my-info-button");
         processingSiteFactorInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -187,6 +193,7 @@ public class ParametersPanel extends CustomComponent {
         stepLength.setResolution(0);
         Button stepLengthInfo = new Button(VaadinIcons.INFO_CIRCLE);
         stepLengthInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        stepLengthInfo.addStyleName("my-info-button");
         stepLengthInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });
@@ -195,6 +202,7 @@ public class ParametersPanel extends CustomComponent {
         baseHeight.setEnabled(false);
         Button baseHeightInfo = new Button(VaadinIcons.INFO_CIRCLE);
         baseHeightInfo.addStyleNames(ValoTheme.BUTTON_ICON_ONLY, ValoTheme.BUTTON_BORDERLESS, ValoTheme.BUTTON_ICON_ALIGN_TOP);
+        baseHeightInfo.addStyleName("my-info-button");
         baseHeightInfo.addClickListener(clickEvent -> {
             helpView.setPopupVisible(true);
         });

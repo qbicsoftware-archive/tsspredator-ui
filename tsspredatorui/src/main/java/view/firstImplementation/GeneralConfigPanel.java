@@ -5,6 +5,7 @@ import model.Globals;
 import model.beans.AlignmentFileBean;
 import model.beans.ProjectBean;
 import presenter.Presenter;
+import view.MyGrid;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,11 +34,9 @@ public class GeneralConfigPanel extends CustomComponent{
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new FormLayout();
-        projectGrid = new Grid<>("Select your project");
+        projectGrid = new MyGrid<>("Select your project");
         projectGrid.addColumn(ProjectBean::getName).setCaption("Project Name");
         projectGrid.addColumn(ProjectBean::getRegistrationDate).setCaption("Registration Date");
-
-
 
         projectGrid.addStyleName("my-file-grid");
 
@@ -49,7 +48,7 @@ public class GeneralConfigPanel extends CustomComponent{
 
         projectTypeButtonGroup.setSelectedItem(strainOrSpecies);
 
-        alignmentFileGrid = new Grid<>("Select alignment file");
+        alignmentFileGrid = new MyGrid<>("Select alignment file");
         alignmentFileGrid.addColumn(AlignmentFileBean::getName).setCaption("File name");
         alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
         alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size in KB");

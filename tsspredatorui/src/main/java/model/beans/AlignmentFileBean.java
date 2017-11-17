@@ -7,6 +7,11 @@ public class AlignmentFileBean {
     private String name, creationDate;
     private int sizeInKB;
 
+    @Override
+    public String toString() {
+        return name + " (" + creationDate + ", " + sizeInKB + "KB)";
+    }
+
     public String getName() {
         return name;
     }

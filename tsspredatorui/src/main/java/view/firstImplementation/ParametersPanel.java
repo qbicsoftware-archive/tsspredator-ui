@@ -1,6 +1,5 @@
 package view.firstImplementation;
 
-import com.sun.java.browser.plugin2.DOM;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;

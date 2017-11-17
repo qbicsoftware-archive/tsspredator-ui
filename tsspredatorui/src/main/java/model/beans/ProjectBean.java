@@ -6,6 +6,11 @@ package model.beans;
 public class ProjectBean {
     private String name, registrationDate;
 
+    @Override
+    public String toString() {
+        return name + " (" + registrationDate + ")";
+    }
+
     public String getName() {
         return name;
     }

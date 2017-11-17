@@ -60,55 +60,62 @@
 
   }
 
-
-  .stepHeightInfo:hover:after{
+  .stepHeightInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .stepHeightReductionInfo:hover:after{
+  .stepHeightReductionInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .stepFactorInfo:hover:after{
+  .stepFactorInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .stepFactorReductionInfo:hover:after{
+  .stepFactorReductionInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .enrichmentFactorInfo:hover:after{
+  .enrichmentFactorInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .processingSiteFactorInfo:hover:after{
+  .processingSiteFactorInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .stepLengthInfo:hover:after{
+  .stepLengthInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .baseHeightInfo:hover:after{
+  .baseHeightInfo:hover:after {
     content: url(css_resources/Dummy.svg);
     display: block;
   }
 
-  .my-file-grid{
+  .my-file-grid {
     height: 5cm !important;
   }
 
-  .layout-with-border{
+  .v-grid-row.selected {
+    font-weight: bold;
+  }
+
+  .v-grid-row.selected > td {
+    background: limegreen;
+    color: gray;
+  }
+
+  .layout-with-border {
     //border-radius: 10px;
     //background-color: lightblue;
-
 
   }
 }

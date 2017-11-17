@@ -3,6 +3,7 @@ package view.firstImplementation;
 import com.vaadin.ui.*;
 import model.beans.GraphFileBean;
 import presenter.Presenter;
+import view.MyGrid;
 
 import java.util.Collection;
 import java.util.LinkedList;

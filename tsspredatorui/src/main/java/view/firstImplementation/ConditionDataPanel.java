@@ -4,6 +4,7 @@ import com.vaadin.ui.*;
 import model.beans.AnnotationFileBean;
 import model.beans.FastaFileBean;
 import presenter.Presenter;
+import view.MyGrid;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,12 +17,12 @@ public class ConditionDataPanel extends DataPanel {
     public ConditionDataPanel(Presenter presenter) {
         super(presenter);
         numberOfDatasetsBox.setCaption("Select number of Conditions");
-        fastaGrid = new Grid<>("Genome FASTA");
+        fastaGrid = new MyGrid<>("Genome FASTA");
         fastaGrid.addColumn(FastaFileBean::getName).setCaption("File name");
         fastaGrid.addColumn(FastaFileBean::getCreationDate).setCaption("Creation Date");
         fastaGrid.addColumn(FastaFileBean::getSizeInKB).setCaption("Size in KB");
         fastaGrid.addStyleName("my-file-grid");
-        gffGrid = new Grid<>("Genome annotation (GFF)");
+        gffGrid = new MyGrid<>("Genome annotation (GFF)");
         gffGrid.addColumn(AnnotationFileBean::getName).setCaption("File name");
         gffGrid.addColumn(AnnotationFileBean::getCreationDate).setCaption("Creation Date");
         gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size in KB");

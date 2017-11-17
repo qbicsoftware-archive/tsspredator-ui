@@ -1,5 +1,6 @@
 package view.firstImplementation;
 
+import com.sun.java.browser.plugin2.DOM;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
@@ -96,7 +97,9 @@ public class ParametersPanel extends CustomComponent {
         Button infoButton;
         Label valueDisplay;
 
-        public ParameterSetter(String caption, int minValue, int maxValue, int resolution, File helpGraphic) {
+        public ParameterSetter(String caption,
+                               int minValue, int maxValue, int resolution,
+                               File helpGraphic, String buttonStyle) {
             //Setup slider
             slider = new Slider(caption);
             slider.setMin(minValue);
@@ -117,7 +120,7 @@ public class ParametersPanel extends CustomComponent {
             //Setup infoButton with helpGraphic
             infoButton = new Button(VaadinIcons.INFO_CIRCLE);
             infoButton.addStyleNames(
-                    "my-info-button",
+                    buttonStyle,
                     ValoTheme.BUTTON_ICON_ONLY,
                     ValoTheme.BUTTON_BORDERLESS,
                     ValoTheme.BUTTON_ICON_ALIGN_TOP);
@@ -146,17 +149,33 @@ public class ParametersPanel extends CustomComponent {
 
         //TODO: Bind the max value of the reduction sliders to the other sliders so that they don't exceed them
         HorizontalLayout stepParams = new HorizontalLayout();
-        stepHeight = new ParameterSetter("Step Height", 0, 1, 1, new File(basepath + "/resources/Dummy.svg"));
-        stepHeightReduction = new ParameterSetter("Step Height Reduction", 0, 1, 1, new File(basepath + "/resources/Dummy.svg"));
-        stepFactor = new ParameterSetter("Step Factor", 1, 5, 1, new File(basepath + "/resources/Dummy.svg"));
-        stepFactorReduction = new ParameterSetter("Step Factor Reduction", 0, 2, 1, new File(basepath + "/resources/Dummy.svg"));
+        stepHeight = new ParameterSetter("Step Height",
+                0, 1, 1,
+                new File(basepath + "/resources/Dummy.svg"), "stepHeightInfo");
+        stepHeightReduction = new ParameterSetter("Step Height Reduction",
+                0, 1, 1,
+                new File(basepath + "/resources/Dummy.svg"), "stepHeightReductionInfo");
+        stepFactor = new ParameterSetter("Step Factor",
+                1, 5, 1,
+                new File(basepath + "/resources/Dummy.svg"), "stepFactorInfo");
+        stepFactorReduction = new ParameterSetter("Step Factor Reduction",
+                0, 2, 1,
+                new File(basepath + "/resources/Dummy.svg"), "stepFactorReductionInfo");
         stepParams.addComponents(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction);
 
         HorizontalLayout otherCustomParams = new HorizontalLayout();
-        enrichmentFactor = new ParameterSetter("Enrichment Factor", 0, 10, 1, new File(basepath + "/resources/Dummy.svg"));
-        processingSiteFactor = new ParameterSetter("Processing Site Factor", 0, 10, 1, new File(basepath + "/resources/Dummy.svg"));
-        stepLength = new ParameterSetter("Step Length", 0, 100, 0, new File(basepath + "/resources/Dummy.svg"));
-        baseHeight = new ParameterSetter("Base Height (disabled by default)", 0, 1, 0, new File(basepath + "/resources/Dummy.svg"));
+        enrichmentFactor = new ParameterSetter("Enrichment Factor",
+                0, 10, 1,
+                new File(basepath + "/resources/Dummy.svg"), "enrichmentFactorInfo");
+        processingSiteFactor = new ParameterSetter("Processing Site Factor",
+                0, 10, 1,
+                new File(basepath + "/resources/Dummy.svg"), "processingSiteFactorInfo");
+        stepLength = new ParameterSetter("Step Length",
+                0, 100, 0,
+                new File(basepath + "/resources/Dummy.svg"), "stepLengthInfo");
+        baseHeight = new ParameterSetter("Base Height (disabled by default)",
+                0, 1, 0,
+                new File(basepath + "/resources/Dummy.svg"), "baseHeightInfo");
         baseHeight.setEnabled(false);
         otherCustomParams.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
 

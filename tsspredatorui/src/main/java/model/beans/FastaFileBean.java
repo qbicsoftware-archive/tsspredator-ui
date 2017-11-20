@@ -7,6 +7,11 @@ public class FastaFileBean {
     private String name, creationDate;
     private int sizeInKB;
 
+    @Override
+    public String toString() {
+        return name + " (" + creationDate + ", " + sizeInKB + "kB)";
+    }
+
     public String getName() {
         return name;
     }

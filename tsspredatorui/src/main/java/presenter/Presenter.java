@@ -5,10 +5,7 @@ import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.server.Setter;
 import com.vaadin.ui.Notification;
 import model.Globals;
-import model.beans.AlignmentFileBean;
-import model.beans.AnnotationFileBean;
-import model.beans.FastaFileBean;
-import model.beans.ProjectBean;
+import model.beans.*;
 import model.config.ConfigFile;
 import model.config.Genome;
 import model.config.Replicate;
@@ -59,7 +56,6 @@ public class Presenter {
      * TODO: Move stuff from the view here so the view contains less logic
      */
     public void initFields() {
-        view.getParametersPanel().getPresetOrCustom().setSelectedItem("Preset");
         view.getParametersPanel().getPresetSelection().setSelectedItem("Default");
         view.getGenomeDataPanel().initAccordion();
 
@@ -403,58 +399,73 @@ public class Presenter {
         } else {
             replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
         }
-        configFileBinder.forField(replicateTab.getEnrichedCoding()).asRequired("Please select a graph file (*.gr)")
-                .bind(new ValueProvider<ConfigFile, String>() {
+
+        configFileBinder.forField(replicateTab.getEnrichedCoding().asSingleSelect())
+                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
                           @Override
-                          public String apply(ConfigFile configFile) {
-                              return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getEnrichedCodingStrand();
+                          public GraphFileBean apply(ConfigFile configFile) {
+                              return new GraphFileBean(); //TODO: Do something useful here
+                          }
+                      }, new Setter<ConfigFile, GraphFileBean>() {
+                          @Override
+                          public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
+                              if (graphFileBean != null) {
+                                  configFile.getGenomeList().get(datasetIndex)
+                                          .getReplicateList().get(replicateIndex)
+                                          .setEnrichedCodingStrand(graphFileBean.getName());
+                              }
+                          }
+                      }
+                );
+        configFileBinder.forField(replicateTab.getEnrichedTemplate().asSingleSelect())
+                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
+                    @Override
+                    public GraphFileBean apply(ConfigFile configFile) {
+                        return new GraphFileBean();
+                    }
+                }, new Setter<ConfigFile, GraphFileBean>() {
+                    @Override
+                    public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
+                        if (graphFileBean != null) {
+                            configFile.getGenomeList().get(datasetIndex)
+                                    .getReplicateList().get(replicateIndex)
+                                    .setEnrichedTemplateStrand(graphFileBean.getName());
+                        }
+                    }
+                });
+        configFileBinder.forField(replicateTab.getNormalCoding().asSingleSelect())
+                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
+                          @Override
+                          public GraphFileBean apply(ConfigFile configFile) {
+                              return new GraphFileBean();
                           }
                       },
-                        new Setter<ConfigFile, String>() {
+                        new Setter<ConfigFile, GraphFileBean>() {
                             @Override
-                            public void accept(ConfigFile configFile, String strand) {
-                                configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedCodingStrand(strand);
+                            public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
+                                if (graphFileBean != null) {
+                                    configFile.getGenomeList().get(datasetIndex)
+                                            .getReplicateList().get(replicateIndex)
+                                            .setNormalCodingStrand(graphFileBean.getName());
+                                }
                             }
                         });
-        configFileBinder.forField(replicateTab.getEnrichedTemplate()).asRequired("Please select a graph file (*.gr)")
-                .bind(new ValueProvider<ConfigFile, String>() {
-                          @Override
-                          public String apply(ConfigFile configFile) {
-                              return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getEnrichedTemplateStrand();
-                          }
-                      },
-                        new Setter<ConfigFile, String>() {
-                            @Override
-                            public void accept(ConfigFile configFile, String strand) {
-                                configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setEnrichedTemplateStrand(strand);
-                            }
-                        });
-        configFileBinder.forField(replicateTab.getNormalCoding()).asRequired("Please select a graph file (*.gr)")
-                .bind(new ValueProvider<ConfigFile, String>() {
-                          @Override
-                          public String apply(ConfigFile configFile) {
-                              return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getNormalCodingStrand();
-                          }
-                      },
-                        new Setter<ConfigFile, String>() {
-                            @Override
-                            public void accept(ConfigFile configFile, String strand) {
-                                configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setNormalCodingStrand(strand);
-                            }
-                        });
-        configFileBinder.forField(replicateTab.getNormalTemplate()).asRequired("Please select a graph file (*.gr)")
-                .bind(new ValueProvider<ConfigFile, String>() {
-                          @Override
-                          public String apply(ConfigFile configFile) {
-                              return configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).getNormalTemplateStrand();
-                          }
-                      },
-                        new Setter<ConfigFile, String>() {
-                            @Override
-                            public void accept(ConfigFile configFile, String strand) {
-                                configFile.getGenomeList().get(datasetIndex).getReplicateList().get(replicateIndex).setNormalTemplateStrand(strand);
-                            }
-                        });
+        configFileBinder.forField(replicateTab.getNormalTemplate().asSingleSelect())
+                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
+                    @Override
+                    public GraphFileBean apply(ConfigFile configFile) {
+                        return new GraphFileBean();
+                    }
+                }, new Setter<ConfigFile, GraphFileBean>() {
+                    @Override
+                    public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
+                        if (graphFileBean != null) {
+                            configFile.getGenomeList().get(datasetIndex)
+                                    .getReplicateList().get(replicateIndex)
+                                    .setNormalTemplateStrand(graphFileBean.getName());
+                        }
+                    }
+                });
     }
 
     public void addDatasets(int datasetsToAdd) {
@@ -538,6 +549,9 @@ public class Presenter {
     }
 
     public void applyPresetParameters() {
+        if (preset == null) { //Happens when custom is selected
+            return;
+        }
         switch (preset) {
 
             case VERY_SPECIFIC:
@@ -590,7 +604,10 @@ public class Presenter {
                 configFile.setStepLength(0);
                 configFile.setBaseHeight(0);
                 break;
+
         }
+        configFileBinder.readBean(configFile);
+
     }
 
     public void setView(AccordionLayoutMain view) {

@@ -110,6 +110,7 @@ public class ConfigFile {
 
     private void buildLine(StringBuilder builder, String key, String value) {
         if (value == null)
+            //TODO: Log instead of print
             System.err.println("Couldn't create config file! Parameter \'" + key + "\' isn't set.");
         else
             builder.append(key).append(" = ").append(value).append("\n");

@@ -1,5 +1,6 @@
 package view;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.Accordion;
@@ -52,13 +53,13 @@ public class AccordionLayoutMain extends VerticalLayout {
 
         parametersPanel = new ParametersPanel(presenter);
 
-        contentAccordion.addTab(generalConfigPanel, Globals.GENERAL_PANEL_CAPTION);
-        contentAccordion.addTab(genomeDataPanel, Globals.DATA_PANEL_CAPTION);
-        contentAccordion.addTab(conditionDataPanel, Globals.DATA_PANEL_CAPTION);
+        contentAccordion.addTab(generalConfigPanel, Globals.GENERAL_PANEL_CAPTION).setIcon(VaadinIcons.EDIT);
+        contentAccordion.addTab(genomeDataPanel, Globals.DATA_PANEL_CAPTION).setIcon(VaadinIcons.DATABASE);
+        contentAccordion.addTab(conditionDataPanel, Globals.DATA_PANEL_CAPTION).setIcon(VaadinIcons.DATABASE);
         //Only one of the two data panels is visible
         contentAccordion.getTab(1).setVisible(!Globals.IS_CONDITIONS_INIT);
         contentAccordion.getTab(2).setVisible(Globals.IS_CONDITIONS_INIT);
-        contentAccordion.addTab(parametersPanel, Globals.PARAMETERS_PANEL_CAPTION);
+        contentAccordion.addTab(parametersPanel, Globals.PARAMETERS_PANEL_CAPTION).setIcon(VaadinIcons.SLIDERS);
 
     }
 

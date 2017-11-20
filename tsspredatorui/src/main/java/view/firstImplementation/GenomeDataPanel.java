@@ -31,12 +31,12 @@ public class GenomeDataPanel extends DataPanel {
             fastaGrid = new MyGrid<>("Genome FASTA");
             fastaGrid.addColumn(FastaFileBean::getName).setCaption("File name");
             fastaGrid.addColumn(FastaFileBean::getCreationDate).setCaption("Creation Date");
-            fastaGrid.addColumn(FastaFileBean::getSizeInKB).setCaption("Size in KB");
+            fastaGrid.addColumn(FastaFileBean::getSizeInKB).setCaption("Size (kB)");
             fastaGrid.addStyleName("my-file-grid");
             gffGrid = new MyGrid<>("Genome annotation (GFF)");
             gffGrid.addColumn(AnnotationFileBean::getName).setCaption("File name");
             gffGrid.addColumn(AnnotationFileBean::getCreationDate).setCaption("Creation Date");
-            gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size in KB");
+            gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size (kB)");
             gffGrid.addStyleName("my-file-grid");
             genomeData.addComponents(new HorizontalLayout(nameField, idField), fastaGrid, gffGrid);
             this.tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);

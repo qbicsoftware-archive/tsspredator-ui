@@ -1,8 +1,15 @@
 package view.firstImplementation;
 
+import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.shared.ui.dnd.DropEffect;
+import com.vaadin.shared.ui.dnd.EffectAllowed;
+import com.vaadin.shared.ui.grid.DropMode;
 import com.vaadin.ui.*;
+import com.vaadin.ui.components.grid.GridDragSource;
+import com.vaadin.ui.components.grid.GridDropTarget;
 import model.beans.GraphFileBean;
 import presenter.Presenter;
+import view.MyGraphFileGrid;
 import view.MyGrid;
 
 import java.util.Collection;
@@ -157,29 +164,65 @@ public abstract class DataPanel extends CustomComponent {
      */
     public class ReplicateTab extends CustomComponent {
         VerticalLayout layout;
-        TextField enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
+        MyGraphFileGrid enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
         Grid<GraphFileBean> graphFileGrid;
+        private GraphFileBean draggedItem;
 
         public ReplicateTab(int datasetIndex, int replicateIndex) {
             layout = new VerticalLayout();
 
             VerticalLayout enrichedPart = new VerticalLayout();
-            enrichedCoding = new TextField("Enriched Coding Strand");
-            enrichedTemplate = new TextField("Enriched Template Strand");
+            enrichedCoding = new MyGraphFileGrid("Enriched Coding Strand");
+            enrichedTemplate = new MyGraphFileGrid("Enriched Template Strand");
             enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
             VerticalLayout normalPart = new VerticalLayout();
-            normalCoding = new TextField("Normal Coding Strand");
-            normalTemplate = new TextField("Normal Template Strand");
+            normalCoding = new MyGraphFileGrid("Normal Coding Strand");
+            normalTemplate = new MyGraphFileGrid("Normal Template Strand");
             normalPart.addComponents(normalCoding, normalTemplate);
 
-            graphFileGrid = new Grid<>("Graph Files");
-            graphFileGrid.addColumn(GraphFileBean::getName).setCaption("File name");
-            graphFileGrid.addColumn(GraphFileBean::getCreationDate).setCaption("Creation Date");
-            graphFileGrid.addColumn(GraphFileBean::getSizeInKB).setCaption("Size in KB");
+            graphFileGrid = new Grid<>("Available Graph Files");
+            float graphFileGridWidth = 600;
+            graphFileGrid.setWidth(graphFileGridWidth, Unit.PIXELS);
+            graphFileGrid.addColumn(GraphFileBean::getName)
+                    .setCaption("File name")
+                    .setWidth(graphFileGridWidth / 2);
+            graphFileGrid.addColumn(GraphFileBean::getCreationDate)
+                    .setCaption("Creation Date")
+                    .setWidth(graphFileGridWidth / 3.5);
+            graphFileGrid.addColumn(GraphFileBean::getSizeInKB)
+                    .setCaption("Size (kB)")
+                    .setWidthUndefined(); //Column takes up remaining space
+
             graphFileGrid.addStyleName("my-file-grid");
+
+            setupDragSource(graphFileGrid);
+            setupDragSource(enrichedCoding);
+            setupDragSource(enrichedTemplate);
+            setupDragSource(normalCoding);
+            setupDragSource(normalTemplate);
+
+            //Setup drop target for the graph file grid
+            GridDropTarget dropTarget = new GridDropTarget<>(graphFileGrid, DropMode.ON_TOP_OR_BETWEEN);
+            dropTarget.setDropEffect(DropEffect.MOVE);
+            dropTarget.addGridDropListener(event -> {
+                //Remove dragged item from source
+                Grid<GraphFileBean> dragSourceGrid = (Grid<GraphFileBean>) event.getDragSourceComponent().get();
+                ListDataProvider<GraphFileBean> sourceProvider = (ListDataProvider<GraphFileBean>) dragSourceGrid.getDataProvider();
+                sourceProvider.getItems().remove(draggedItem);
+                dragSourceGrid.deselectAll();
+                sourceProvider.refreshAll();
+                Collection<GraphFileBean> items = ((ListDataProvider<GraphFileBean>) graphFileGrid.getDataProvider()).getItems();
+                if (!items.contains(draggedItem))
+                    items.add(draggedItem);
+                graphFileGrid.getDataProvider().refreshAll();
+            });
+
+
+
 
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
             layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
+            layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 
             //<-- DEBUG
@@ -196,19 +239,34 @@ public abstract class DataPanel extends CustomComponent {
 
         }
 
-        public TextField getEnrichedCoding() {
+        private void setupDragSource(Grid<GraphFileBean> grid) {
+            GridDragSource<GraphFileBean> dragSource = new GridDragSource<>(grid);
+            dragSource.setEffectAllowed(EffectAllowed.MOVE);
+            dragSource.addGridDragStartListener(event ->
+                    setDraggedItemInGraphFileGrids((GraphFileBean) event.getDraggedItems().toArray()[0]));
+        }
+
+        private void setDraggedItemInGraphFileGrids(GraphFileBean draggedItem) {
+            this.draggedItem = draggedItem;
+            enrichedCoding.setDraggedItem(draggedItem);
+            enrichedTemplate.setDraggedItem(draggedItem);
+            normalCoding.setDraggedItem(draggedItem);
+            normalTemplate.setDraggedItem(draggedItem);
+        }
+
+        public MyGraphFileGrid getEnrichedCoding() {
             return enrichedCoding;
         }
 
-        public TextField getEnrichedTemplate() {
+        public MyGraphFileGrid getEnrichedTemplate() {
             return enrichedTemplate;
         }
 
-        public TextField getNormalCoding() {
+        public MyGraphFileGrid getNormalCoding() {
             return normalCoding;
         }
 
-        public TextField getNormalTemplate() {
+        public MyGraphFileGrid getNormalTemplate() {
             return normalTemplate;
         }
     }

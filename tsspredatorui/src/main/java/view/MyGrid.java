@@ -20,7 +20,6 @@ public class MyGrid<T> extends Grid<T>{
 
     public MyGrid(String caption){
         super(caption);
-
         setStyleGenerator((StyleGenerator<T>) t -> this.getSelectedItems().contains(t) ? "selected": null);
 
         addSelectionListener((SelectionListener<T>) selectionEvent -> {

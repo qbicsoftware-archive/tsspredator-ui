@@ -9,7 +9,7 @@ public class GraphFileBean {
 
     @Override
     public String toString() {
-        return name + " (" + creationDate + ", " + sizeInKB + "KB)";
+        return name + " (" + creationDate + ", " + sizeInKB + "kB)";
     }
 
     public String getName() {

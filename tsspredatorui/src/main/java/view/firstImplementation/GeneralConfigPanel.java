@@ -51,7 +51,7 @@ public class GeneralConfigPanel extends CustomComponent{
         alignmentFileGrid = new MyGrid<>("Select alignment file");
         alignmentFileGrid.addColumn(AlignmentFileBean::getName).setCaption("File name");
         alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
-        alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size in KB");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size (kB)");
         alignmentFileGrid.addStyleName("my-file-grid");
         //The alignment file selection should only be visible if strains/species are to be compared
         alignmentFileGrid.setVisible(!Globals.IS_CONDITIONS_INIT);

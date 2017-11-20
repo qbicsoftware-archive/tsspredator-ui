@@ -123,17 +123,6 @@ public class ParametersPanel extends CustomComponent {
                     ValoTheme.BUTTON_ICON_ONLY,
                     ValoTheme.BUTTON_BORDERLESS,
                     ValoTheme.BUTTON_ICON_ALIGN_TOP);
-
-            //TODO: Implement hovering, change layout to a fixed view
-            VerticalLayout helpLayout = new VerticalLayout();
-            FileResource resource = new FileResource(helpGraphic);
-            Image image = new Image(null, resource);
-            helpLayout.addComponent(image);
-            PopupView helpView = new PopupView(null, helpLayout);
-            contentLayout.addComponent(helpView);
-            contentLayout.setComponentAlignment(helpView, Alignment.MIDDLE_CENTER);
-            infoButton.addClickListener(e -> helpView.setPopupVisible(true));
-
             //Create layout, put all components there and set as root
             layout = new VerticalLayout();
             layout.addComponents(new HorizontalLayout(slider, infoButton), valueDisplay);

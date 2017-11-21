@@ -172,8 +172,8 @@ public abstract class DataPanel extends CustomComponent {
             layout = new VerticalLayout();
 
             VerticalLayout enrichedPart = new VerticalLayout();
-            enrichedCoding = new MyGraphFileGrid("Enriched Coding Strand");
-            enrichedTemplate = new MyGraphFileGrid("Enriched Template Strand");
+            enrichedCoding = new MyGraphFileGrid("Treated Coding Strand");
+            enrichedTemplate = new MyGraphFileGrid("Treated Template Strand");
             enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
             VerticalLayout normalPart = new VerticalLayout();
             normalCoding = new MyGraphFileGrid("Normal Coding Strand");

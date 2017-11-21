@@ -1,9 +1,14 @@
 package view.firstImplementation;
 
-import com.vaadin.event.selection.SingleSelectionListener;
 import com.vaadin.ui.*;
+import model.Globals;
+import model.beans.AlignmentFileBean;
+import model.beans.ProjectBean;
 import presenter.Presenter;
-import view.GeneralConfigView;
+import view.MyGrid;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This component has a panel where the user chooses a nameField for his project, selects the type of study,
@@ -11,12 +16,12 @@ import view.GeneralConfigView;
  *
  * @author jmueller
  */
-public class GeneralConfigPanel extends CustomComponent implements GeneralConfigView {
+public class GeneralConfigPanel extends CustomComponent{
     private Presenter presenter;
     private Panel generalConfigPanel;
     private Layout contentLayout;
-    private TextField projectName;
-    private TextField alignmentFileUpload;
+    private Grid<ProjectBean> projectGrid;
+    private Grid<AlignmentFileBean> alignmentFileGrid;
     RadioButtonGroup<String> projectTypeButtonGroup;
 
     public GeneralConfigPanel(Presenter presenter) {
@@ -29,38 +34,64 @@ public class GeneralConfigPanel extends CustomComponent implements GeneralConfig
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new FormLayout();
-        projectName = new TextField("Enter a name for your project");
+        projectGrid = new MyGrid<>("Select your project");
+        projectGrid.addColumn(ProjectBean::getName).setCaption("Project Name");
+        projectGrid.addColumn(ProjectBean::getRegistrationDate).setCaption("Registration Date");
+
+        projectGrid.addStyleName("my-file-grid");
 
         projectTypeButtonGroup = new RadioButtonGroup<>("Select type of study");
-        //TODO: Replace hard-coded strings by global variables (and also replace in Presenter!)
-        String strainOrSpecies = "Compare Strain/Species";
-        String conditions = "Compare Conditions";
+        String strainOrSpecies = Globals.COMPARE_GENOMES;
+        String conditions = Globals.COMPARE_CONDITIONS;
         projectTypeButtonGroup.setItems(strainOrSpecies, conditions);
+
+
         projectTypeButtonGroup.setSelectedItem(strainOrSpecies);
 
-        alignmentFileUpload = new TextField("Upload alignment file");
-        //The uploader should only be visible if strains/species are to be compared
-        //(which is the initial case)
-        alignmentFileUpload.setVisible(true);
-        projectTypeButtonGroup.addSelectionListener((SingleSelectionListener<String>) e -> {
-            if (e.getSelectedItem().get().equals(strainOrSpecies))
-                alignmentFileUpload.setVisible(true);
-            else
-                alignmentFileUpload.setVisible(false);
-        });
-
-        contentLayout.addComponents(projectName, projectTypeButtonGroup, alignmentFileUpload);
+        alignmentFileGrid = new MyGrid<>("Select alignment file");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getName).setCaption("File name");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getCreationDate).setCaption("Creation Date");
+        alignmentFileGrid.addColumn(AlignmentFileBean::getSizeInKB).setCaption("Size (kB)");
+        alignmentFileGrid.addStyleName("my-file-grid");
+        //The alignment file selection should only be visible if strains/species are to be compared
+        alignmentFileGrid.setVisible(!Globals.IS_CONDITIONS_INIT);
+        contentLayout.addComponents(projectTypeButtonGroup, projectGrid, alignmentFileGrid);
         panel.setContent(contentLayout);
+
+
+        //<-- DEBUG
+        List<ProjectBean> projectBeanList = new LinkedList<>();
+        for (int i = 0; i < 10; i++) {
+            ProjectBean pb = new ProjectBean();
+            pb.setName("TestProject " + i);
+            pb.setRegistrationDate("01-01-01");
+            projectBeanList.add(pb);
+        }
+        projectGrid.setItems(projectBeanList);
+
+        List<AlignmentFileBean> alignmentFileBeanList = new LinkedList<>();
+        for (int i = 0; i < 10; i++) {
+            AlignmentFileBean afb = new AlignmentFileBean();
+            afb.setName("TestAlignmentFile " + i);
+            afb.setCreationDate("01-01-01");
+            afb.setSizeInKB(42);
+            alignmentFileBeanList.add(afb);
+        }
+        alignmentFileGrid.setItems(alignmentFileBeanList);
+
+        //DEBUG -->
+
+
         return panel;
     }
 
 
-    public TextField getProjectName() {
-        return projectName;
+    public Grid<ProjectBean> getProjectGrid() {
+        return projectGrid;
     }
 
-    public TextField getAlignmentFileUpload() {
-        return alignmentFileUpload;
+    public Grid<AlignmentFileBean> getAlignmentFileGrid() {
+        return alignmentFileGrid;
     }
 
     public RadioButtonGroup<String> getProjectTypeButtonGroup() {

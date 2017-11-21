@@ -7,6 +7,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import presenter.Presenter;
 import view.AccordionLayoutMain;
 
@@ -19,10 +20,12 @@ import view.AccordionLayoutMain;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
+    static {
+        SLF4JBridgeHandler.install();
+    }
 
 
     protected void init(VaadinRequest vaadinRequest) {
-        //TODO: Replace AccordionLayoutMain with an interface
         Presenter presenter = new Presenter();
         AccordionLayoutMain layout = new AccordionLayoutMain(presenter);
         presenter.setView(layout);

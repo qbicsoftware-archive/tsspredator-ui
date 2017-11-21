@@ -1,13 +1,22 @@
 package view.firstImplementation;
 
+import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.shared.ui.dnd.DropEffect;
+import com.vaadin.shared.ui.dnd.EffectAllowed;
+import com.vaadin.shared.ui.grid.DropMode;
 import com.vaadin.ui.*;
-import model.Genome;
-import model.Replicate;
+import com.vaadin.ui.components.grid.GridDragSource;
+import com.vaadin.ui.components.grid.GridDropTarget;
+import model.beans.GraphFileBean;
 import presenter.Presenter;
-import view.DataView;
+import view.MyGraphFileGrid;
+import view.MyGrid;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * In this abstract class, the parts of the DataPanel which are common to both
@@ -16,15 +25,14 @@ import java.util.LinkedList;
  *
  * @author jmueller
  */
-public abstract class DataPanel extends CustomComponent implements DataView {
+public abstract class DataPanel extends CustomComponent {
     Presenter presenter;
     Panel dataPanel;
     Layout contentLayout;
-    int numberOfDatasets, numberOfReplicates;
     Accordion datasetAccordion;
     ComboBox<Integer> numberOfDatasetsBox;
     ComboBox<Integer> numberOfReplicatesBox;
-    Button setNumbers;
+    //Button setNumbers;
 
     public DataPanel(Presenter presenter) {
         dataPanel = designPanel();
@@ -39,34 +47,32 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         numberOfReplicatesBox = new ComboBox<>("Select number of Replicates");
 
 
-        //TODO: Is this the most elegant way to do this?
-        Collection<Integer> possibleGenomesOrConditions = new LinkedList<>();
-        for (int i = 0; i < 100; i++) {
-            possibleGenomesOrConditions.add(i + 1);
-        }
-        numberOfDatasetsBox.setItems(possibleGenomesOrConditions);
+        List<Integer> possibleDatasetNumber =
+                IntStream.rangeClosed(1, 100).boxed().collect(Collectors.toList());
+        numberOfDatasetsBox.setItems(possibleDatasetNumber);
 
-        Collection<Integer> possibleReplicates = new LinkedList<>();
-        for (int i = 0; i < 100; i++) {
-            possibleReplicates.add(i + 1);
-        }
-        numberOfReplicatesBox.setItems(possibleReplicates);
-        setNumbers = new Button("Set selection", e -> {
-            int oldDatasetCount = numberOfDatasets;
-            int oldReplicateCount = numberOfReplicates;
-            numberOfDatasets = numberOfDatasetsBox.getValue();
-            numberOfReplicates = numberOfReplicatesBox.getValue();
-            updateAccordion(oldDatasetCount, oldReplicateCount);
-
-        });
-
+        List<Integer> possibleReplicateNumber =
+                IntStream.rangeClosed(1, 100).boxed().collect(Collectors.toList());
+        numberOfReplicatesBox.setItems(possibleReplicateNumber);
 
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
-        datasetAccordion.setVisible(false);
 
         panel.setContent(contentLayout);
         return panel;
+    }
+
+    /**
+     * The accordion is initialized with one dataset (genome/condition) and one replicate
+     */
+    public void initAccordion() {
+        Component initialTab = this instanceof GenomeDataPanel
+                ? ((GenomeDataPanel) this).createGenomeTab(0)
+                : ((ConditionDataPanel) this).createConditionTab(0);
+        //Tell presenter to set up bindings
+        datasetAccordion.addTab(initialTab, "Genome " + 1);
+        presenter.initDatasetBindings(0);
+        presenter.initReplicateBindings(0, 0);
     }
 
 
@@ -75,52 +81,55 @@ public abstract class DataPanel extends CustomComponent implements DataView {
      * the number of genomes/conditions or replicates, this Accordion has to be updated,
      * which happens here
      */
-    void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
+    public void updateAccordion(int oldDatasetCount, int oldReplicateCount) {
         //Adjust number of replicate tabs for each dataset tab
-        int replicateDelta = numberOfReplicates - oldReplicateCount;
+        int replicateDelta = presenter.getNumberOfReplicates() - oldReplicateCount;
         for (int datasetIndex = 0; datasetIndex < oldDatasetCount; datasetIndex++) {
             datasetAccordion.getTab(datasetIndex);
             TabSheet.Tab tab = datasetAccordion.getTab(datasetIndex);
             //Access the replicate sheet of the current tab
             //It's the last of its three components, so its index is 2
-            Component currentReplicateSheet = ((VerticalLayout) tab.getComponent()).getComponent(2);
+            TabSheet currentReplicateSheet = ((DatasetTab) tab.getComponent()).replicatesSheet;
             if (replicateDelta > 0) {
                 //Add new replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = oldReplicateCount;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     Component replicateTab = new ReplicateTab(datasetIndex, replicateIndex);
-                    ((TabSheet) currentReplicateSheet).addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
+                    currentReplicateSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             } else {
                 //Remove excess replicate tabs
-                for (int replicateIndex = oldReplicateCount; replicateIndex > numberOfReplicates; replicateIndex--) {
-                    ((TabSheet) currentReplicateSheet).removeTab(((TabSheet) currentReplicateSheet).getTab(replicateIndex - 1));
+                for (int replicateIndex = oldReplicateCount; replicateIndex > presenter.getNumberOfReplicates(); replicateIndex--) {
+                    currentReplicateSheet.removeTab(currentReplicateSheet.getTab(replicateIndex - 1));
                 }
             }
         }
 
 
-        int datasetDelta = numberOfDatasets - oldDatasetCount;
+        int datasetDelta = presenter.getNumberOfDatasets() - oldDatasetCount;
         if (datasetDelta > 0) {
             //Add new dataset tabs
-            for (int datasetIndex = oldDatasetCount; datasetIndex < numberOfDatasets; datasetIndex++) {
+            for (int datasetIndex = oldDatasetCount; datasetIndex < presenter.getNumberOfDatasets(); datasetIndex++) {
                 Component currentTab = this instanceof GenomeDataPanel
                         ? ((GenomeDataPanel) this).createGenomeTab(datasetIndex)
                         : ((ConditionDataPanel) this).createConditionTab(datasetIndex);
                 //Tell presenter to set up bindings
                 datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
                 presenter.initDatasetBindings(datasetIndex);
-                for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+                for (int replicateIndex = 0;
+                     replicateIndex < presenter.getNumberOfReplicates();
+                     replicateIndex++) {
                     presenter.initReplicateBindings(datasetIndex, replicateIndex);
                 }
             }
         } else {
             //Remove excess dataset tabs
-            for (int i = oldDatasetCount; i > numberOfDatasets; i--) {
+            for (int i = oldDatasetCount; i > presenter.getNumberOfDatasets(); i--) {
                 datasetAccordion.removeTab(datasetAccordion.getTab(i - 1));
             }
         }
-        datasetAccordion.setVisible(true);
 
     }
 
@@ -134,7 +143,9 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         public DatasetTab(int index) {
             tab = new VerticalLayout();
             replicatesSheet = new TabSheet();
-            for (int replicateIndex = 0; replicateIndex < numberOfReplicates; replicateIndex++) {
+            for (int replicateIndex = 0;
+                 replicateIndex < presenter.getNumberOfReplicates();
+                 replicateIndex++) {
                 ReplicateTab replicateTab = new ReplicateTab(index, replicateIndex);
                 replicatesSheet.addTab(replicateTab, "Replicate " + createReplicateID(replicateIndex));
             }
@@ -152,39 +163,111 @@ public abstract class DataPanel extends CustomComponent implements DataView {
      * It works for both the genome and the condition variants.
      */
     public class ReplicateTab extends CustomComponent {
-        HorizontalLayout layout;
-        TextField eplus, eminus, nplus, nminus;
+        VerticalLayout layout;
+        MyGraphFileGrid enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
+        Grid<GraphFileBean> graphFileGrid;
+        private GraphFileBean draggedItem;
 
         public ReplicateTab(int datasetIndex, int replicateIndex) {
-            layout = new HorizontalLayout();
+            layout = new VerticalLayout();
+
             VerticalLayout enrichedPart = new VerticalLayout();
-            eplus = new TextField("Enriched Plus");
-            eminus = new TextField("Enriched Minus");
-            enrichedPart.addComponents(eplus, eminus);
+            enrichedCoding = new MyGraphFileGrid("Treated Coding Strand");
+            enrichedTemplate = new MyGraphFileGrid("Treated Template Strand");
+            enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
             VerticalLayout normalPart = new VerticalLayout();
-            nplus = new TextField("Normal Plus");
-            nminus = new TextField("Normal Minus");
-            normalPart.addComponents(nplus, nminus);
+            normalCoding = new MyGraphFileGrid("Normal Coding Strand");
+            normalTemplate = new MyGraphFileGrid("Normal Template Strand");
+            normalPart.addComponents(normalCoding, normalTemplate);
+
+            graphFileGrid = new Grid<>("Available Graph Files");
+            float graphFileGridWidth = 600;
+            graphFileGrid.setWidth(graphFileGridWidth, Unit.PIXELS);
+            graphFileGrid.addColumn(GraphFileBean::getName)
+                    .setCaption("File name")
+                    .setWidth(graphFileGridWidth / 2);
+            graphFileGrid.addColumn(GraphFileBean::getCreationDate)
+                    .setCaption("Creation Date")
+                    .setWidth(graphFileGridWidth / 3.5);
+            graphFileGrid.addColumn(GraphFileBean::getSizeInKB)
+                    .setCaption("Size (kB)")
+                    .setWidthUndefined(); //Column takes up remaining space
+
+            graphFileGrid.addStyleName("my-file-grid");
+
+            setupDragSource(graphFileGrid);
+            setupDragSource(enrichedCoding);
+            setupDragSource(enrichedTemplate);
+            setupDragSource(normalCoding);
+            setupDragSource(normalTemplate);
+
+            //Setup drop target for the graph file grid
+            GridDropTarget dropTarget = new GridDropTarget<>(graphFileGrid, DropMode.ON_TOP_OR_BETWEEN);
+            dropTarget.setDropEffect(DropEffect.MOVE);
+            dropTarget.addGridDropListener(event -> {
+                //Remove dragged item from source
+                Grid<GraphFileBean> dragSourceGrid = (Grid<GraphFileBean>) event.getDragSourceComponent().get();
+                ListDataProvider<GraphFileBean> sourceProvider = (ListDataProvider<GraphFileBean>) dragSourceGrid.getDataProvider();
+                sourceProvider.getItems().remove(draggedItem);
+                dragSourceGrid.deselectAll();
+                sourceProvider.refreshAll();
+                Collection<GraphFileBean> items = ((ListDataProvider<GraphFileBean>) graphFileGrid.getDataProvider()).getItems();
+                if (!items.contains(draggedItem))
+                    items.add(draggedItem);
+                graphFileGrid.getDataProvider().refreshAll();
+            });
+
+
+
+
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
-            layout.addComponents(enrichedPart, normalPart);
+            layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
+            layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 
+            //<-- DEBUG
+            List<GraphFileBean> graphFileBeanList = new LinkedList<>();
+            for (int i = 0; i < 10; i++) {
+                GraphFileBean gfb = new GraphFileBean();
+                gfb.setName("Test Graph File " + i);
+                gfb.setCreationDate("01-01-01");
+                gfb.setSizeInKB(42);
+                graphFileBeanList.add(gfb);
+            }
+            graphFileGrid.setItems(graphFileBeanList);
+            //DEBUG -->
+
         }
 
-        public TextField getEplus() {
-            return eplus;
+        private void setupDragSource(Grid<GraphFileBean> grid) {
+            GridDragSource<GraphFileBean> dragSource = new GridDragSource<>(grid);
+            dragSource.setEffectAllowed(EffectAllowed.MOVE);
+            dragSource.addGridDragStartListener(event ->
+                    setDraggedItemInGraphFileGrids((GraphFileBean) event.getDraggedItems().toArray()[0]));
         }
 
-        public TextField getEminus() {
-            return eminus;
+        private void setDraggedItemInGraphFileGrids(GraphFileBean draggedItem) {
+            this.draggedItem = draggedItem;
+            enrichedCoding.setDraggedItem(draggedItem);
+            enrichedTemplate.setDraggedItem(draggedItem);
+            normalCoding.setDraggedItem(draggedItem);
+            normalTemplate.setDraggedItem(draggedItem);
         }
 
-        public TextField getNplus() {
-            return nplus;
+        public MyGraphFileGrid getEnrichedCoding() {
+            return enrichedCoding;
         }
 
-        public TextField getNminus() {
-            return nminus;
+        public MyGraphFileGrid getEnrichedTemplate() {
+            return enrichedTemplate;
+        }
+
+        public MyGraphFileGrid getNormalCoding() {
+            return normalCoding;
+        }
+
+        public MyGraphFileGrid getNormalTemplate() {
+            return normalTemplate;
         }
     }
 
@@ -214,16 +297,8 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         return numberOfDatasetsBox;
     }
 
-    public void setNumberOfDatasetsBox(ComboBox<Integer> numberOfDatasetsBox) {
-        this.numberOfDatasetsBox = numberOfDatasetsBox;
-    }
-
     public ComboBox<Integer> getNumberOfReplicatesBox() {
         return numberOfReplicatesBox;
-    }
-
-    public void setNumberOfReplicatesBox(ComboBox<Integer> numberOfReplicatesBox) {
-        this.numberOfReplicatesBox = numberOfReplicatesBox;
     }
 
     public TextField getGenomeNameField(int index) {
@@ -231,7 +306,12 @@ public abstract class DataPanel extends CustomComponent implements DataView {
         return null;
     }
 
+    public Accordion getDatasetAccordion() {
+        return datasetAccordion;
+    }
+
     public DatasetTab getDatasetTab(int index) {
         return (DatasetTab) datasetAccordion.getTab(index).getComponent();
     }
+
 }

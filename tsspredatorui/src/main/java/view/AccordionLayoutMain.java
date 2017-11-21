@@ -1,17 +1,18 @@
 package view;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
+import model.Globals;
 import presenter.Presenter;
 import view.firstImplementation.*;
 
 import java.io.File;
 
 /**
- * TODO: Make this an interface
  * The class {@link AccordionLayoutMain} contains the main layout of the GUI. Its core component
  * is an Accordion whose tabs are the parts of the TSSPredator workflow
  *
@@ -52,27 +53,21 @@ public class AccordionLayoutMain extends VerticalLayout {
 
         parametersPanel = new ParametersPanel(presenter);
 
-        contentAccordion.addTab(generalConfigPanel, "General Configuration");
-        contentAccordion.addTab(genomeDataPanel, "Data Settings");
-        contentAccordion.addTab(conditionDataPanel, "Data Settings");
-        //Initially, the "Data Settings"-panel is a GenomeDataPanel,
-        // since "Genome" is the initial selection in the respective checkbox.
-        //We thus set conditionDataPanel to invisible.
-        contentAccordion.getTab(2).setVisible(false);
-        contentAccordion.addTab(parametersPanel, "Parameters");
+        contentAccordion.addTab(generalConfigPanel, Globals.GENERAL_PANEL_CAPTION).setIcon(VaadinIcons.EDIT);
+        contentAccordion.addTab(genomeDataPanel, Globals.DATA_PANEL_CAPTION).setIcon(VaadinIcons.DATABASE);
+        contentAccordion.addTab(conditionDataPanel, Globals.DATA_PANEL_CAPTION).setIcon(VaadinIcons.DATABASE);
+        //Only one of the two data panels is visible
+        contentAccordion.getTab(1).setVisible(!Globals.IS_CONDITIONS_INIT);
+        contentAccordion.getTab(2).setVisible(Globals.IS_CONDITIONS_INIT);
+        contentAccordion.addTab(parametersPanel, Globals.PARAMETERS_PANEL_CAPTION).setIcon(VaadinIcons.SLIDERS);
 
     }
 
-    public void updateDataPanelMode(boolean isConditions){
+    public void updateDataPanelMode(boolean isConditions) {
         //The genomeDataPanel has tab index 1, the conditionDataPanel has tab index 2
         // in the contentAccordion
-        if(isConditions){
-            contentAccordion.getTab(2).setVisible(true);
-            contentAccordion.getTab(1).setVisible(false);
-        }else{
-            contentAccordion.getTab(1).setVisible(true);
-            contentAccordion.getTab(2).setVisible(false);
-        }
+        contentAccordion.getTab(1).setVisible(!isConditions);
+        contentAccordion.getTab(2).setVisible(isConditions);
 
     }
 

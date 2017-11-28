@@ -2,6 +2,8 @@ package presenter;
 
 import com.vaadin.data.*;
 import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.server.ErrorMessage;
+import com.vaadin.server.SerializablePredicate;
 import com.vaadin.server.Setter;
 import com.vaadin.ui.Notification;
 import model.Globals;
@@ -63,19 +65,29 @@ public class Presenter {
 
     public void initBindings() {
         configFileBinder.forField(view.getGeneralConfigPanel().getProjectGrid().asSingleSelect())
-                .withValidator(Objects::nonNull, "Please select a project from the list")
-                .bind(new ValueProvider<ConfigFile, ProjectBean>() {
-                          @Override
-                          public ProjectBean apply(ConfigFile configFile) {
-                              return new ProjectBean(); //TODO: Return something useful here
-                          }
-                      },
-                        new Setter<ConfigFile, ProjectBean>() {
+                .withValidator(projectBean -> {
+                    if (projectBean.toString().equals("null (null)")) {
+                        view.getGeneralConfigPanel().getProjectGrid().setComponentError(new ErrorMessage() {
                             @Override
-                            public void accept(ConfigFile configFile, ProjectBean projectBean) {
-                                configFile.setProjectName(projectBean.getName());
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please select a project file by double-clicking it!";
                             }
                         });
+                    } else {
+                        view.getGeneralConfigPanel().getProjectGrid().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, ProjectBean>) configFile -> {
+                            return new ProjectBean(); //TODO: Return something useful here
+                        },
+                        (Setter<ConfigFile, ProjectBean>) (configFile, projectBean) -> configFile.setProjectName(projectBean.getName()));
+
 
         configFileBinder.forField(view.getGenomeDataPanel().getNumberOfDatasetsBox())
                 .asRequired("Please set a number")
@@ -182,19 +194,28 @@ public class Presenter {
                         }
                 );
         configFileBinder.forField(view.getGeneralConfigPanel().getAlignmentFileGrid().asSingleSelect())
-                .withValidator(Objects::nonNull, "Please select an alignment file from the list")
-                .bind(new ValueProvider<ConfigFile, AlignmentFileBean>() {
-                          @Override
-                          public AlignmentFileBean apply(ConfigFile configFile) {
-                              return new AlignmentFileBean(); //TODO: Return something useful here
-                          }
-                      },
-                        new Setter<ConfigFile, AlignmentFileBean>() {
+                .withValidator(alignmentFileBean -> {
+                    if (alignmentFileBean.toString().equals("null (null, 0kB)")) {
+                        view.getGeneralConfigPanel().getAlignmentFileGrid().setComponentError(new ErrorMessage() {
                             @Override
-                            public void accept(ConfigFile configFile, AlignmentFileBean alignmentFileBean) {
-                                configFile.setAlignmentFile(alignmentFileBean.getName());
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please select an alignment file by double-clicking it!";
                             }
                         });
+                    } else {
+                        view.getGeneralConfigPanel().getAlignmentFileGrid().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, AlignmentFileBean>) configFile -> {
+                            return new AlignmentFileBean(); //TODO: Return something useful here
+                        },
+                        (Setter<ConfigFile, AlignmentFileBean>) (configFile, alignmentFileBean) -> configFile.setAlignmentFile(alignmentFileBean.getName()));
 
         configFileBinder.forField(view.getParametersPanel().getWriteGraphs())
                 .bind(ConfigFile::isWriteGraphs,
@@ -257,32 +278,47 @@ public class Presenter {
 
         //Bindings for conditionDataPanel exclusively
         configFileBinder.forField(view.getConditionDataPanel().getFastaGrid().asSingleSelect())
-                .withValidator(Objects::nonNull, "Please select a Fasta file (*.fasta)")
-                .bind(new ValueProvider<ConfigFile, FastaFileBean>() {
-                          @Override
-                          public FastaFileBean apply(ConfigFile configFile) {
-                              return new FastaFileBean();
-                          }
-                      },
-                        new Setter<ConfigFile, FastaFileBean>() {
+                .withValidator(fastaFileBean -> {
+                    if (fastaFileBean.toString().equals("null (null, 0kB)")) {
+                        view.getConditionDataPanel().getFastaGrid().setComponentError(new ErrorMessage() {
                             @Override
-                            public void accept(ConfigFile configFile, FastaFileBean fastaFileBean) {
-                                configFile.setConditionFasta(fastaFileBean.getName());
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please select a Fasta file by double clicking it!";
                             }
                         });
+                    } else {
+                        view.getConditionDataPanel().getFastaGrid().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, FastaFileBean>) configFile -> new FastaFileBean(),
+                        (Setter<ConfigFile, FastaFileBean>) (configFile, fastaFileBean) -> configFile.setConditionFasta(fastaFileBean.getName()));
         configFileBinder.forField(view.getConditionDataPanel().getGffGrid().asSingleSelect())
-                .withValidator(Objects::nonNull, "Please select an annotation file (*.gff)")
-                .bind(new ValueProvider<ConfigFile, AnnotationFileBean>() {
-                    @Override
-                    public AnnotationFileBean apply(ConfigFile configFile) {
-                        return new AnnotationFileBean();
+                .withValidator(annotationFileBean -> {
+                    if (annotationFileBean.toString().equals("null (null, 0kB)")) {
+                        view.getConditionDataPanel().getGffGrid().setComponentError(new ErrorMessage() {
+                            @Override
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please select an annotation file by double-clicking it!";
+                            }
+                        });
+                    } else {
+                        view.getConditionDataPanel().getGffGrid().setComponentError(null);
                     }
-                }, new Setter<ConfigFile, AnnotationFileBean>() {
-                    @Override
-                    public void accept(ConfigFile configFile, AnnotationFileBean annotationFileBean) {
-                        configFile.setConditionGFF(annotationFileBean.getName());
-                    }
-                });
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, AnnotationFileBean>) configFile -> new AnnotationFileBean(),
+                        (Setter<ConfigFile, AnnotationFileBean>) (configFile, annotationFileBean) -> configFile.setConditionGFF(annotationFileBean.getName()));
 
         //Bind the matching replicates combobox in the parameters panel
         // to the number of replicates comboboxes in the two data panels
@@ -346,18 +382,26 @@ public class Presenter {
                             });
 
             configFileBinder.forField(genomeTab.getFastaGrid().asSingleSelect())
-                    .withValidator(Objects::nonNull, "Please select the fasta file of this genome (*.fasta)")
-                    .bind(new ValueProvider<ConfigFile, FastaFileBean>() {
-                        @Override
-                        public FastaFileBean apply(ConfigFile configFile) {
-                            return new FastaFileBean();
+                    .withValidator(fastaFileBean -> {
+                        if (fastaFileBean.toString().equals("null (null, 0kB)")) {
+                            genomeTab.getFastaGrid().setComponentError(new ErrorMessage() {
+                                @Override
+                                public ErrorLevel getErrorLevel() {
+                                    return null;
+                                }
+
+                                @Override
+                                public String getFormattedHtmlMessage() {
+                                    return "Please select the fasta file of this genome (*.fasta)!";
+                                }
+                            });
+                        } else {
+                            genomeTab.getFastaGrid().setComponentError(null);
                         }
-                    }, new Setter<ConfigFile, FastaFileBean>() {
-                        @Override
-                        public void accept(ConfigFile configFile, FastaFileBean fastaFileBean) {
-                            configFile.getGenomeList().get(index).setFasta(fastaFileBean.getName());
-                        }
-                    });
+                        return true;
+                    }, "")
+                    .bind((ValueProvider<ConfigFile, FastaFileBean>) configFile -> new FastaFileBean(),
+                            (Setter<ConfigFile, FastaFileBean>) (configFile, fastaFileBean) -> configFile.getGenomeList().get(index).setFasta(fastaFileBean.getName()));
 
             configFileBinder.forField(genomeTab.getIdField()).asRequired("Please enter the alignment id of this genome")
                     .bind(new ValueProvider<ConfigFile, String>() {
@@ -374,18 +418,26 @@ public class Presenter {
                             });
 
             configFileBinder.forField(genomeTab.getGffGrid().asSingleSelect())
-                    .withValidator(Objects::nonNull, "Please select the annotation file of this genome (*.gff)")
-                    .bind(new ValueProvider<ConfigFile, AnnotationFileBean>() {
-                        @Override
-                        public AnnotationFileBean apply(ConfigFile configFile) {
-                            return new AnnotationFileBean();
+                    .withValidator(annotationFileBean -> {
+                        if (annotationFileBean.toString().equals("null (null, 0kB)")) {
+                            genomeTab.getGffGrid().setComponentError(new ErrorMessage() {
+                                @Override
+                                public ErrorLevel getErrorLevel() {
+                                    return null;
+                                }
+
+                                @Override
+                                public String getFormattedHtmlMessage() {
+                                    return "Please select the annotation file of this genome (*.gff)";
+                                }
+                            });
+                        } else {
+                            genomeTab.getGffGrid().setComponentError(null);
                         }
-                    }, new Setter<ConfigFile, AnnotationFileBean>() {
-                        @Override
-                        public void accept(ConfigFile configFile, AnnotationFileBean annotationFileBean) {
-                            configFile.getGenomeList().get(index).setGff(annotationFileBean.getName());
-                        }
-                    });
+                        return true;
+                    }, "")
+                    .bind((ValueProvider<ConfigFile, AnnotationFileBean>) configFile -> new AnnotationFileBean(),
+                            (Setter<ConfigFile, AnnotationFileBean>) (configFile, annotationFileBean) -> configFile.getGenomeList().get(index).setGff(annotationFileBean.getName()));
         }
 
 
@@ -401,71 +453,115 @@ public class Presenter {
         }
 
         configFileBinder.forField(replicateTab.getEnrichedCoding().asSingleSelect())
-                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
-                          @Override
-                          public GraphFileBean apply(ConfigFile configFile) {
-                              return new GraphFileBean(); //TODO: Do something useful here
-                          }
-                      }, new Setter<ConfigFile, GraphFileBean>() {
-                          @Override
-                          public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
-                              if (graphFileBean != null) {
-                                  configFile.getGenomeList().get(datasetIndex)
-                                          .getReplicateList().get(replicateIndex)
-                                          .setEnrichedCodingStrand(graphFileBean.getName());
-                              }
-                          }
-                      }
+                .withValidator(graphFileBean -> {
+                    if (graphFileBean.toString().equals("null (null, 0kB)")) {
+                        replicateTab.getEnrichedCoding().setComponentError(new ErrorMessage() {
+                            @Override
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please drag a graph file here!";
+                            }
+                        });
+                    } else {
+                        replicateTab.getEnrichedCoding().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, GraphFileBean>) configFile -> {
+                            return new GraphFileBean(); //TODO: Do something useful here
+                        }, (Setter<ConfigFile, GraphFileBean>) (configFile, graphFileBean) -> {
+                            if (graphFileBean != null) {
+                                configFile.getGenomeList().get(datasetIndex)
+                                        .getReplicateList().get(replicateIndex)
+                                        .setEnrichedCodingStrand(graphFileBean.getName());
+                            }
+                        }
                 );
         configFileBinder.forField(replicateTab.getEnrichedTemplate().asSingleSelect())
-                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
-                    @Override
-                    public GraphFileBean apply(ConfigFile configFile) {
-                        return new GraphFileBean();
-                    }
-                }, new Setter<ConfigFile, GraphFileBean>() {
-                    @Override
-                    public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
-                        if (graphFileBean != null) {
-                            configFile.getGenomeList().get(datasetIndex)
-                                    .getReplicateList().get(replicateIndex)
-                                    .setEnrichedTemplateStrand(graphFileBean.getName());
-                        }
-                    }
-                });
-        configFileBinder.forField(replicateTab.getNormalCoding().asSingleSelect())
-                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
-                          @Override
-                          public GraphFileBean apply(ConfigFile configFile) {
-                              return new GraphFileBean();
-                          }
-                      },
-                        new Setter<ConfigFile, GraphFileBean>() {
+                .withValidator(graphFileBean -> {
+                    if (graphFileBean.toString().equals("null (null, 0kB)")) {
+                        replicateTab.getEnrichedTemplate().setComponentError(new ErrorMessage() {
                             @Override
-                            public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
-                                if (graphFileBean != null) {
-                                    configFile.getGenomeList().get(datasetIndex)
-                                            .getReplicateList().get(replicateIndex)
-                                            .setNormalCodingStrand(graphFileBean.getName());
-                                }
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please drag a graph file here!";
+                            }
+                        });
+                    } else {
+                        replicateTab.getEnrichedTemplate().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, GraphFileBean>) configFile -> new GraphFileBean(),
+                        (Setter<ConfigFile, GraphFileBean>) (configFile, graphFileBean) -> {
+                            if (graphFileBean != null) {
+                                configFile.getGenomeList().get(datasetIndex)
+                                        .getReplicateList().get(replicateIndex)
+                                        .setEnrichedTemplateStrand(graphFileBean.getName());
+                            }
+                        });
+        configFileBinder.forField(replicateTab.getNormalCoding().asSingleSelect())
+                .withValidator(graphFileBean -> {
+                    if (graphFileBean.toString().equals("null (null, 0kB)")) {
+                        replicateTab.getNormalCoding().setComponentError(new ErrorMessage() {
+                            @Override
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please drag a graph file here!";
+                            }
+                        });
+                    } else {
+                        replicateTab.getNormalCoding().setComponentError(null);
+                    }
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, GraphFileBean>) configFile -> new GraphFileBean(),
+                        (Setter<ConfigFile, GraphFileBean>) (configFile, graphFileBean) -> {
+                            if (graphFileBean != null) {
+                                configFile.getGenomeList().get(datasetIndex)
+                                        .getReplicateList().get(replicateIndex)
+                                        .setNormalCodingStrand(graphFileBean.getName());
                             }
                         });
         configFileBinder.forField(replicateTab.getNormalTemplate().asSingleSelect())
-                .bind(new ValueProvider<ConfigFile, GraphFileBean>() {
-                    @Override
-                    public GraphFileBean apply(ConfigFile configFile) {
-                        return new GraphFileBean();
+                .withValidator(graphFileBean -> {
+                    if (graphFileBean.toString().equals("null (null, 0kB)")) {
+                        replicateTab.getNormalTemplate().setComponentError(new ErrorMessage() {
+                            @Override
+                            public ErrorLevel getErrorLevel() {
+                                return null;
+                            }
+
+                            @Override
+                            public String getFormattedHtmlMessage() {
+                                return "Please drag a graph file here!";
+                            }
+                        });
+                    } else {
+                        replicateTab.getNormalTemplate().setComponentError(null);
                     }
-                }, new Setter<ConfigFile, GraphFileBean>() {
-                    @Override
-                    public void accept(ConfigFile configFile, GraphFileBean graphFileBean) {
-                        if (graphFileBean != null) {
-                            configFile.getGenomeList().get(datasetIndex)
-                                    .getReplicateList().get(replicateIndex)
-                                    .setNormalTemplateStrand(graphFileBean.getName());
-                        }
-                    }
-                });
+                    return true;
+                }, "")
+                .bind((ValueProvider<ConfigFile, GraphFileBean>) configFile -> new GraphFileBean(),
+                        (Setter<ConfigFile, GraphFileBean>) (configFile, graphFileBean) -> {
+                            if (graphFileBean != null) {
+                                configFile.getGenomeList().get(datasetIndex)
+                                        .getReplicateList().get(replicateIndex)
+                                        .setNormalTemplateStrand(graphFileBean.getName());
+                            }
+                        });
     }
 
     public void addDatasets(int datasetsToAdd) {

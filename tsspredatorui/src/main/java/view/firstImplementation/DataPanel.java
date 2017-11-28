@@ -185,7 +185,8 @@ public abstract class DataPanel extends CustomComponent {
             graphFileGrid.setWidth(graphFileGridWidth, Unit.PIXELS);
             graphFileGrid.addColumn(GraphFileBean::getName)
                     .setCaption("File name")
-                    .setWidth(graphFileGridWidth / 2);
+                    .setWidth(graphFileGridWidth / 2)
+                    .setId("Name");
             graphFileGrid.addColumn(GraphFileBean::getCreationDate)
                     .setCaption("Creation Date")
                     .setWidth(graphFileGridWidth / 3.5);
@@ -194,6 +195,7 @@ public abstract class DataPanel extends CustomComponent {
                     .setWidthUndefined(); //Column takes up remaining space
 
             graphFileGrid.addStyleName("my-file-grid");
+            graphFileGrid.sort(graphFileGrid.getColumn("Name"));
 
             setupDragSource(graphFileGrid);
             setupDragSource(enrichedCoding);

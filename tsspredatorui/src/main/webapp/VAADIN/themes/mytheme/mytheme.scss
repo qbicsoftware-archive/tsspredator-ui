@@ -110,11 +110,12 @@
 
   .v-grid-row.selected {
     font-weight: bold;
+    font-style: italic;
   }
 
   .v-grid-row.selected > td {
-    background: limegreen;
-    color: gray;
+    background: none;
+    color: green;
   }
 
   .layout-with-border {

@@ -26,13 +26,19 @@
           <element id="library" level="project" name="Maven: org.hamcrest:hamcrest-core:1.3" />
           <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.5" />
           <element id="library" level="project" name="Maven: org.slf4j:jul-to-slf4j:1.7.25" />
+          <element id="library" level="project" name="Maven: mysql:mysql-connector-java:5.1.6" />
+          <element id="library" level="project" name="Maven: org.mariadb.jdbc:mariadb-java-client:2.0.2" />
         </element>
       </element>
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/tsspredatorui/target/tsspredator-ui-1.0-SNAPSHOT/META-INF/MANIFEST.MF" />
       </element>
       <element id="javaee-facet-resources" facet="tsspredatorui/web/Web" />
-      <element id="gwt-compiler-output" facet="tsspredatorui/gwt/GWT" />
+      <element id="directory" name="VAADIN">
+        <element id="directory" name="widgetsets">
+          <element id="gwt-compiler-output" facet="tsspredatorui/gwt/GWT" />
+        </element>
+      </element>
     </root>
   </artifact>
 </component>

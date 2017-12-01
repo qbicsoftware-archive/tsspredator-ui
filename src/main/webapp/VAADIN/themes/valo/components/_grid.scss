@@ -63,7 +63,7 @@ $v-grid-details-border-top-stripe: $v-grid-cell-horizontal-border !default;
 $v-grid-details-border-bottom: 1px solid darken($v-grid-row-stripe-background-color, 10%) !default;
 $v-grid-details-border-bottom-stripe: 1px solid darken($v-grid-row-background-color, 10%) !default;
 
-@import "_escalator";
+@import "escalator";
 
 @mixin base-grid($primaryStyleName: v-grid) {
 

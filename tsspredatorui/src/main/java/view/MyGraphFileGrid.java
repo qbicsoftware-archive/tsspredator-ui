@@ -9,6 +9,7 @@ import com.vaadin.shared.ui.dnd.DropEffect;
 import com.vaadin.shared.ui.dnd.EffectAllowed;
 import com.vaadin.shared.ui.grid.DropMode;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.StyleGenerator;
 import com.vaadin.ui.components.grid.GridDragSource;
 import com.vaadin.ui.components.grid.GridDropEvent;
 import com.vaadin.ui.components.grid.GridDropListener;
@@ -36,6 +37,7 @@ public class MyGraphFileGrid extends Grid<GraphFileBean> {
 
     public MyGraphFileGrid(String caption) {
         super(caption);
+        setStyleGenerator((StyleGenerator<GraphFileBean>) t -> this.getSelectedItems().contains(t) ? "selected": null);
         float gridWidth = 400;
         setWidth(gridWidth, Unit.PIXELS);
         addColumn(GraphFileBean::getName)

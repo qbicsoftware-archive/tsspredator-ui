@@ -54,10 +54,10 @@ public class ConfigFile {
             for (Genome genome : genomeList) {
                 buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
                 for (Replicate replicate : genome.getReplicateList()) {
-                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
-                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
-                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
-                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getTreatedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getTreatedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getUntreatedCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getUntreatedTemplateStrand());
                 }
             }
 
@@ -67,10 +67,10 @@ public class ConfigFile {
                 buildLine(builder, "annotation_" + genome.getAlignmentID(), genome.getGff());
                 buildLine(builder, "outputPrefix_" + genome.getAlignmentID(), genome.getName());
                 for (Replicate replicate : genome.getReplicateList()) {
-                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedCodingStrand());
-                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getEnrichedTemplateStrand());
-                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalCodingStrand());
-                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getNormalTemplateStrand());
+                    buildLine(builder, "fivePrimePlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getTreatedCodingStrand());
+                    buildLine(builder, "fivePrimeMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getTreatedTemplateStrand());
+                    buildLine(builder, "normalPlus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getUntreatedCodingStrand());
+                    buildLine(builder, "normalMinus_" + genome.getAlignmentID() + replicate.getReplicateID(), replicate.getUntreatedTemplateStrand());
                 }
             }
 

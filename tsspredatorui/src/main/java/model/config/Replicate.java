@@ -6,7 +6,7 @@ package model.config;
  */
 public class Replicate {
     private String replicateID;
-    private String enrichedCodingStrand, enrichedTemplateStrand, normalCodingStrand, normalTemplateStrand;
+    private String treatedCodingStrand, treatedTemplateStrand, untreatedCodingStrand, untreatedTemplateStrand;
 
     public Replicate() {
     }
@@ -19,35 +19,35 @@ public class Replicate {
         this.replicateID = replicateID;
     }
 
-    public String getEnrichedCodingStrand() {
-        return enrichedCodingStrand;
+    public String getTreatedCodingStrand() {
+        return treatedCodingStrand;
     }
 
-    public void setEnrichedCodingStrand(String enrichedCodingStrand) {
-        this.enrichedCodingStrand = enrichedCodingStrand;
+    public void setTreatedCodingStrand(String treatedCodingStrand) {
+        this.treatedCodingStrand = treatedCodingStrand;
     }
 
-    public String getEnrichedTemplateStrand() {
-        return enrichedTemplateStrand;
+    public String getTreatedTemplateStrand() {
+        return treatedTemplateStrand;
     }
 
-    public void setEnrichedTemplateStrand(String enrichedTemplateStrand) {
-        this.enrichedTemplateStrand = enrichedTemplateStrand;
+    public void setTreatedTemplateStrand(String treatedTemplateStrand) {
+        this.treatedTemplateStrand = treatedTemplateStrand;
     }
 
-    public String getNormalCodingStrand() {
-        return normalCodingStrand;
+    public String getUntreatedCodingStrand() {
+        return untreatedCodingStrand;
     }
 
-    public void setNormalCodingStrand(String normalCodingStrand) {
-        this.normalCodingStrand = normalCodingStrand;
+    public void setUntreatedCodingStrand(String untreatedCodingStrand) {
+        this.untreatedCodingStrand = untreatedCodingStrand;
     }
 
-    public String getNormalTemplateStrand() {
-        return normalTemplateStrand;
+    public String getUntreatedTemplateStrand() {
+        return untreatedTemplateStrand;
     }
 
-    public void setNormalTemplateStrand(String normalTemplateStrand) {
-        this.normalTemplateStrand = normalTemplateStrand;
+    public void setUntreatedTemplateStrand(String untreatedTemplateStrand) {
+        this.untreatedTemplateStrand = untreatedTemplateStrand;
     }
 }

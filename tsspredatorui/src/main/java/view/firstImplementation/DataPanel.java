@@ -10,7 +10,6 @@ import com.vaadin.ui.components.grid.GridDropTarget;
 import model.beans.GraphFileBean;
 import presenter.Presenter;
 import view.MyGraphFileGrid;
-import view.MyGrid;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -164,21 +163,17 @@ public abstract class DataPanel extends CustomComponent {
      */
     public class ReplicateTab extends CustomComponent {
         VerticalLayout layout;
-        MyGraphFileGrid enrichedCoding, enrichedTemplate, normalCoding, normalTemplate;
+        MyGraphFileGrid treatedCoding, treatedTemplate, untreatedCoding, untreatedTemplate;
         Grid<GraphFileBean> graphFileGrid;
         private GraphFileBean draggedItem;
 
         public ReplicateTab(int datasetIndex, int replicateIndex) {
             layout = new VerticalLayout();
 
-            VerticalLayout enrichedPart = new VerticalLayout();
-            enrichedCoding = new MyGraphFileGrid("Treated Coding Strand");
-            enrichedTemplate = new MyGraphFileGrid("Treated Template Strand");
-            enrichedPart.addComponents(enrichedCoding, enrichedTemplate);
-            VerticalLayout normalPart = new VerticalLayout();
-            normalCoding = new MyGraphFileGrid("Normal Coding Strand");
-            normalTemplate = new MyGraphFileGrid("Normal Template Strand");
-            normalPart.addComponents(normalCoding, normalTemplate);
+            treatedCoding = new MyGraphFileGrid("Treated Coding Strand");
+            treatedTemplate = new MyGraphFileGrid("Treated Template Strand");
+            untreatedCoding = new MyGraphFileGrid("Untreated Coding Strand");
+            untreatedTemplate = new MyGraphFileGrid("Untreated Template Strand");
 
             graphFileGrid = new Grid<>("Available Graph Files");
             float graphFileGridWidth = 600;
@@ -198,10 +193,10 @@ public abstract class DataPanel extends CustomComponent {
             graphFileGrid.sort(graphFileGrid.getColumn("Name"));
 
             setupDragSource(graphFileGrid);
-            setupDragSource(enrichedCoding);
-            setupDragSource(enrichedTemplate);
-            setupDragSource(normalCoding);
-            setupDragSource(normalTemplate);
+            setupDragSource(treatedCoding);
+            setupDragSource(treatedTemplate);
+            setupDragSource(untreatedCoding);
+            setupDragSource(untreatedTemplate);
 
             //Setup drop target for the graph file grid
             GridDropTarget dropTarget = new GridDropTarget<>(graphFileGrid, DropMode.ON_TOP_OR_BETWEEN);
@@ -223,7 +218,7 @@ public abstract class DataPanel extends CustomComponent {
 
 
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
-            layout.addComponents(new HorizontalLayout(enrichedPart, normalPart), graphFileGrid);
+            layout.addComponents(new HorizontalLayout(new VerticalLayout(treatedCoding, treatedTemplate), new VerticalLayout(untreatedCoding, untreatedTemplate)), graphFileGrid);
             layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 
@@ -250,26 +245,26 @@ public abstract class DataPanel extends CustomComponent {
 
         private void setDraggedItemInGraphFileGrids(GraphFileBean draggedItem) {
             this.draggedItem = draggedItem;
-            enrichedCoding.setDraggedItem(draggedItem);
-            enrichedTemplate.setDraggedItem(draggedItem);
-            normalCoding.setDraggedItem(draggedItem);
-            normalTemplate.setDraggedItem(draggedItem);
+            treatedCoding.setDraggedItem(draggedItem);
+            treatedTemplate.setDraggedItem(draggedItem);
+            untreatedCoding.setDraggedItem(draggedItem);
+            untreatedTemplate.setDraggedItem(draggedItem);
         }
 
-        public MyGraphFileGrid getEnrichedCoding() {
-            return enrichedCoding;
+        public MyGraphFileGrid getTreatedCoding() {
+            return treatedCoding;
         }
 
-        public MyGraphFileGrid getEnrichedTemplate() {
-            return enrichedTemplate;
+        public MyGraphFileGrid getTreatedTemplate() {
+            return treatedTemplate;
         }
 
-        public MyGraphFileGrid getNormalCoding() {
-            return normalCoding;
+        public MyGraphFileGrid getUntreatedCoding() {
+            return untreatedCoding;
         }
 
-        public MyGraphFileGrid getNormalTemplate() {
-            return normalTemplate;
+        public MyGraphFileGrid getUntreatedTemplate() {
+            return untreatedTemplate;
         }
     }
 

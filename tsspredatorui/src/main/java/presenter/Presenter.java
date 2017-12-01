@@ -3,7 +3,6 @@ package presenter;
 import com.vaadin.data.*;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.server.ErrorMessage;
-import com.vaadin.server.SerializablePredicate;
 import com.vaadin.server.Setter;
 import com.vaadin.ui.Notification;
 import model.Globals;
@@ -19,7 +18,6 @@ import view.firstImplementation.GenomeDataPanel;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.logging.Level;
@@ -247,7 +245,7 @@ public class Presenter {
         configFileBinder.forField(view.getParametersPanel().getNormalizationPercentile()).bind(
                 ConfigFile::getNormalizationPercentile,
                 ConfigFile::setNormalizationPercentile);
-        configFileBinder.forField(view.getParametersPanel().getEnrichedNormalizationPercentile()).bind(
+        configFileBinder.forField(view.getParametersPanel().getTreatedNormalizationPercentile()).bind(
                 ConfigFile::getEnrichmentNormalizationPercentile,
                 ConfigFile::setEnrichmentNormalizationPercentile);
         configFileBinder.forField(view.getParametersPanel().getClusterMethod()).bind(
@@ -452,10 +450,10 @@ public class Presenter {
             replicateTab = view.getGenomeDataPanel().getDatasetTab(datasetIndex).getReplicateTab(replicateIndex);
         }
 
-        configFileBinder.forField(replicateTab.getEnrichedCoding().asSingleSelect())
+        configFileBinder.forField(replicateTab.getTreatedCoding().asSingleSelect())
                 .withValidator(graphFileBean -> {
                     if (graphFileBean.toString().equals("null (null, 0kB)")) {
-                        replicateTab.getEnrichedCoding().setComponentError(new ErrorMessage() {
+                        replicateTab.getTreatedCoding().setComponentError(new ErrorMessage() {
                             @Override
                             public ErrorLevel getErrorLevel() {
                                 return null;
@@ -467,7 +465,7 @@ public class Presenter {
                             }
                         });
                     } else {
-                        replicateTab.getEnrichedCoding().setComponentError(null);
+                        replicateTab.getTreatedCoding().setComponentError(null);
                     }
                     return true;
                 }, "")
@@ -477,14 +475,14 @@ public class Presenter {
                             if (graphFileBean != null) {
                                 configFile.getGenomeList().get(datasetIndex)
                                         .getReplicateList().get(replicateIndex)
-                                        .setEnrichedCodingStrand(graphFileBean.getName());
+                                        .setTreatedCodingStrand(graphFileBean.getName());
                             }
                         }
                 );
-        configFileBinder.forField(replicateTab.getEnrichedTemplate().asSingleSelect())
+        configFileBinder.forField(replicateTab.getTreatedTemplate().asSingleSelect())
                 .withValidator(graphFileBean -> {
                     if (graphFileBean.toString().equals("null (null, 0kB)")) {
-                        replicateTab.getEnrichedTemplate().setComponentError(new ErrorMessage() {
+                        replicateTab.getTreatedTemplate().setComponentError(new ErrorMessage() {
                             @Override
                             public ErrorLevel getErrorLevel() {
                                 return null;
@@ -496,7 +494,7 @@ public class Presenter {
                             }
                         });
                     } else {
-                        replicateTab.getEnrichedTemplate().setComponentError(null);
+                        replicateTab.getTreatedTemplate().setComponentError(null);
                     }
                     return true;
                 }, "")
@@ -505,13 +503,13 @@ public class Presenter {
                             if (graphFileBean != null) {
                                 configFile.getGenomeList().get(datasetIndex)
                                         .getReplicateList().get(replicateIndex)
-                                        .setEnrichedTemplateStrand(graphFileBean.getName());
+                                        .setTreatedTemplateStrand(graphFileBean.getName());
                             }
                         });
-        configFileBinder.forField(replicateTab.getNormalCoding().asSingleSelect())
+        configFileBinder.forField(replicateTab.getUntreatedCoding().asSingleSelect())
                 .withValidator(graphFileBean -> {
                     if (graphFileBean.toString().equals("null (null, 0kB)")) {
-                        replicateTab.getNormalCoding().setComponentError(new ErrorMessage() {
+                        replicateTab.getUntreatedCoding().setComponentError(new ErrorMessage() {
                             @Override
                             public ErrorLevel getErrorLevel() {
                                 return null;
@@ -523,7 +521,7 @@ public class Presenter {
                             }
                         });
                     } else {
-                        replicateTab.getNormalCoding().setComponentError(null);
+                        replicateTab.getUntreatedCoding().setComponentError(null);
                     }
                     return true;
                 }, "")
@@ -532,13 +530,13 @@ public class Presenter {
                             if (graphFileBean != null) {
                                 configFile.getGenomeList().get(datasetIndex)
                                         .getReplicateList().get(replicateIndex)
-                                        .setNormalCodingStrand(graphFileBean.getName());
+                                        .setUntreatedCodingStrand(graphFileBean.getName());
                             }
                         });
-        configFileBinder.forField(replicateTab.getNormalTemplate().asSingleSelect())
+        configFileBinder.forField(replicateTab.getUntreatedTemplate().asSingleSelect())
                 .withValidator(graphFileBean -> {
                     if (graphFileBean.toString().equals("null (null, 0kB)")) {
-                        replicateTab.getNormalTemplate().setComponentError(new ErrorMessage() {
+                        replicateTab.getUntreatedTemplate().setComponentError(new ErrorMessage() {
                             @Override
                             public ErrorLevel getErrorLevel() {
                                 return null;
@@ -550,7 +548,7 @@ public class Presenter {
                             }
                         });
                     } else {
-                        replicateTab.getNormalTemplate().setComponentError(null);
+                        replicateTab.getUntreatedTemplate().setComponentError(null);
                     }
                     return true;
                 }, "")
@@ -559,7 +557,7 @@ public class Presenter {
                             if (graphFileBean != null) {
                                 configFile.getGenomeList().get(datasetIndex)
                                         .getReplicateList().get(replicateIndex)
-                                        .setNormalTemplateStrand(graphFileBean.getName());
+                                        .setUntreatedTemplateStrand(graphFileBean.getName());
                             }
                         });
     }

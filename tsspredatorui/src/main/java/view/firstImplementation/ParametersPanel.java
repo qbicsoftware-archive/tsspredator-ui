@@ -1,7 +1,6 @@
 package view.firstImplementation;
 
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
@@ -32,7 +31,7 @@ public class ParametersPanel extends CustomComponent {
 
     //These parameters are always shown
     private VerticalLayout basicParameters;
-    Slider normalizationPercentile, enrichedNormalizationPercentile;
+    Slider normalizationPercentile, treatedNormalizationPercentile;
     ComboBox<String> clusterMethod;
     Slider clusteringDistance;
     Slider crossDatasetShift, crossReplicateShift;
@@ -176,11 +175,11 @@ public class ParametersPanel extends CustomComponent {
         normalizationPercentile.setMin(0);
         normalizationPercentile.setMax(1);
         normalizationPercentile.setResolution(1);
-        enrichedNormalizationPercentile = new Slider("Enriched Normalization Percentile");
-        enrichedNormalizationPercentile.setMin(0);
-        enrichedNormalizationPercentile.setMax(1);
-        enrichedNormalizationPercentile.setResolution(1);
-        percentiles.addComponents(normalizationPercentile, enrichedNormalizationPercentile);
+        treatedNormalizationPercentile = new Slider("Normalization Percentile (Treated)");
+        treatedNormalizationPercentile.setMin(0);
+        treatedNormalizationPercentile.setMax(1);
+        treatedNormalizationPercentile.setResolution(1);
+        percentiles.addComponents(normalizationPercentile, treatedNormalizationPercentile);
         HorizontalLayout methodAndDistance = new HorizontalLayout();
         clusterMethod = new ComboBox<>("Clustering Method");
         clusterMethod.setItems(Globals.CLUSTER_METHOD_HIGHEST, Globals.CLUSTER_METHOD_FIRST);
@@ -260,8 +259,8 @@ public class ParametersPanel extends CustomComponent {
         return normalizationPercentile;
     }
 
-    public Slider getEnrichedNormalizationPercentile() {
-        return enrichedNormalizationPercentile;
+    public Slider getTreatedNormalizationPercentile() {
+        return treatedNormalizationPercentile;
     }
 
     public ComboBox<String> getClusterMethod() {

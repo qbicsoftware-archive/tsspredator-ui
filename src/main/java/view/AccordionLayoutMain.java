@@ -5,6 +5,7 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.ui.Accordion;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.VerticalLayout;
 import model.Globals;
 import presenter.Presenter;
@@ -18,7 +19,8 @@ import java.io.File;
  *
  * @author jmueller
  */
-public class AccordionLayoutMain extends VerticalLayout {
+public class AccordionLayoutMain extends CustomComponent{
+    private VerticalLayout mainLayout;
     private Presenter presenter;
     private Accordion contentAccordion;
     private Button createConfigButton, downloadButton, loadConfigButton;
@@ -29,6 +31,7 @@ public class AccordionLayoutMain extends VerticalLayout {
     private ParametersPanel parametersPanel;
 
     public AccordionLayoutMain(Presenter presenter) {
+        this.mainLayout = new VerticalLayout();
         this.presenter = presenter;
         createContentAccordion();
         createConfigButton = new Button("Create Config File", (Button.ClickListener) clickEvent -> {
@@ -41,7 +44,8 @@ public class AccordionLayoutMain extends VerticalLayout {
         loadConfigButton.addClickListener(e -> {
             //TODO: Tell presenter to start loading procedure
         });
-        this.addComponents(contentAccordion, createConfigButton, downloadButton, loadConfigButton);
+        mainLayout.addComponents(contentAccordion, createConfigButton, downloadButton, loadConfigButton);
+        setCompositionRoot(mainLayout);
     }
 
     private void createContentAccordion() {
@@ -61,6 +65,7 @@ public class AccordionLayoutMain extends VerticalLayout {
         contentAccordion.getTab(2).setVisible(Globals.IS_CONDITIONS_INIT);
         contentAccordion.addTab(parametersPanel, Globals.PARAMETERS_PANEL_CAPTION).setIcon(VaadinIcons.SLIDERS);
 
+        contentAccordion.setWidth(100, Unit.PERCENTAGE);
     }
 
     public void updateDataPanelMode(boolean isConditions) {

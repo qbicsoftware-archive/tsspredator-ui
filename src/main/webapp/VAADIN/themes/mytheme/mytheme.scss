@@ -123,4 +123,12 @@
     //background-color: lightblue;
 
   }
+
+  .my-info-bar {
+    border-left: 6px solid valo-focus-color();
+    background: #e6f0ff;
+    padding: 6px 20px 6px 6px;
+    margin: 5px 15px 5px 20px;
+    border-right: 15px solid white;
+  }
 }

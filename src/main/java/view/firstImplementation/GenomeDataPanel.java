@@ -39,7 +39,7 @@ public class GenomeDataPanel extends DataPanel {
             gffGrid.addColumn(AnnotationFileBean::getSizeInKB).setCaption("Size (kB)");
             gffGrid.addStyleName("my-file-grid");
             genomeData.addComponents(new HorizontalLayout(nameField, idField), fastaGrid, gffGrid);
-            this.tab.addComponents(genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
+            this.tab.addComponents(new InfoBar("TODO: Add GenomeTab info here!"),genomeData, new Label("RNA-seq graph files:"), replicatesSheet);
 
             //<-- DEBUG
            List<FastaFileBean> fastaFileBeanList = new LinkedList<>();

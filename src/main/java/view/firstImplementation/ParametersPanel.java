@@ -196,15 +196,18 @@ public class ParametersPanel extends CustomComponent {
         //Layouts
         normalizationLayout = new VerticalLayout(
                 new Label("Normalization"),
+                new InfoBar("TODO: Add Normalization info here!"),
                 new HorizontalLayout(normalizationPercentile, enrichmentNormalizationPercentile),
                 writeNormalizedGraphs);
         prePredictionLayout = new VerticalLayout(
                 new Label("Pre-prediction"),
+                new InfoBar("TODO: Add Pre-Prediction info here!"),
                 presetSelection,
                 new HorizontalLayout(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction),
                 new HorizontalLayout(enrichmentFactor, processingSiteFactor, stepLength, baseHeight));
         postPredictionLayout = new VerticalLayout(
                 new Label("Post-Prediction"),
+                new InfoBar("TODO: Add Post-Prediction info here!"),
                 new HorizontalLayout(matchingReplicates, utrLengths),
                 new HorizontalLayout(crossDatasetShift, crossReplicateShift),
                 new HorizontalLayout(clusterMethod, clusteringDistance));

@@ -57,7 +57,7 @@ public abstract class DataPanel extends CustomComponent {
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
 
-        panel.setContent(contentLayout);
+        panel.setContent(new VerticalLayout(new InfoBar("TODO: Add Data Settings info here!"),contentLayout));
         return panel;
     }
 
@@ -224,7 +224,7 @@ public abstract class DataPanel extends CustomComponent {
             gridLayout.setComponentAlignment(treatedLayout, Alignment.MIDDLE_LEFT);
             gridLayout.setComponentAlignment(untreatedLayout, Alignment.MIDDLE_RIGHT);
             gridLayout.setWidth(100, Unit.PERCENTAGE);
-            layout.addComponents(gridLayout, graphFileGrid);
+            layout.addComponents(new InfoBar("TODO: Add Replicate Tab info here!"), gridLayout, graphFileGrid);
             layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 

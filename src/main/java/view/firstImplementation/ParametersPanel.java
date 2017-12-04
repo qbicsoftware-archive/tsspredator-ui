@@ -116,7 +116,15 @@ public class ParametersPanel extends CustomComponent {
             //Setup valueDisplay, bind label to value of slider
             valueDisplay = new Label();
             slider.addValueChangeListener(event -> {
-                valueDisplay.setValue(String.valueOf(event.getValue()));
+                if (resolution == 0) {
+                    valueDisplay.setValue(String.valueOf(event.getValue().intValue()));
+                } else {
+                    valueDisplay.setValue(String.valueOf(event.getValue()));
+                }
+
+                if (caption.contains("Shift") || caption.contains("UTR") || caption.contains("Clustering Distance")) {
+                    valueDisplay.setValue(valueDisplay.getValue() + " Base Pairs");
+                }
             });
 
             //Setup infoButton with helpGraphic as Tooltip

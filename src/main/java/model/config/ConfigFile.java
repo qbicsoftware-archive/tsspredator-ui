@@ -15,7 +15,7 @@ public class ConfigFile {
     //If we choose to compare conditions, there's only one fasta and one gff file.
     private String conditionFasta, conditionGFF;
 
-    private boolean writeGraphs;
+    private boolean writeGraphs = true; //Write normalized graphs by default
     private double stepHeight;
     private double stepHeightReduction;
     private double stepFactor;

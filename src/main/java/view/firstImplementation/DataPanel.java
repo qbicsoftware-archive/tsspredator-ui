@@ -218,7 +218,13 @@ public abstract class DataPanel extends CustomComponent {
 
 
             presenter.updateReplicateID(datasetIndex, replicateIndex, createReplicateID(replicateIndex));
-            layout.addComponents(new HorizontalLayout(new VerticalLayout(treatedCoding, treatedTemplate), new VerticalLayout(untreatedCoding, untreatedTemplate)), graphFileGrid);
+            VerticalLayout treatedLayout = new VerticalLayout(treatedCoding, treatedTemplate);
+            VerticalLayout untreatedLayout = new VerticalLayout(untreatedCoding, untreatedTemplate);
+            HorizontalLayout gridLayout = new HorizontalLayout(treatedLayout, untreatedLayout);
+            gridLayout.setComponentAlignment(treatedLayout, Alignment.MIDDLE_LEFT);
+            gridLayout.setComponentAlignment(untreatedLayout, Alignment.MIDDLE_RIGHT);
+            gridLayout.setWidth(100, Unit.PERCENTAGE);
+            layout.addComponents(gridLayout, graphFileGrid);
             layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 

@@ -2,6 +2,7 @@ package view.firstImplementation;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinService;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import model.Globals;
@@ -21,24 +22,28 @@ public class ParametersPanel extends CustomComponent {
     private Panel parametersPanel;
     private VerticalLayout contentLayout;
     RadioButtonGroup<String> presetSelection;
+    //Normalization part
+    private VerticalLayout normalizationLayout;
+    ParameterSetter normalizationPercentile;
+    ParameterSetter enrichmentNormalizationPercentile;
+    CheckBox writeNormalizedGraphs;
 
-    //These parameters may be set by a preset
-    private VerticalLayout customParameters;
+    //Pre-prediction part
+    private VerticalLayout prePredictionLayout;
     private ParameterSetter stepHeight, stepHeightReduction;
     private ParameterSetter stepFactor, stepFactorReduction;
     private ParameterSetter enrichmentFactor, processingSiteFactor;
     private ParameterSetter stepLength, baseHeight;
 
-    //These parameters are always shown
-    private VerticalLayout basicParameters;
-    Slider normalizationPercentile, treatedNormalizationPercentile;
+    //Post-prediction part
+    private VerticalLayout postPredictionLayout;
     ComboBox<String> clusterMethod;
-    Slider clusteringDistance;
-    Slider crossDatasetShift, crossReplicateShift;
+    ParameterSetter clusteringDistance;
+    ParameterSetter crossDatasetShift;
+    ParameterSetter crossReplicateShift;
     ComboBox<Integer> matchingReplicates;
-    Slider utrLength, antisenseUtrLength;
-    CheckBox writeGraphs;
-
+    ParameterSetter utrLength;
+    ParameterSetter antisenseUtrLength;
 
     public ParametersPanel(Presenter presenter) {
         this.presenter = presenter;
@@ -49,12 +54,13 @@ public class ParametersPanel extends CustomComponent {
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new VerticalLayout();
+
         presetSelection = new RadioButtonGroup<>("Choose Parameter Preset");
         //TODO: Add some kind of separator between Presets and "Custom"
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive", Globals.PARAMETERS_CUSTOM);
         setupPresetListeners();
         createParameterLayouts();
-        contentLayout.addComponents(new HorizontalLayout(presetSelection, customParameters), basicParameters);
+        contentLayout.addComponents(normalizationLayout, prePredictionLayout, postPredictionLayout);
         panel.setContent(contentLayout);
         return panel;
     }
@@ -96,8 +102,7 @@ public class ParametersPanel extends CustomComponent {
         Label valueDisplay;
 
         public ParameterSetter(String caption,
-                               int minValue, int maxValue, int resolution,
-                               File helpGraphic, String buttonStyle) {
+                               int minValue, int maxValue, int resolution, String imagePath) {
             //Setup slider
             slider = new Slider(caption);
             slider.setMin(minValue);
@@ -108,113 +113,101 @@ public class ParametersPanel extends CustomComponent {
                     presetSelection.setSelectedItem(Globals.PARAMETERS_CUSTOM);
                 }
             });
-
             //Setup valueDisplay, bind label to value of slider
             valueDisplay = new Label();
             slider.addValueChangeListener(event -> {
                 valueDisplay.setValue(String.valueOf(event.getValue()));
             });
 
-            //Setup infoButton with helpGraphic
+            //Setup infoButton with helpGraphic as Tooltip
             infoButton = new Button(VaadinIcons.INFO_CIRCLE);
             infoButton.addStyleNames(
-                    buttonStyle,
                     ValoTheme.BUTTON_ICON_ONLY,
                     ValoTheme.BUTTON_BORDERLESS,
-                    ValoTheme.BUTTON_ICON_ALIGN_TOP);
+                    ValoTheme.BUTTON_ICON_ALIGN_TOP,
+                    ValoTheme.BUTTON_SMALL);
+            infoButton.setDescription("<img src=\"" + imagePath + "\"/>", ContentMode.HTML);
             //Create layout, put all components there and set as root
             layout = new VerticalLayout();
             layout.addComponents(new HorizontalLayout(slider, infoButton), valueDisplay);
+            layout.setComponentAlignment(valueDisplay, Alignment.BOTTOM_CENTER);
             layout.addStyleNames("layout-with-border");
+            layout.setHeight(75, Unit.PERCENTAGE);
             setCompositionRoot(layout);
         }
     }
 
     private void createParameterLayouts() {
-        customParameters = new VerticalLayout();
-        String basepath = VaadinService.getCurrent().getBaseDirectory().getParent();
+
+        //Normalization Part
+        normalizationPercentile = new ParameterSetter(
+                "Normalization Percentile", 0, 1, 1, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
+        enrichmentNormalizationPercentile = new ParameterSetter(
+                "Enrichment Normalization Percentile", 0, 1, 1, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
+        writeNormalizedGraphs = new CheckBox("Write Normalized graph files");
+
+        //Pre-Prediction Part
 
         //TODO: Bind the max value of the reduction sliders to the other sliders so that they don't exceed them
-        HorizontalLayout stepParams = new HorizontalLayout();
         stepHeight = new ParameterSetter("Step Height",
                 0, 1, 1,
-                new File(basepath + "/resources/Dummy.svg"), "stepHeightInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         stepHeightReduction = new ParameterSetter("Step Height Reduction",
                 0, 1, 1,
-                new File(basepath + "/resources/Dummy.svg"), "stepHeightReductionInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         stepFactor = new ParameterSetter("Step Factor",
                 1, 5, 1,
-                new File(basepath + "/resources/Dummy.svg"), "stepFactorInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         stepFactorReduction = new ParameterSetter("Step Factor Reduction",
                 0, 2, 1,
-                new File(basepath + "/resources/Dummy.svg"), "stepFactorReductionInfo");
-        stepParams.addComponents(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction);
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
 
-        HorizontalLayout otherCustomParams = new HorizontalLayout();
         enrichmentFactor = new ParameterSetter("Enrichment Factor",
                 0, 10, 1,
-                new File(basepath + "/resources/Dummy.svg"), "enrichmentFactorInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         processingSiteFactor = new ParameterSetter("Processing Site Factor",
                 0, 10, 1,
-                new File(basepath + "/resources/Dummy.svg"), "processingSiteFactorInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         stepLength = new ParameterSetter("Step Length",
                 0, 100, 0,
-                new File(basepath + "/resources/Dummy.svg"), "stepLengthInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         baseHeight = new ParameterSetter("Base Height (disabled by default)",
                 0, 1, 0,
-                new File(basepath + "/resources/Dummy.svg"), "baseHeightInfo");
+                "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         baseHeight.setEnabled(false);
-        otherCustomParams.addComponents(enrichmentFactor, processingSiteFactor, stepLength, baseHeight);
 
-        customParameters.addComponents(stepParams, otherCustomParams);
 
-        basicParameters = new VerticalLayout();
-
-        HorizontalLayout percentiles = new HorizontalLayout();
-        normalizationPercentile = new Slider("Normalization Percentile");
-        normalizationPercentile.setMin(0);
-        normalizationPercentile.setMax(1);
-        normalizationPercentile.setResolution(1);
-        treatedNormalizationPercentile = new Slider("Normalization Percentile (Treated)");
-        treatedNormalizationPercentile.setMin(0);
-        treatedNormalizationPercentile.setMax(1);
-        treatedNormalizationPercentile.setResolution(1);
-        percentiles.addComponents(normalizationPercentile, treatedNormalizationPercentile);
-        HorizontalLayout methodAndDistance = new HorizontalLayout();
+        //Post-prediction Part
         clusterMethod = new ComboBox<>("Clustering Method");
         clusterMethod.setItems(Globals.CLUSTER_METHOD_HIGHEST, Globals.CLUSTER_METHOD_FIRST);
-        clusteringDistance = new Slider("TSS Clustering Distance");
-        clusteringDistance.setMin(0);
-        clusteringDistance.setMax(100);
-        clusteringDistance.setResolution(0);
-        methodAndDistance.addComponents(clusterMethod, clusteringDistance);
+        clusteringDistance = new ParameterSetter("TSS Clustering Distance", 0, 100, 0, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
 
-        HorizontalLayout allowedShifts = new HorizontalLayout();
-        crossDatasetShift = new Slider();
-        crossDatasetShift.setCaption(presenter.isModeConditions()
-                ? "Allowed Cross-Condition Shift"
-                : "Allowed Cross-Genome Shift");
-        crossDatasetShift.setMin(0);
-        crossDatasetShift.setMax(100);
-        crossReplicateShift = new Slider("Allowed Cross-Replication Shift");
-        crossReplicateShift.setMin(0);
-        crossReplicateShift.setMax(100);
-        allowedShifts.addComponents(crossDatasetShift, crossReplicateShift);
+        //TODO: Bind caption to mode
+        crossDatasetShift = new ParameterSetter("Allowed Cross-Genome Shift", 0, 100, 0, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
+        crossReplicateShift = new ParameterSetter("Allowed Cross-Replication Shift", 0, 100, 0, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         matchingReplicates = new ComboBox<>("Matching Replicates");
         matchingReplicates.setItems(IntStream.rangeClosed(1, presenter.getNumberOfReplicates())
                 .boxed().collect(Collectors.toList()));
         HorizontalLayout utrLengths = new HorizontalLayout();
-        utrLength = new Slider("UTR length");
-        utrLength.setMin(0);
-        utrLength.setMax(1000);
-        antisenseUtrLength = new Slider("Antisense UTR length");
-        antisenseUtrLength.setMin(0);
-        antisenseUtrLength.setMax(1000);
+        utrLength = new ParameterSetter("UTR length", 0, 1000, 0, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
+        antisenseUtrLength = new ParameterSetter("Antisense UTR length", 0, 1000, 0, "../VAADIN/themes/mytheme/css_resources/Dummy.svg");
         utrLengths.addComponents(utrLength, antisenseUtrLength);
-        writeGraphs = new CheckBox("Write RNA-Seq graphs");
 
-        basicParameters.addComponents(percentiles, methodAndDistance, allowedShifts, matchingReplicates, utrLengths, writeGraphs);
-
+        //Layouts
+        normalizationLayout = new VerticalLayout(
+                new Label("Normalization"),
+                new HorizontalLayout(normalizationPercentile, enrichmentNormalizationPercentile),
+                writeNormalizedGraphs);
+        prePredictionLayout = new VerticalLayout(
+                new Label("Pre-prediction"),
+                presetSelection,
+                new HorizontalLayout(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction),
+                new HorizontalLayout(enrichmentFactor, processingSiteFactor, stepLength, baseHeight));
+        postPredictionLayout = new VerticalLayout(
+                new Label("Post-Prediction"),
+                new HorizontalLayout(matchingReplicates, utrLengths),
+                new HorizontalLayout(crossDatasetShift, crossReplicateShift),
+                new HorizontalLayout(clusterMethod, clusteringDistance));
 
     }
 
@@ -256,11 +249,11 @@ public class ParametersPanel extends CustomComponent {
     }
 
     public Slider getNormalizationPercentile() {
-        return normalizationPercentile;
+        return normalizationPercentile.slider;
     }
 
-    public Slider getTreatedNormalizationPercentile() {
-        return treatedNormalizationPercentile;
+    public Slider getEnrichmentNormalizationPercentile() {
+        return enrichmentNormalizationPercentile.slider;
     }
 
     public ComboBox<String> getClusterMethod() {
@@ -268,15 +261,15 @@ public class ParametersPanel extends CustomComponent {
     }
 
     public Slider getClusteringDistance() {
-        return clusteringDistance;
+        return clusteringDistance.slider;
     }
 
     public Slider getCrossDatasetShift() {
-        return crossDatasetShift;
+        return crossDatasetShift.slider;
     }
 
     public Slider getCrossReplicateShift() {
-        return crossReplicateShift;
+        return crossReplicateShift.slider;
     }
 
     public ComboBox<Integer> getMatchingReplicates() {
@@ -284,14 +277,14 @@ public class ParametersPanel extends CustomComponent {
     }
 
     public Slider getUtrLength() {
-        return utrLength;
+        return utrLength.slider;
     }
 
     public Slider getAntisenseUtrLength() {
-        return antisenseUtrLength;
+        return antisenseUtrLength.slider;
     }
 
-    public CheckBox getWriteGraphs() {
-        return writeGraphs;
+    public CheckBox getWriteNormalizedGraphs() {
+        return writeNormalizedGraphs;
     }
 }

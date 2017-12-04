@@ -215,7 +215,7 @@ public class Presenter {
                         },
                         (Setter<ConfigFile, AlignmentFileBean>) (configFile, alignmentFileBean) -> configFile.setAlignmentFile(alignmentFileBean.getName()));
 
-        configFileBinder.forField(view.getParametersPanel().getWriteGraphs())
+        configFileBinder.forField(view.getParametersPanel().getWriteNormalizedGraphs())
                 .bind(ConfigFile::isWriteGraphs,
                         ConfigFile::setWriteGraphs);
         configFileBinder.forField(view.getParametersPanel().getStepHeight()).bind(
@@ -245,7 +245,7 @@ public class Presenter {
         configFileBinder.forField(view.getParametersPanel().getNormalizationPercentile()).bind(
                 ConfigFile::getNormalizationPercentile,
                 ConfigFile::setNormalizationPercentile);
-        configFileBinder.forField(view.getParametersPanel().getTreatedNormalizationPercentile()).bind(
+        configFileBinder.forField(view.getParametersPanel().getEnrichmentNormalizationPercentile()).bind(
                 ConfigFile::getEnrichmentNormalizationPercentile,
                 ConfigFile::setEnrichmentNormalizationPercentile);
         configFileBinder.forField(view.getParametersPanel().getClusterMethod()).bind(

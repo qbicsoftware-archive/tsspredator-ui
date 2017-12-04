@@ -21,7 +21,7 @@
 //$v-error-indicator-color: #ed473b;
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
-@import "../valo/valo.scss";
+@import "../valo/valo";
 
 @mixin mytheme {
   @include valo;
@@ -122,5 +122,13 @@
     //border-radius: 10px;
     //background-color: lightblue;
 
+  }
+
+  .my-info-bar {
+    border-left: 6px solid valo-focus-color();
+    background: #e6f0ff;
+    padding: 6px 20px 6px 6px;
+    margin: 5px 15px 5px 20px;
+    border-right: 15px solid white;
   }
 }

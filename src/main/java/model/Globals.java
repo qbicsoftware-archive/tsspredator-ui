@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.image.Kernel;
 import java.io.File;
 
 /**
@@ -32,4 +33,51 @@ public class Globals {
     public static final int UTR_LENGTH_INIT = 300;
     public static final int ANTISENSE_UTR_LENGTH_INIT = 100;
 
+    //Info texts
+    public static final String GENERAL_CONFIG_INFO =
+            "Welcome to <b>TSSpredator</b>!<br>" +
+                    "Please select the type of your study below. Then select your project from the list by double-clicking on it. " +
+                    "If you chose to compare different strains or species, please also select a multiple alignment file (<i>*.xmfa</i>).<br>" +
+                    "When you're done, click on <b>\"Data Settings\"</b> to continue. You can always come back to this window by " +
+                    "clicking on <b>\"General Configuration\"</b>.";
+    public static final String GENOME_DATA_SETTINGS_INFO =
+            "Please select how many <b>Genomes</b> you want to compare and how many <b>Replicates</b> you have for each genome.<br>" +
+                    "Then enter genome and replicate data below.<br>" +
+                    "When you're done, click on <b>\"Parameter Settings\"</b> to continue. " +
+                    "You can always come back to this window by clicking on <b>\"Data Settings\"</b>";
+    public static final String CONDITION_DATA_SETTINGS_INFO =
+            "Please select how many <b>Conditions</b> you want to compare and how many <b>Replicates</b> you have for each condition.<br>" +
+                    "Next, choose the <b>nucleotide sequence</b> file (<i>*.fasta</i>) and the <b>annotation</b> file (<i>*.gff</i>) " +
+                    "of your project by double-clicking on them.<br>" +
+                    "Then scroll down to enter genome and replicate data.<br>" +
+                    "When you're done, click on <b>\"Parameter Settings\"</b> to continue. " +
+                    "You can always come back to this window by clicking on <b>\"Data Settings\"</b>";
+    public static final String GENOME_TAB_INFO =
+            "Please enter the <b>Name</b> of this genome as well as its <b>Alignment ID</b> in the multiple alignment file.<br>" +
+                    "Next, choose the <b>Nucleotide Sequence</b> file (<i>*.fasta</i>) and the <b>Annotation</b> file (<i>*.gff</i>) " +
+                    "of this genome by double-clicking on them.<br>" +
+                    "Then scroll down to select the <b>RNA-seq Graph Files</b> for this genome.";
+    public static final String CONDITION_TAB_INFO =
+            "Please enter the <b>Name</b> of this condition.<br>" +
+                    "Then scroll down to select the <b>RNA-seq Graph Files</b> for this condition.";
+    public static final String REPLICATE_TAB_INFO =
+            "You need to select 4 <b>Graph Files</b> (<i>*.gff</i>) per replicate. " +
+                    "All the graph files that are contained in your project are listed below (<b>\"Available Graph Files\"</b>).<br>" +
+                    "Please <i>drag'n'drop</i> them into the appropriate fields to select them.<br>" +
+                    "If you've made a mistake, you can either drag the graph files from one field to another to swap them " +
+                    "or you can drag them back into the list of available files.";
+    public static final String PARAMETER_INFO =
+            "In case you don't want to use default parameters, you can customize them here. " +
+                    "There are three kinds of parameters in TSSpredator:" +
+                    "<ul>" +
+                    "<li><b>Normalization Parameters</b>: TODO</li>" +
+                    "<li><b>Pre-Prediction Parameters</b>: TODO</li>" +
+                    "<li><b>Post-Prediction Parameters</b>: TODO</li>" +
+                    "</ul>";
+    public static final String NORMALIZATION_INFO = "TODO";
+    public static final String PRE_PREDICTION_INFO = "TODO";
+    public static final String POST_PREDICTION_INFO = "TODO";
+
+
 }
+

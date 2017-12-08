@@ -56,7 +56,7 @@ public class GeneralConfigPanel extends CustomComponent{
         //The alignment file selection should only be visible if strains/species are to be compared
         alignmentFileGrid.setVisible(!Globals.IS_CONDITIONS_INIT);
         contentLayout.addComponents(projectTypeButtonGroup, projectGrid, alignmentFileGrid);
-        panel.setContent(new VerticalLayout(new InfoBar("TODO: Add General Configuration info here!"), contentLayout));
+        panel.setContent(new VerticalLayout(new InfoBar(Globals.GENERAL_CONFIG_INFO), contentLayout));
 
         //<-- DEBUG
         List<ProjectBean> projectBeanList = new LinkedList<>();

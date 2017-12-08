@@ -60,7 +60,7 @@ public class ParametersPanel extends CustomComponent {
         presetSelection.setItems("Very Specific", "More Specific", "Default", "More Sensitive", "Very Sensitive", Globals.PARAMETERS_CUSTOM);
         setupPresetListeners();
         createParameterLayouts();
-        contentLayout.addComponents(normalizationLayout, prePredictionLayout, postPredictionLayout);
+        contentLayout.addComponents(new InfoBar(Globals.PARAMETER_INFO), normalizationLayout, prePredictionLayout, postPredictionLayout);
         panel.setContent(contentLayout);
         return panel;
     }
@@ -203,19 +203,19 @@ public class ParametersPanel extends CustomComponent {
 
         //Layouts
         normalizationLayout = new VerticalLayout(
-                new Label("Normalization"),
-                new InfoBar("TODO: Add Normalization info here!"),
+                new Label("<b>Normalization</b>", ContentMode.HTML),
+                new InfoBar(Globals.NORMALIZATION_INFO),
                 new HorizontalLayout(normalizationPercentile, enrichmentNormalizationPercentile),
                 writeNormalizedGraphs);
         prePredictionLayout = new VerticalLayout(
-                new Label("Pre-prediction"),
-                new InfoBar("TODO: Add Pre-Prediction info here!"),
+                new Label("<b>Pre-prediction</b>", ContentMode.HTML),
+                new InfoBar(Globals.PRE_PREDICTION_INFO),
                 presetSelection,
                 new HorizontalLayout(stepHeight, stepHeightReduction, stepFactor, stepFactorReduction),
                 new HorizontalLayout(enrichmentFactor, processingSiteFactor, stepLength, baseHeight));
         postPredictionLayout = new VerticalLayout(
-                new Label("Post-Prediction"),
-                new InfoBar("TODO: Add Post-Prediction info here!"),
+                new Label("<b>Post-Prediction</b>", ContentMode.HTML),
+                new InfoBar(Globals.POST_PREDICTION_INFO),
                 new HorizontalLayout(matchingReplicates, utrLengths),
                 new HorizontalLayout(crossDatasetShift, crossReplicateShift),
                 new HorizontalLayout(clusterMethod, clusteringDistance));

@@ -1,6 +1,8 @@
 package view.firstImplementation;
 
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.*;
+import model.Globals;
 import model.beans.AnnotationFileBean;
 import model.beans.FastaFileBean;
 import presenter.Presenter;
@@ -29,6 +31,7 @@ public class ConditionDataPanel extends DataPanel {
         gffGrid.addStyleName("my-file-grid");
         contentLayout.addComponents(numberOfDatasetsBox, numberOfReplicatesBox,
                 fastaGrid, gffGrid, datasetAccordion);
+        wrapperLayout.addComponents(new InfoBar(Globals.CONDITION_DATA_SETTINGS_INFO), contentLayout);
 
         //<-- DEBUG
         List<FastaFileBean> fastaFileBeanList = new LinkedList<>();
@@ -58,7 +61,7 @@ public class ConditionDataPanel extends DataPanel {
         public ConditionTab(int index) {
             super(index);
             nameField = new TextField("Name");
-            this.tab.addComponents(nameField, new Label("RNA-seq graph files:"), replicatesSheet);
+            this.tab.addComponents(new InfoBar(Globals.CONDITION_TAB_INFO),nameField, new Label("<b>RNA-seq graph files for this condition:</b>", ContentMode.HTML), replicatesSheet);
 
 
         }

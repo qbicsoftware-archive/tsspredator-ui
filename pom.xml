@@ -23,7 +23,7 @@
         <!-- If there are no local customizations, this can also be "fetch" or "cdn" -->
         <!-- Note to self: Project suddenly wouldn't run anymore on the Acer machine, so I changed this value
         from "local" to "fetch".-->
-        <vaadin.widgetset.mode>fetch</vaadin.widgetset.mode>
+        <vaadin.widgetset.mode>local</vaadin.widgetset.mode>
         <liferay.version>6.2.5</liferay.version>
         <liferay.maven.plugin.version>6.2.5</liferay.maven.plugin.version>
     </properties>

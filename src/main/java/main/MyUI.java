@@ -1,13 +1,9 @@
 package main;
 
-import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import presenter.Presenter;
 import view.AccordionLayoutMain;
 
@@ -20,10 +16,6 @@ import view.AccordionLayoutMain;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
-    static {
-        SLF4JBridgeHandler.install();
-    }
-
 
     protected void init(VaadinRequest vaadinRequest) {
         Presenter presenter = new Presenter();
@@ -32,10 +24,5 @@ public class MyUI extends UI {
         presenter.initFields();
         presenter.initBindings();
         setContent(layout);
-    }
-
-    @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
-    public static class MyUIServlet extends VaadinServlet {
     }
 }

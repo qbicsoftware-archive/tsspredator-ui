@@ -7,7 +7,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.*;
-import org.slf4j.bridge.SLF4JBridgeHandler;
+//import org.slf4j.bridge.SLF4JBridgeHandler;
 import presenter.Presenter;
 import view.AccordionLayoutMain;
 
@@ -21,7 +21,8 @@ import view.AccordionLayoutMain;
 @Theme("mytheme")
 public class MyUI extends UI {
     static {
-        SLF4JBridgeHandler.install();
+        //Never actually worked and suddenly showed an error out of nowhere, so I'm commenting it out for now
+        //SLF4JBridgeHandler.install();
     }
 
 

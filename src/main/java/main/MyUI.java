@@ -34,9 +34,4 @@ public class MyUI extends UI {
         presenter.initBindings();
         setContent(layout);
     }
-
-    @WebServlet(urlPatterns = "/*", name = "TSSpredator Portlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
-    public static class MyUIServlet extends VaadinServlet {
-    }
 }

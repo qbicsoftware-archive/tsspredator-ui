@@ -8,7 +8,7 @@
 
     <portlet>
         <description>This is a portlet for TSSpredator</description>
-        <portlet-name>TSSpredator</portlet-name>
+        <portlet-name>TSSpredator Portlet</portlet-name>
         <display-name>TSSpredator</display-name>
 
         <portlet-class>com.vaadin.server.VaadinPortlet</portlet-class>
@@ -30,7 +30,7 @@
 
 
         <portlet-info>
-            <title>TSSpredator</title>
+            <title>TSSpredator Portlet</title>
             <short-title>TSSpredator</short-title>
             <keywords>Vaadin 8</keywords>
         </portlet-info>

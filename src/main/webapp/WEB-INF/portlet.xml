@@ -30,7 +30,7 @@
 
 
         <portlet-info>
-            <title>TSSpredator portlet</title>
+            <title>TSSpredator Portlet</title>
             <short-title>TSSpredator</short-title>
             <keywords>Vaadin 8</keywords>
         </portlet-info>

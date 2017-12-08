@@ -1,13 +1,16 @@
 package view.firstImplementation;
 
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.ui.dnd.DropEffect;
 import com.vaadin.shared.ui.dnd.EffectAllowed;
 import com.vaadin.shared.ui.grid.DropMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.components.grid.GridDragSource;
 import com.vaadin.ui.components.grid.GridDropTarget;
+import model.Globals;
 import model.beans.GraphFileBean;
+import model.config.Genome;
 import presenter.Presenter;
 import view.MyGraphFileGrid;
 
@@ -27,7 +30,7 @@ import java.util.stream.IntStream;
 public abstract class DataPanel extends CustomComponent {
     Presenter presenter;
     Panel dataPanel;
-    Layout contentLayout;
+    Layout contentLayout, wrapperLayout;
     Accordion datasetAccordion;
     ComboBox<Integer> numberOfDatasetsBox;
     ComboBox<Integer> numberOfReplicatesBox;
@@ -42,6 +45,7 @@ public abstract class DataPanel extends CustomComponent {
     private Panel designPanel() {
         Panel panel = new Panel();
         contentLayout = new FormLayout();
+        wrapperLayout = new VerticalLayout();
         numberOfDatasetsBox = new ComboBox<>();
         numberOfReplicatesBox = new ComboBox<>("Select number of Replicates");
 
@@ -57,7 +61,7 @@ public abstract class DataPanel extends CustomComponent {
         datasetAccordion = new Accordion();
         datasetAccordion.setWidth("100%");
 
-        panel.setContent(new VerticalLayout(new InfoBar("TODO: Add Data Settings info here!"),contentLayout));
+        panel.setContent(wrapperLayout);
         return panel;
     }
 
@@ -65,13 +69,17 @@ public abstract class DataPanel extends CustomComponent {
      * The accordion is initialized with one dataset (genome/condition) and one replicate
      */
     public void initAccordion() {
-        Component initialTab = this instanceof GenomeDataPanel
-                ? ((GenomeDataPanel) this).createGenomeTab(0)
-                : ((ConditionDataPanel) this).createConditionTab(0);
+        if(this instanceof  GenomeDataPanel){
+            Component initialTab = ((GenomeDataPanel) this).createGenomeTab(0);
+            datasetAccordion.addTab(initialTab, "Genome " + 1);
+        }else{
+            Component initialTab = ((ConditionDataPanel) this).createConditionTab(0);
+            datasetAccordion.addTab(initialTab, "Condition " + 1);
+        }
         //Tell presenter to set up bindings
-        datasetAccordion.addTab(initialTab, "Genome " + 1);
         presenter.initDatasetBindings(0);
         presenter.initReplicateBindings(0, 0);
+
     }
 
 
@@ -111,11 +119,15 @@ public abstract class DataPanel extends CustomComponent {
         if (datasetDelta > 0) {
             //Add new dataset tabs
             for (int datasetIndex = oldDatasetCount; datasetIndex < presenter.getNumberOfDatasets(); datasetIndex++) {
-                Component currentTab = this instanceof GenomeDataPanel
-                        ? ((GenomeDataPanel) this).createGenomeTab(datasetIndex)
-                        : ((ConditionDataPanel) this).createConditionTab(datasetIndex);
+                if(this instanceof GenomeDataPanel){
+                    Component currentTab = ((GenomeDataPanel) this).createGenomeTab(datasetIndex);
+                    datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
+                }else{
+                    Component currentTab = ((ConditionDataPanel) this).createConditionTab(datasetIndex);
+                    datasetAccordion.addTab(currentTab, "Condition " + (datasetIndex + 1));
+
+                }
                 //Tell presenter to set up bindings
-                datasetAccordion.addTab(currentTab, "Genome " + (datasetIndex + 1));
                 presenter.initDatasetBindings(datasetIndex);
                 for (int replicateIndex = 0;
                      replicateIndex < presenter.getNumberOfReplicates();
@@ -170,10 +182,14 @@ public abstract class DataPanel extends CustomComponent {
         public ReplicateTab(int datasetIndex, int replicateIndex) {
             layout = new VerticalLayout();
 
-            treatedCoding = new MyGraphFileGrid("Treated Coding Strand");
-            treatedTemplate = new MyGraphFileGrid("Treated Template Strand");
-            untreatedCoding = new MyGraphFileGrid("Untreated Coding Strand");
-            untreatedTemplate = new MyGraphFileGrid("Untreated Template Strand");
+            treatedCoding = new MyGraphFileGrid("Treated Coding <b><i>(+)</i></b> Strand");
+            treatedCoding.setCaptionAsHtml(true);
+            treatedTemplate = new MyGraphFileGrid("Treated Template <b><i>(-)</i></b> Strand");
+            treatedTemplate.setCaptionAsHtml(true);
+            untreatedCoding = new MyGraphFileGrid("Untreated Coding <b><i>(+)</i></b> Strand");
+            untreatedCoding.setCaptionAsHtml(true);
+            untreatedTemplate = new MyGraphFileGrid("Untreated Template <b><i>(-)</i></b> Strand");
+            untreatedTemplate.setCaptionAsHtml(true);
 
             graphFileGrid = new Grid<>("Available Graph Files");
             float graphFileGridWidth = 600;
@@ -224,7 +240,7 @@ public abstract class DataPanel extends CustomComponent {
             gridLayout.setComponentAlignment(treatedLayout, Alignment.MIDDLE_LEFT);
             gridLayout.setComponentAlignment(untreatedLayout, Alignment.MIDDLE_RIGHT);
             gridLayout.setWidth(100, Unit.PERCENTAGE);
-            layout.addComponents(new InfoBar("TODO: Add Replicate Tab info here!"), gridLayout, graphFileGrid);
+            layout.addComponents(new InfoBar(Globals.REPLICATE_TAB_INFO), gridLayout, graphFileGrid);
             layout.setComponentAlignment(graphFileGrid, Alignment.BOTTOM_CENTER);
             setCompositionRoot(layout);
 

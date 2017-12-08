@@ -7,7 +7,7 @@
     <artifactId>tsspredator-ui</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>TSSpredator Portlet</name>
+    <name>TSSpredator</name>
 
     <prerequisites>
         <maven>3</maven>

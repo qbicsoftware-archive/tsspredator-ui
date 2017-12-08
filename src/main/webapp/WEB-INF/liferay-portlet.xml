@@ -3,7 +3,7 @@
 
 <liferay-portlet-app>
     <portlet>
-        <portlet-name>TSSpredator Portlet</portlet-name>
+        <portlet-name>TSSpredator</portlet-name>
     </portlet>
     <role-mapper>
         <role-name>administrator</role-name>
